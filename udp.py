@@ -40,7 +40,7 @@ for x in udp_server():
   z = len(data)
   for i in range(0, z-1, 2):
     val = struct.unpack("<H",data[i:i+2])[0]
-    if not val: val = "-----"
+    if val <= 1: val = "-----"
     print(str(int(i/2 + 1)).zfill(3), str(val).zfill(5), end=" ")
   print()
  
@@ -53,5 +53,28 @@ looks like chain levels
 
 """
 
+"""
+[001-032] Input 1-32
+[034-039] ???
+[040] 0xFFFF
+[041-072] Preamp Output - Chain 1 Input | 1-32
+[073-104] Chain 1 Output - Chain 2 Input | 1-32
+[105-136] Chain 2 Output - Chain 3 Input | 1-32
+[137-168] Chain 3 Output - Chain 4 Input | 1-32
+[169-200] Chain 4 Output
+[201-232] Main - Channel Inputs
 
-# 201 -> Main out
+[...] - FX, Subs?
+
+[289-304] - Aux Post-Fader
+[305-320] - Pre-Aux Output - Aux Chain 1 Input
+[321-336] - Aux Chain 1 Output - Aux Chain 2 Input
+[337-352] - Aux Chain 2 Output - Aux Chain 3 Input
+[353-358] - Aux Chain 3 Output
+
+[...] - ??
+
+[405-412] main signal ??
+
+369 373 377 FX A
+"""
