@@ -11,6 +11,9 @@ colorama.init()
 
 
 """
+--> Send Hello packet 
+
+
 CONTROL OVER TCP
 METER OVER UDP (52703)
 """
@@ -106,8 +109,9 @@ class Client(Protocol):
             # {"id": "Subscribe","clientName": "Universal Control","clientInternalName": "ucapp","clientType": "PC","clientDescription": "FEATHERNET-PC","clientIdentifier": "FEATHERNET-PC","clientOptions": "perm users levl redu rtan","clientEncoding": 23106}
 
             return b"\xf2\x00\x00\x00" + json.dumps(data).encode()
-
-        self.send(self.MessagePrefix.Hello, b"\xdf\xcd", customA=b"\x00")
+        UDPport = 52703
+        print(f"TCP {port}, UDP {UDPport}")
+        self.send(self.MessagePrefix.Hello, struct.pack("<H", UDPport), customA=b"\x00")
         self.send(self.MessagePrefix.JSON, craftSubscribe(
             dict(clientDescription="Develop")))
 
@@ -190,8 +194,24 @@ class Client(Protocol):
 
         return buffer
 
-# unsubscribe = b"\x4a\x4d" + Protocol.A + b"\x00" + Protocol.B +         b"\x00\x15\x00\x00\x00\x7b\x22\x69\x64\x22\x3a\x20\x22\x55\x6e\x73\x75\x62\x73\x63\x72\x69\x62\x65\x22\x7d"
 
+"""
+0000   00 0a 92 00 6b c3 02 18 b9 e3 db e2 08 00 45 00   ....k.........E.
+0010   00 4d e5 0b 40 00 80 06 00 00 c0 a8 00 e6 c0 a8   .M..@...........
+0020   00 a7 c4 74 cf 08 e0 1a 59 c8 00 00 5f 98 50 18   ...t....Y..._.P.
+0030   fa cc 83 1d 00 00 55 43 00 01 1f 00 4a 4d 68 00   ......UC....JMh.
+0040   65 00 15 00 00 00 7b 22 69 64 22 3a 20 22 55 6e   e.....{"id": "Un
+0050   73 75 62 73 63 72 69 62 65 22 7d                  subscribe"}
+
+0000   00 00 0c c0 a8 00 00 09 2d 01 02 03 08 00 45 00   ........-.....E.
+0010   00 4d 00 3e 00 00 40 06 f8 6b c0 a8 00 0a c0 a8   .M.>..@..k......
+0020   00 a7 7f fb cf 08 00 00 02 bf 00 00 5d 92 50 18   ............].P.
+0030   10 00 cc 8b 00 00 55 43 00 01 1f 00 4a 4d 68 00   ......UC....JMh.
+0040   65 00 15 00 00 00 7b 22 69 64 22 3a 20 22 55 6e   e.....{"id": "Un
+0050   73 75 62 73 63 72 69 62 65 22 7d                  subscribe"}
+
+# unsubscribe = b"\x4a\x4d" + Protocol.A + b"\x00" + Protocol.B +         b"\x00\x15\x00\x00\x00\x7b\x22\x69\x64\x22\x3a\x20\x22\x55\x6e\x73\x75\x62\x73\x63\x72\x69\x62\x65\x22\x7d"
+"""
 # Turn on ..\x80\x3f
 # Turn off ..\x80\x3f
 
