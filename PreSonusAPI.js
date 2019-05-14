@@ -44,38 +44,15 @@ const dgram = require("dgram");
 
 class Client {
   constructor(host, port) {
-    this.serverAddress = host;
+    this.serverHost = host;
     this.serverPort = port;
     this._packetHeader = Buffer.from([0x55, 0x43, 0x00, 0x01]); // UC..
     this._A = 0x68; // These values might come from
     this._B = 0x65; // the broadcast discovery
 
     this._UdpServerPort = 52704;
-
-    {
-      // Start UDP Server to listen to Metering data
-      let UDPserver = dgram.createSocket("udp4");
-
-      UDPserver.on("error", err => {
-        UDPserver.close();
-        throw Error("UDP error:\n" + err.stack);
-      });
-
-      UDPserver.on("message", (msg, rinfo) => {
-        //   console.log(
-        //     "(UDP) got data of length " + msg.length + "..." + " from " + rinfo.address + ":" + rinfo.port
-        //   );
-      });
-
-      UDPserver.on("listening", () => {
-        var address = UDPserver.address();
-        console.info(
-          `UDP server listening on ${address.address}:${address.port}`
-        );
-      });
-      UDPserver.bind(this._UdpServerPort);
-      this.meterListener = UDPserver;
-    }
+    this.meterListener = null;
+    this.metering = {};
 
     {
       let TCPclient = new net.Socket();
@@ -93,7 +70,7 @@ class Client {
                 correctLength - (buffData.length - 6);
               return;
             } else {
-              this.handleRecvPacket(buffData.slice(0, correctLength + 6));
+              this._handleRecvPacket(buffData.slice(0, correctLength + 6));
 
               buffData = buffData.slice(correctLength + 6);
 
@@ -114,7 +91,7 @@ class Client {
             TCPclient.payloadLengthRemaining -= extractN;
 
             if (TCPclient.payloadLengthRemaining == 0) {
-              this.handleRecvPacket(TCPclient.payloadTemp);
+              this._handleRecvPacket(TCPclient.payloadTemp);
               TCPclient.payloadTemp = Buffer.allocUnsafe(0);
             }
 
@@ -129,27 +106,138 @@ class Client {
         console.log("Connection closed");
       });
 
-      TCPclient.connect(port, host, () => {
-        // Tell mixer to send metering data to our UDP server
-        this._sendPacket(
-          MessagePrefix.Hello,
-          shortToLE(this._UdpServerPort),
-          0x00
-        );
+      this.conn = TCPclient;
+    }
+  }
+
+  connect() {
+    {
+      this.conn.connect(this.serverPort, this.serverHost, () => {
+        // Tell mixer to send metering data to our meter server
+        if (this.meterListener)
+          this._sendPacket(
+            MessagePrefix.Hello,
+            shortToLE(this._UdpServerPort),
+            0x00
+          );
 
         // Send subscribe request
         this._sendPacket(MessagePrefix.JSON, craftSubscribe());
+
         this.sendList("presets/scene");
-        console.log("Connected");
 
         // Send KeepAlive every second
         setInterval(() => {
           this._sendPacket(MessagePrefix.KeepAlive);
         }, 1000);
-      });
 
-      this.conn = TCPclient;
+        console.log("Connected");
+      });
     }
+  }
+
+  listen() {
+    if (this.meterListener) throw Error("Meter server already listening!");
+
+    // Create UDP Server to listen to metering data
+    let UDPserver = dgram.createSocket("udp4");
+
+    UDPserver.on("error", err => {
+      UDPserver.close();
+      throw Error("Meter server error error: " + err.stack);
+    });
+
+    // UDPserver.on("message", this._handleRecvPacket.bind(this));
+    UDPserver.on("message", (msg, rinfo) => {
+      let data = Buffer.from(msg);
+
+      if (
+        !data.slice(0, 4).equals(this._packetHeader) ||
+        data.slice(6, 8).toString() != "MS"
+      ) {
+        console.warn("Ignoring irrelevant packet", packet);
+        return;
+      }
+
+      // var length = data.slice(4, 6); // length is given as cf08 = 53000, but the payload is only 1041 long
+
+      // var conn = data.slice(8, 12);
+
+      var text = data.slice(12, 16);
+      if (text.toString() != "levl") return; // Only 'levl' (partially) implemented
+      // head, length, code, conn, levl, SPACER, data = x[:4], x[4:6], x[6:8], x[8:12], x[12:16], x[16:20], x[20:]
+
+      var _ = data.slice(16, 20);
+
+      data = data.slice(20);
+
+      if (data.length != 1041) return;
+
+      {
+        let valArray = [];
+        for (let i = 0; i < 32; i++) valArray.push(data.readUInt16LE(i * 2));
+        this.metering["chain1input"] = this.metering["input"] = valArray;
+        // looks like it's the same as 041-072
+      }
+
+      {
+        let valArray = [];
+        const offset = 72;
+        for (let i = 0 + offset; i < 32 + offset; i++)
+          valArray.push(data.readUInt16LE(i * 2));
+        this.metering["chain2input"] = this.metering["chain1output"] = valArray;
+      }
+
+      {
+        let valArray = [];
+        const offset = 104;
+        for (let i = 0 + offset; i < 32 + offset; i++)
+          valArray.push(data.readUInt16LE(i * 2));
+        this.metering["chain3input"] = this.metering["chain2output"] = valArray;
+      }
+
+      {
+        let valArray = [];
+        const offset = 136;
+        for (let i = 0 + offset; i < 32 + offset; i++)
+          valArray.push(data.readUInt16LE(i * 2));
+        this.metering["chain4input"] = this.metering["chain3output"] = valArray;
+      }
+
+      {
+        let valArray = [];
+        const offset = 168;
+        for (let i = 0 + offset; i < 32 + offset; i++)
+          valArray.push(data.readUInt16LE(i * 2));
+        this.metering["level"] = this.metering["chain4output"] = valArray;
+      }
+    });
+
+    UDPserver.on("listening", () => {
+      var address = UDPserver.address();
+      console.info(
+        `Meter server started on: ${address.address}:${address.port}`
+      );
+    });
+
+    UDPserver.bind(this._UdpServerPort);
+    this.meterListener = UDPserver;
+  }
+  stop() {
+    if (!this.meterListener) throw Error("Meter server hasn't started yet");
+    this.meterListener.close();
+    this.meterListener = null;
+  }
+
+  setUDPServerPort(port) {
+    if (typeof port !== "number" || port <= 0 || port > 65535) {
+      throw Error("setUDPServerPort: Invalid port number");
+    }
+    if (this.meterListener)
+      throw Error(
+        "Meter server is currently running, please stop the server first"
+      );
+    self._UdpServerPort = port;
   }
 
   on(evtName, func) {
@@ -169,7 +257,7 @@ class Client {
     }
   }
 
-  handleRecvPacket(packet) {
+  _handleRecvPacket(packet) {
     if (
       !packet.slice(0, this._packetHeader.length).equals(this._packetHeader)
     ) {
