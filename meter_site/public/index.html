@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>PreSonus API Metering Example</title>
+  </head>
+  <body>
+    <span id="metering"></span>
+  </body>
+  <script>
+    function loop() {
+      console.log(
+        fetch("/meter")
+          .then(d => d.json())
+          .then(d => {
+            document.getElementById("metering").innerText = d;
+            loop();
+          })
+          .catch(e => {
+            setTimeout(loop, 3 * 1000);
+          })
+      );
+    }
+    loop();
+  </script>
+</html>
