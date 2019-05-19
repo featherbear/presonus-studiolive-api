@@ -1,24 +1,64 @@
 <html>
   <head>
     <title>PreSonus API Metering Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+    </style>
   </head>
   <body>
-    <span id="metering"></span>
+    <canvas id="metering" width="100%" height="100%"></canvas>
   </body>
   <script>
-    function loop() {
-      console.log(
-        fetch("/meter")
-          .then(d => d.json())
-          .then(d => {
-            document.getElementById("metering").innerText = d;
-            loop();
-          })
-          .catch(e => {
-            setTimeout(loop, 3 * 1000);
-          })
-      );
-    }
-    loop();
+    (() => {
+      let canvasContext = document.getElementById("metering").getContext("2d");
+      let data;
+
+      function redraw() {
+        if (!data) return;
+
+        let w = canvasContext.canvas.width;
+        let h = canvasContext.canvas.height;
+
+        canvasContext.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < 32; i++) {
+          let v = data.level[i];
+          if (v / 65535 > 0.8) {
+            canvasContext.fillStyle = "red";
+          } else if (v / 65535 > 0.5) {
+            canvasContext.fillStyle = "yellow";
+          } else {
+            canvasContext.fillStyle = "green";
+          }
+
+          canvasContext.fillRect(
+            i * (w / 32),
+            (1 - v / 65535) * h,
+            w / 32,
+            (v / 65535) * h
+          );
+        }
+      }
+
+      io("/meter").on("meter", function(d) {
+        data = d;
+        redraw();
+      });
+
+      function resize() {
+        canvasContext.canvas.width = window.innerWidth;
+        canvasContext.canvas.height = window.innerHeight;
+        redraw();
+      }
+      resize();
+
+      window.addEventListener("resize", resize, false);
+    })();
   </script>
 </html>

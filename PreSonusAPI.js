@@ -211,6 +211,8 @@ class Client {
           valArray.push(data.readUInt16LE(i * 2));
         this.metering["level"] = this.metering["chain4output"] = valArray;
       }
+
+      this.emit("meter", this.metering)
     });
 
     UDPserver.on("listening", () => {
