@@ -62,7 +62,7 @@ Sends a packet to the server, messageCode is a two byte long string.
 ## Metering
 Metering data is stored as a dictionary
 
-```json
+```
 {
   input: [..., ..., ... /* 32 */], // Input signal
   chain1input: input
