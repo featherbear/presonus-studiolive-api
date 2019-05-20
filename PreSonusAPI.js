@@ -131,6 +131,7 @@ class Client {
           this._sendPacket(MessagePrefix.KeepAlive);
         }, 1000);
 
+        this.emit("connected");
         console.log("Connected");
       });
     }
@@ -220,6 +221,7 @@ class Client {
       console.info(
         `Meter server started on: ${address.address}:${address.port}`
       );
+      this.emit("listening");
     });
 
     UDPserver.bind(this._UdpServerPort);
