@@ -9,26 +9,26 @@ There's no dependencies so just download a copy of [`PreSonusAPI.js`](https://ra
 
 # Documentation
 
-* `new Client(host: int, port: int)`
+* `new Client(host: int, port: int)`  
 Creates a Client object that will later connect to the console at `host`:`port`
 
-* `client.connect()`
+* `client.connect()`  
 Connect to the console
 
-* `client.listen()`
+* `client.listen()`  
 Start the metering server
 
-* `client.stop()`
+* `client.stop()`  
 Stop the metering server
 
-* `client.setUDPServerPort(port: int)`
+* `client.setUDPServerPort(port: int)`  
 Set the listen port of the metering server.  
 Can only be run while the metering server is not running
 
-* `client.on(evtName: str, fn: function)`
+* `client.on(evtName: str, fn: function)`  
 Listen for `evtName` events that will call `fn`
 
-* `client.sendList(path: str)`
+* `client.sendList(path: str)`  
 Request `path` from the console
 
 ## Events
@@ -49,10 +49,10 @@ Events are splitted into Protocol Events (event codes that are part of the proto
 * `meter` | `meterData` - Emitted when metering data is received
 
 ## Low(er) level access
-* `client.emit(evttName: str, ...data)`
+* `client.emit(evttName: str, ...data)`  
 Emits an event for `evtName` with `data`
 
-* `client._sendPacket(messageCode: bytes[2], data, <customA>, <customB>)`
+* `client._sendPacket(messageCode: bytes[2], data, <customA>, <customB>)`  
 Sends a packet to the server, messageCode is a two byte long string.  
 `customA` is an optional single byte character  
 `customB` is an optional single byte character  
