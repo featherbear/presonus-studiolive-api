@@ -1,0 +1,19 @@
+{
+  "name": "presonus-studiolive-api",
+  "version": "1.0.0",
+  "description": "Unofficial PreSonus StudioLive III Network Control API",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/featherbear/PreSonus-StudioLive-API.git"
+  },
+  "author": "featherbear",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/featherbear/PreSonus-StudioLive-API/issues"
+  },
+  "homepage": "https://github.com/featherbear/PreSonus-StudioLive-API#readme",
+  "dependencies": {
+    "esm": "^3.2.25"
+  }
+}
