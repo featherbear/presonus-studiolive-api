@@ -12,7 +12,7 @@ The Python client currently has more functionality than the Node.js API.
 
 # Usage
 
-`const { Client, MessagePrefix } = require('presonus-studiolive-api')`
+`const { Client, MessageTypes } = require('presonus-studiolive-api')`
 
 # Documentation
 

@@ -1,8 +1,8 @@
-const { Client, MessagePrefix } = require('./index.js')
+const { Client, MessageTypes } = require('./index.js')
 
 let client = new Client('192.168.0.50', 53000)
 
-client.on(MessagePrefix.Setting, function (data) {
+client.on(MessageTypes.Setting, function (data) {
   console.log(data)
 })
 client.connect()
