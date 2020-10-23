@@ -55,7 +55,7 @@
 </tr>
 <tr class="even">
 <td style="text-align: left;">FR</td>
-<td style="text-align: left;">FileResource</td>
+<td style="text-align: left;">File Request</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">FD</td>
@@ -98,7 +98,7 @@
 <p>I will refer to this group of four bytes as <strong>C-Bytes</strong> (custom bytes).<br />
 The first byte will be known as <strong>C-Byte A</strong> and the third as <strong>C-Byte B</strong></p>
 <p>They seem to be used for signalling and matching responses to requests.<br />
-<em>i.e (hypothetically) If a message is sent with a signal value of ‘A’, a response will be sent containing a signal value of ‘A’ so that the response can be matched with the request.</em></p>
+<em>i.e (hypothetically) If a message is sent with <code>C-Byte A = j</code>, <code>C-Byte B = e</code> a response will be sent containing <code>C-Byte A = e</code>, <code>C-Byte B = j</code> so that the response can be matched with the request.</em></p>
 <p>For most cases it looks like they’re not too important to keep synchronised - But as I keep researching and developing this API, I might find the need to actually implement proper request matching</p>
 <h1 id="hello">Hello</h1>
 <blockquote>
@@ -142,6 +142,9 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tbody>
 </table>
 <h1 id="subscribe">Subscribe</h1>
+<blockquote>
+<p>Register the client to the console</p>
+</blockquote>
 <pre><code>55 43 00 01 fe 00 4a 4d 6a 00 65 00 f4 00 00 00   UC....JMj.e.....
 7b 22 69 64 22 3a 20 22 53 75 62 73 63 72 69 62   {&quot;id&quot;: &quot;Subscrib
 65 22 2c 22 63 6c 69 65 6e 74 4e 61 6d 65 22 3a   e&quot;,&quot;clientName&quot;:
@@ -261,12 +264,65 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
+<h1 id="file-request">File Request</h1>
+<!-- TODO: What is a file? -->
+<blockquote>
+<p>Request a file from the console. File path is terminated with a NULL character.</p>
+</blockquote>
 <pre><code>55 43 00 01 1d 00 46 52 6a 00 65 00 01 00 4c 69   UC....FRj.e...Li
 73 74 70 72 65 73 65 74 73 2f 63 68 61 6e 6e 65   stpresets/channe
 6c 00 00                                          l..</code></pre>
-<p>Header +</p>
-<h1 id="broadcast">Broadcast</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Bytes</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0-3</td>
+<td style="text-align: left;">Header</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4-5</td>
+<td style="text-align: left;">Payload Size</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6-7</td>
+<td style="text-align: left;">Payload Type</td>
+<td style="text-align: left;"><code>FR</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8-&gt;11</td>
+<td style="text-align: left;">C-Bytes</td>
+<td style="text-align: left;"><code>6a 00 65 00</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">12-13</td>
+<td style="text-align: left;">??</td>
+<td style="text-align: left;"><code>01 00</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">14-&gt;?</td>
+<td style="text-align: left;">Request path</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">?-&gt;?</td>
+<td style="text-align: left;">Null byte</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h1 id="announcement">Announcement</h1>
+<p><strong>Note: Announcement packets do not follow the standard packet packing format</strong></p>
+<blockquote>
 <p>Every <strong>3 seconds</strong>, the console will broadcast a UDP packet (from port <code>53000</code>) to <code>255.255.255.255:47809</code>.</p>
+</blockquote>
 <pre><code>55 43 00 01 08 cf 44 41 65 00 00 00 00 04 00 80   UC....DAe.......
 48 1c 48 67 23 60 51 4f 92 4e 1e 46 91 50 51 d1   H.Hg#`QO.N.F.PQ.
 53 74 75 64 69 6f 4c 69 76 65 20 32 34 52 00 41   StudioLive 24R.A
