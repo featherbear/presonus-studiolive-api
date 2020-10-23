@@ -22,14 +22,14 @@ jobs:
           --output=dist/index.html
           README.md
 
-    - name: Generate protocol page
+    - name: Generate packet page
       uses: docker://pandoc/core:2.9
       with:
         args: >
           --standalone
-          --metadata pagetitle="Protocol Research"
-          --output=dist/protocol.html
-          PROTOCOL.md
+          --metadata pagetitle="Packet Research | PreSonus StudioLive III Development"
+          --output=dist/packet.html
+          PACKET.md
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2.3.1
