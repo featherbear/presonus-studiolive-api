@@ -28,46 +28,46 @@
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Code</th>
-<th style="text-align: center;">Description</th>
+<th style="text-align: left;">Code</th>
+<th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">KA</td>
-<td style="text-align: center;">KeepAlive</td>
+<td style="text-align: left;">KA</td>
+<td style="text-align: left;">KeepAlive</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">UM</td>
-<td style="text-align: center;">Hello</td>
+<td style="text-align: left;">UM</td>
+<td style="text-align: left;">Hello</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">JM</td>
-<td style="text-align: center;">JSON</td>
+<td style="text-align: left;">JM</td>
+<td style="text-align: left;">JSON</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">PV</td>
-<td style="text-align: center;">Setting</td>
+<td style="text-align: left;">PV</td>
+<td style="text-align: left;">Setting</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">PL</td>
-<td style="text-align: center;">Settings 2</td>
+<td style="text-align: left;">PL</td>
+<td style="text-align: left;">Settings 2</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">FR</td>
-<td style="text-align: center;">FileResource</td>
+<td style="text-align: left;">FR</td>
+<td style="text-align: left;">FileResource</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">FD</td>
-<td style="text-align: center;">FileResource 2</td>
+<td style="text-align: left;">FD</td>
+<td style="text-align: left;">FileResource 2</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">BO</td>
-<td style="text-align: center;">?????????</td>
+<td style="text-align: left;">BO</td>
+<td style="text-align: left;">?????????</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">CK</td>
-<td style="text-align: center;">Compressed Data ??????</td>
+<td style="text-align: left;">CK</td>
+<td style="text-align: left;">Compressed Data ??????</td>
 </tr>
 </tbody>
 </table>
@@ -108,35 +108,35 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Bytes</th>
-<th style="text-align: center;">Description</th>
+<th style="text-align: left;">Bytes</th>
+<th style="text-align: left;">Description</th>
 <th style="text-align: left;">Note</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">0-3</td>
-<td style="text-align: center;">Header</td>
+<td style="text-align: left;">0-3</td>
+<td style="text-align: left;">Header</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">4-5</td>
-<td style="text-align: center;">Payload Size</td>
+<td style="text-align: left;">4-5</td>
+<td style="text-align: left;">Payload Size</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">6-7</td>
-<td style="text-align: center;">Payload Type</td>
+<td style="text-align: left;">6-7</td>
+<td style="text-align: left;">Payload Type</td>
 <td style="text-align: left;"><code>UM</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">8-11</td>
-<td style="text-align: center;">C-Bytes</td>
+<td style="text-align: left;">8-11</td>
+<td style="text-align: left;">C-Bytes</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">12-&gt;13</td>
-<td style="text-align: center;">Payload Data</td>
+<td style="text-align: left;">12-&gt;13</td>
+<td style="text-align: left;">Payload Data</td>
 <td style="text-align: left;"><code>TCP Window Size + 1</code> ???</td>
 </tr>
 </tbody>
@@ -162,40 +162,40 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Bytes</th>
-<th style="text-align: center;">Description</th>
+<th style="text-align: left;">Bytes</th>
+<th style="text-align: left;">Description</th>
 <th style="text-align: left;">Note</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">0-3</td>
-<td style="text-align: center;">Header</td>
+<td style="text-align: left;">0-3</td>
+<td style="text-align: left;">Header</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">4-5</td>
-<td style="text-align: center;">Payload Size</td>
+<td style="text-align: left;">4-5</td>
+<td style="text-align: left;">Payload Size</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">6-7</td>
-<td style="text-align: center;">Payload Type</td>
+<td style="text-align: left;">6-7</td>
+<td style="text-align: left;">Payload Type</td>
 <td style="text-align: left;"><code>JM</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">8-&gt;11</td>
-<td style="text-align: center;">C-Bytes</td>
+<td style="text-align: left;">8-&gt;11</td>
+<td style="text-align: left;">C-Bytes</td>
 <td style="text-align: left;"><code>6a 00 65 00</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">12-15</td>
-<td style="text-align: center;">JSON Size</td>
+<td style="text-align: left;">12-15</td>
+<td style="text-align: left;">JSON Size</td>
 <td style="text-align: left;">4-byte LE</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">16-&gt;?</td>
-<td style="text-align: center;">JSON Data</td>
+<td style="text-align: left;">16-&gt;?</td>
+<td style="text-align: left;">JSON Data</td>
 <td style="text-align: left;"></td>
 </tr>
 </tbody>
@@ -215,29 +215,31 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Bytes</th>
-<th style="text-align: center;">Description</th>
+<th style="text-align: left;">Bytes</th>
+<th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">0-3</td>
-<td style="text-align: center;">Header</td>
+<td style="text-align: left;">0-3</td>
+<td style="text-align: left;">Header</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">4-5</td>
-<td style="text-align: center;">Source Port (2 byte little endian)</td>
+<td style="text-align: left;">4-5</td>
+<td style="text-align: left;">Source Port (2 byte little endian)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">6-23</td>
-<td style="text-align: center;">???</td>
+<td style="text-align: left;">6-23</td>
+<td style="text-align: left;">???</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">24-&gt;?</td>
-<td style="text-align: center;">Console Model*</td>
+<td style="text-align: left;">24-&gt;?</td>
+<td style="text-align: left;">Console Model*</td>
 </tr>
 </tbody>
 </table>
 <p>*Console Model: Used to identify the icon in <a href="https://www.presonus.com/products/UC-Surface">UC Surface</a></p>
+<hr />
+<p>Author: <a href="https://github.com/featherbear">Andrew Wong</a></p>
 </body>
 </html>
