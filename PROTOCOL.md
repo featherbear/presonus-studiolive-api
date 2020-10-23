@@ -1,8 +1,9 @@
 # PreSonus StudioLive III | Protocol Research
 
-## Overview
 
 <!-- 
+
+## Overview
 
 Discovery Broadcast - every 3 seconds
 KeepAlive - every n second ???
@@ -16,7 +17,7 @@ TCP for control
 
 ## Packet Research
 
-Refer to the [PACKET.md](featherbear.cc/presonus-studiolive-api/packet.html) file
+Refer to the [PACKET.md](https://featherbear.cc/presonus-studiolive-api/packet.html) file
 
 ---
 
