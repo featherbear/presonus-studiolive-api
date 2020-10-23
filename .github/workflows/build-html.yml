@@ -1,0 +1,34 @@
+name: build webpage
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@master
+      
+    - run: mkdir dist -p
+      
+    - name: Generate HTML from README.md
+      uses: docker://pandoc/core:2.9
+      with:
+        args: >
+          --standalone
+          --metadata pagetitle="Protocol Research"
+          --output=dist/protocol.html
+          PROTOCOL.md
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v2.3.1
+      env:
+        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: dist
+
+
+
+
