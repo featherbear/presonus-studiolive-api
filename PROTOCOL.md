@@ -15,7 +15,7 @@ All packets start with the four bytes `\x55\x43\x00\x01` (UC..)
 There are different formats of payloads, identified by a two byte preamble preceding the payload data
 
 |Code |Description|
-|:---:|:--------:|
+|:----|:---------|
 |KA|KeepAlive|
 |UM|Hello|
 |JM|JSON|
@@ -61,7 +61,7 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 ```
 
 |Bytes|Description|Note|
-|:---:|:---------:|:---|
+|:----|:----------|:---|
 |0-3|Header||
 |4-5|Payload Size||
 |6-7|Payload Type|`UM`|
@@ -91,7 +91,7 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 ```
 
 |Bytes|Description|Note|
-|:---:|:---------:|:---|
+|:----|:----------|:---|
 |0-3|Header||
 |4-5|Payload Size||
 |6-7|Payload Type|`JM`|
@@ -122,7 +122,7 @@ Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`)
 ```
 
 |Bytes|Description|
-|:---:|:---------:|
+|:----|:----------|
 |0-3|Header|
 |4-5|Source Port (2 byte little endian)|
 |6-23|???|
@@ -130,4 +130,8 @@ Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`)
 
 *Console Model: Used to identify the icon in [UC Surface]
 
+
+---
+
+Author: [Andrew Wong](https://github.com/featherbear)
 

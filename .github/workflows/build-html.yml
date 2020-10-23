@@ -3,7 +3,7 @@ name: build webpage
 on:
   push:
     branches:
-    - master
+    - documentation
 
 jobs:
   build-deploy:
@@ -12,8 +12,17 @@ jobs:
     - uses: actions/checkout@master
       
     - run: mkdir dist -p
-      
-    - name: Generate HTML from README.md
+
+    - name: Generate index page
+      uses: docker://pandoc/core:2.9
+      with:
+        args: >
+          --standalone
+          --metadata pagetitle="PreSonus StudioLive III Development"
+          --output=dist/index.html
+          README.md
+
+    - name: Generate protocol page
       uses: docker://pandoc/core:2.9
       with:
         args: >
