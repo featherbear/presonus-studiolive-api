@@ -21,7 +21,7 @@ There are different formats of payloads, identified by a two byte preamble prece
 |JM|JSON|
 |PV|Setting|
 |PL|Settings 2|
-|FR|FileResource|
+|FR|File Request|
 |FD|FileResource 2|
 |BO|?????????|
 |CK|Compressed Data ??????|
@@ -47,7 +47,7 @@ I will refer to this group of four bytes as **C-Bytes** (custom bytes).
 The first byte will be known as **C-Byte A** and the third as **C-Byte B**
 
 They seem to be used for signalling and matching responses to requests.  
-_i.e (hypothetically) If a message is sent with a signal value of 'A', a response will be sent containing a signal value of 'A' so that the response can be matched with the request._
+_i.e (hypothetically) If a message is sent with `C-Byte A = j`, `C-Byte B = e` a response will be sent containing `C-Byte A = e`, `C-Byte B = j` so that the response can be matched with the request._
 
 For most cases it looks like they're not too important to keep synchronised - But as I keep researching and developing this API, I might find the need to actually implement proper request matching
 
@@ -69,6 +69,8 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |12->13|Payload Data|`TCP Window Size + 1` ???|
 
 # Subscribe
+
+> Register the client to the console
 
 ```
 55 43 00 01 fe 00 4a 4d 6a 00 65 00 f4 00 00 00   UC....JMj.e.....
@@ -112,17 +114,36 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |`clientOptions`     |_string_ |???        |`"perm users levl redu rtan"`|
 |`clientEncoding`    |_integer_|???        |`23106`|
 
+# File Request
+
+<!-- TODO: What is a file? -->
+
+> Request a file from the console. File path is terminated with a NULL character.
+
 ```
 55 43 00 01 1d 00 46 52 6a 00 65 00 01 00 4c 69   UC....FRj.e...Li
 73 74 70 72 65 73 65 74 73 2f 63 68 61 6e 6e 65   stpresets/channe
 6c 00 00                                          l..
 ```
 
-Header + 
+|Bytes|Description|Note|
+|:----|:----------|:---|
+|0-3|Header||
+|4-5|Payload Size||
+|6-7|Payload Type|`FR`|
+|8->11|C-Bytes|`6a 00 65 00`|
+|12-13|??|`01 00`|
+|14->?|Request path||
+|?->?|Null byte||
 
-# Broadcast
 
-Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`) to `255.255.255.255:47809`.
+
+
+# Announcement
+
+**Note: Announcement packets do not follow the standard packet packing format**
+
+> Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`) to `255.255.255.255:47809`.
 
 ```
 55 43 00 01 08 cf 44 41 65 00 00 00 00 04 00 80   UC....DAe.......
