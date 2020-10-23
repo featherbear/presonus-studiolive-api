@@ -1,6 +1,6 @@
 [UC Surface]: https://www.presonus.com/products/UC-Surface
 
-# PreSonus StudioLive III Network Control Protocol Research
+# PreSonus StudioLive III | Packet Research
 
 ---
 
@@ -99,6 +99,19 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |12-15|JSON Size|4-byte LE|
 |16->?|JSON Data||
 
+## JSON Fields
+
+|Key                 |Type     |Description|Known Values|
+|:-------------------|:--------|:----------|:-----------|
+|`id`                |_string_ |Action     |`"Subscribe"`|
+|`clientName`        |_string_ |Name|`"Universal Control"`/`"UC-Surface"`|  
+|`clientInternalName`|_string_ |Internal name|`"ucapp"`/`"ucremoteapp"`|
+|`clientType`        |_string_ |Client platform||`"PC"`,`"Android"`|
+|`clientDescription` |_string_ |Visible name||
+|`clientIdentifier`  |_string_ |ID         ||
+|`clientOptions`     |_string_ |???        |`"perm users levl redu rtan"`|
+|`clientEncoding`    |_integer_|???        |`23106`|
+
 ```
 55 43 00 01 1d 00 46 52 6a 00 65 00 01 00 4c 69   UC....FRj.e...Li
 73 74 70 72 65 73 65 74 73 2f 63 68 61 6e 6e 65   stpresets/channe
@@ -110,8 +123,6 @@ Header +
 # Broadcast
 
 Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`) to `255.255.255.255:47809`.
-
-## UDP Payload
 
 ```
 55 43 00 01 08 cf 44 41 65 00 00 00 00 04 00 80   UC....DAe.......

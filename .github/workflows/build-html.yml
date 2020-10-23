@@ -22,6 +22,15 @@ jobs:
           --output=dist/index.html
           README.md
 
+    - name: Generate protocol page
+      uses: docker://pandoc/core:2.9
+      with:
+        args: >
+          --standalone
+          --metadata pagetitle="Protocol Research | PreSonus StudioLive III Development"
+          --output=dist/protocol.html
+          PROTOCOL.md
+
     - name: Generate packet page
       uses: docker://pandoc/core:2.9
       with:
