@@ -16,15 +16,15 @@ There are different formats of payloads, identified by a two byte preamble prece
 
 |Code |Description|
 |:----|:---------|
-|KA|KeepAlive|
-|UM|Hello|
-|JM|JSON|
-|PV|Setting|
-|PL|Settings 2|
-|FR|File Request|
-|FD|FileResource 2|
-|BO|?????????|
-|CK|Compressed Data ??????|
+|`KA`|KeepAlive|
+|`UM`|Hello|
+|`JM`|JSON|
+|`PV`|Setting|
+|`PL`|Device List|
+|`FR`|File Request|
+|`FD`|FileResource 2|
+|`BO`|?????????|
+|`CK`|Compressed Data ??????|
 
 ## Payload Packing
 
