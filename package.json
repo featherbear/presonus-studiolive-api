@@ -14,6 +14,7 @@
   },
   "homepage": "https://github.com/featherbear/PreSonus-StudioLive-API#readme",
   "dependencies": {
-    "esm": "^3.2.25"
+    "esm": "^3.2.25",
+    "queue": "^6.0.1"
   }
 }
