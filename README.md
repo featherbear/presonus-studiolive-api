@@ -12,7 +12,7 @@ This page/repo outlines my research and implementation of the undocumented PreSo
 
 ## API
 
-The majority of you probably have stumbled upon this page because you've wanted some sort of integration with your StudioLive console. Checkout the ode.js API below
+The majority of you probably have stumbled upon this page because you've wanted some sort of integration with your StudioLive console. Checkout the Node.js API below
 
 * [presonus-studiolive-api](https://github.com/featherbear/presonus-studiolive-api/) (unofficial)
 * [Demos and Examples](https://github.com/featherbear/presonus-studiolive-api-demo)
