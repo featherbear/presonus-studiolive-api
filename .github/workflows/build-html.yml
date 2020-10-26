@@ -40,6 +40,15 @@ jobs:
           --output=dist/packet.html
           PACKET.md
 
+    - name: Generate API docs
+      uses: docker://pandoc/core:2.9
+      with:
+        args: >
+          --standalone
+          --metadata pagetitle="API Documentation | PreSonus StudioLive III Development"
+          --output=dist/api-documentation.html
+          API.md
+
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2.3.1
       env:
