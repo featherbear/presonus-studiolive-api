@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>API Documentation | PreSonus StudioLive III Development</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="unofficial-presonus-studiolive-iii-api">Unofficial PreSonus StudioLive III API</h1>
+<blockquote>
+<p>A Node.js API to interface with PreSonus’ StudioLive III consoles over the network. Read more <a href="https://featherbear.cc/presonus-studiolive-api/">here</a></p>
+</blockquote>
+<hr />
+<p>Page currently under construction</p>
+<!-- ...
+
+`const { Client, MessageTypes } = require('presonus-studiolive-api')`
+
+# Documentation
+
+* `new Client(host: int, port: int)`  
+Creates a Client object that will later connect to the console at `host`:`port`
+
+* `client.connect()`  
+Connect to the console
+
+* `client.listen()`  
+Start the metering server
+
+* `client.stop()`  
+Stop the metering server
+
+* `client.setUDPServerPort(port: int)`  
+Set the listen port of the metering server.  
+Can only be run while the metering server is not running
+
+* `client.on(evtName: str, fn: function)`  
+Listen for `evtName` events that will call `fn`
+
+* `client.sendList(path: str)`  
+Request `path` from the console
+
+## Events
+
+Events are split into Protocol Events (event codes that are part of the protocol), and custom events defined by this API.  
+
+### Protocol Events
+
+* `Hello`
+* `JSON`
+* `Setting`
+* `Settings2`
+* `FileResource`
+* `FileResource2`
+* `CompressedUnknown`
+
+### Custom Events
+
+* `connected` - Emitted when the client has successfully connected to the console
+* `listening` - Emitted when the client has successfully started the meter server
+* `meter` | `meterData` - Emitted when metering data is received
+
+## Low(er) level access
+
+* `client.emit(evtName: str, ...data)`  
+Emits an event for `evtName` with `data`
+
+* `client._sendPacket(messageCode: bytes[2], data, <customA>, <customB>)`  
+Sends a packet to the server, messageCode is a two byte long string.  
+`customA` is an optional single byte character  
+`customB` is an optional single byte character  
+
+* `client.conn` => TCP socket connection
+
+## Metering
+
+Metering is currently unavailable in the Node.js version -->
+<!-- Metering data is stored as a dictionary -->
+<!-- ```
+{
+  input: [..., ..., ... /* 32 */], // Input signal
+  chain1input: input
+  chain1output: [..., ..., ... /* 32 */], // First FX chain
+  chain2input: chain1output,
+  chain2output: [..., ..., ... /* 32 */], // Second FX chain
+  chain3input: chain2output,
+  chain3output: [..., ..., ... /* 32 */], // Third FX chain
+  chain4input: chain3output,
+  chain4output: [..., ..., ... /* 32 */], // Fourth FX chain
+  level: chain4output
+}
+``` -->
+<hr />
+<h2 id="license">License</h2>
+<p>Copyright © 2019 - 2020 <a href="https://featherbear.cc">Andrew Wong</a></p>
+<p>This software is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.<br />
+You are free to redistribute it and/or modify it under the <a href="https://opensource.org/licenses/MIT">terms</a> of the <a href="https://opensource.org/licenses/MIT">license</a>.</p>
+</body>
+</html>
