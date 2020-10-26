@@ -100,7 +100,7 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 <p>They seem to be used for signalling and matching responses to requests.<br />
 <em>i.e (hypothetically) If a message is sent with <code>C-Byte A = j</code>, <code>C-Byte B = e</code> a response will be sent containing <code>C-Byte A = e</code>, <code>C-Byte B = j</code> so that the response can be matched with the request.</em></p>
 <p>For most cases it looks like they’re not too important to keep synchronised - But as I keep researching and developing this API, I might find the need to actually implement proper request matching</p>
-<h1 id="hello">Hello</h1>
+<h2 id="hello">Hello</h2>
 <blockquote>
 <p>The first packet that gets sent to the console</p>
 </blockquote>
@@ -141,7 +141,7 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
-<h1 id="subscribe">Subscribe</h1>
+<h2 id="subscribe">Subscribe</h2>
 <blockquote>
 <p>Register the client to the console</p>
 </blockquote>
@@ -203,7 +203,7 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
-<h2 id="json-fields">JSON Fields</h2>
+<h3 id="json-fields">JSON Fields</h3>
 <table>
 <thead>
 <tr class="header">
@@ -264,7 +264,7 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
-<h1 id="file-request">File Request</h1>
+<h2 id="file-request">File Request</h2>
 <!-- TODO: What is a file? -->
 <blockquote>
 <p>Request a file from the console. File path is terminated with a NULL character.</p>
@@ -318,8 +318,23 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
-<h1 id="announcement">Announcement</h1>
-<p><strong>Note: Announcement packets do not follow the standard packet packing format</strong></p>
+<h1 id="response-packets">Response Packets</h1>
+<p>(Maybe they’re the same?)</p>
+<h2 id="settings">Settings</h2>
+<p>Setting packets have a payload type code of <code>0x50 0x56</code> (<code>PV</code>).</p>
+<h3 id="format">Format</h3>
+<blockquote>
+<p><strong>key</strong> + <code>\x00</code> + <code>partA</code> (+ <code>partB</code>)</p>
+</blockquote>
+<ul>
+<li><code>key</code> - The name of the setting value</li>
+<li><code>partA</code> - <code>0x00 0x00</code> or <code>0x00 0x01</code></li>
+<li><code>partB</code> - Optional 4-byte value</li>
+</ul>
+<p>For most responses, <code>partA</code> is <code>0x00 0x00</code>, and <code>partB</code> is appended.<br />
+However, for keys related to filter groups, <code>partA</code> is <code>0x00 0x01</code> and <code>partB</code> is omitted.</p>
+<h2 id="discovery">Discovery</h2>
+<p><strong>Note: Discovery packets do not follow the standard packet packing format</strong></p>
 <blockquote>
 <p>Every <strong>3 seconds</strong>, the console will broadcast a UDP packet (from port <code>53000</code>) to <code>255.255.255.255:47809</code>.</p>
 </blockquote>
