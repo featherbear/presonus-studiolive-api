@@ -51,8 +51,7 @@ _i.e (hypothetically) If a message is sent with `C-Byte A = j`, `C-Byte B = e` a
 
 For most cases it looks like they're not too important to keep synchronised - But as I keep researching and developing this API, I might find the need to actually implement proper request matching
 
-
-# Hello
+## Hello
 
 > The first packet that gets sent to the console
 
@@ -68,7 +67,7 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |8-11|C-Bytes||
 |12->13|Payload Data|`TCP Window Size + 1` ???|
 
-# Subscribe
+## Subscribe
 
 > Register the client to the console
 
@@ -101,7 +100,7 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |12-15|JSON Size|4-byte LE|
 |16->?|JSON Data||
 
-## JSON Fields
+### JSON Fields
 
 |Key                 |Type     |Description|Known Values|
 |:-------------------|:--------|:----------|:-----------|
@@ -114,7 +113,7 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |`clientOptions`     |_string_ |???        |`"perm users levl redu rtan"`|
 |`clientEncoding`    |_integer_|???        |`23106`|
 
-# File Request
+## File Request
 
 <!-- TODO: What is a file? -->
 
@@ -136,12 +135,28 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |14->?|Request path||
 |?->?|Null byte||
 
+# Response Packets
 
+(Maybe they're the same?)
 
+## Settings
 
-# Announcement
+Setting packets have a payload type code of `0x50 0x56` (`PV`).
 
-**Note: Announcement packets do not follow the standard packet packing format**
+### Format
+
+> **key** + `\x00` + `partA` (+ `partB`)
+
+* `key` - The name of the setting value
+* `partA` - `0x00 0x00` or `0x00 0x01`
+* `partB` -  Optional 4-byte value
+
+For most responses, `partA` is `0x00 0x00`, and `partB` is appended.  
+However, for keys related to filter groups, `partA` is `0x00 0x01` and `partB` is omitted.
+
+## Discovery
+
+**Note: Discovery packets do not follow the standard packet packing format**
 
 > Every **3 seconds**, the console will broadcast a UDP packet (from port `53000`) to `255.255.255.255:47809`.
 
