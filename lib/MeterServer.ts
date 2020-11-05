@@ -3,7 +3,7 @@
 // The console establishes a UDP connection to the computer, and sends over metering data
 // Current status: BROKEN
 
-import dgram from 'dgram'
+import * as dgram from 'dgram'
 import { PacketHeader } from './constants'
 
 let instanceCount = 0
@@ -34,7 +34,7 @@ export default function (port) {
       !data.slice(0, 4).equals(PacketHeader) ||
       data.slice(6, 8).toString() != 'MS'
     ) {
-      console.warn('Ignoring irrelevant packet', packet)
+      console.warn('Ignoring irrelevant packet')
       return
     }
 

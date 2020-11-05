@@ -1,9 +1,11 @@
 import { PacketHeader } from './constants'
 import { analysePacket } from './MessageProtocol'
 import { EventEmitter } from 'events'
-import dgram from 'dgram'
+import * as dgram from 'dgram'
 
 export default class extends EventEmitter {
+  socket: dgram.Socket
+
   async start (timeout = null) {
     return new Promise((resolve, reject) => {
       this.stop()

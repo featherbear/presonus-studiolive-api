@@ -1,4 +1,5 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
+
 import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
@@ -17,13 +18,23 @@ import KVTree from './KVTree'
 import { PacketHeader, CByte } from './constants'
 
 export default class Client extends EventEmitter {
-  constructor (host, port = 53000) {
+  serverHost: string
+  serverPort: number
+  serverPortUDP: number
+  discovery: Discovery
+  state: KVTree
+
+  conn: any
+  meterListener: any
+  metering: any
+  
+  constructor (host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
     this.serverHost = host
     this.serverPort = port
 
-    this._UdpServerPort = 52704
+    this.serverPortUDP = 52704
     this.meterListener = null
     this.metering = {}
 
@@ -58,7 +69,7 @@ export default class Client extends EventEmitter {
   }
 
   meterSubscribe (port) {
-    port = port || this._UdpServerPort
+    port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
     this._sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
   }
@@ -156,7 +167,7 @@ export default class Client extends EventEmitter {
     )
   }
 
-  _sendPacket (messageCode, data, customA, customB) {
+  _sendPacket (messageCode: Buffer | string, data ?: Buffer | string , customA ?: any, customB ?: any) {
     if (!data) data = Buffer.allocUnsafe(0)
     const connIdentity = Buffer.from([
       customA || CByte.A,
@@ -182,7 +193,7 @@ export default class Client extends EventEmitter {
     let cursor = 0
     b.fill(PacketHeader)
     b.fill(lengthLE, (cursor += PacketHeader.length))
-    b.write(messageCode, (cursor += lengthLE.length))
+    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode , (cursor += lengthLE.length))
     b.fill(connIdentity, (cursor += messageCode.length))
 
     if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))

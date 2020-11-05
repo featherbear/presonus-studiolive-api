@@ -1,1 +1,2 @@
-module.exports = require("esm")(module)("./api.js")
+require('typescript-require')
+module.exports = require('./api.ts')
