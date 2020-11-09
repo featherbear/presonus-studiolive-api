@@ -8,7 +8,8 @@
     "clean": "rimraf dist",
     "transpile": "sucrase ./src -d ./dist --transforms typescript,imports",
     "lint": "standardx src/**/*.{ts,js} | snazzy",
-    "lint:fix": "standardx -fix src/**/*.{ts,js} | snazzy"
+    "lint:fix": "standardx -fix src/**/*.{ts,js} | snazzy",
+    "install": "npm run transpile"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,8 @@
   },
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
-    "queue": "^6.0.1"
+    "queue": "^6.0.1",
+    "sucrase": "^3.16.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
@@ -31,7 +33,6 @@
     "rimraf": "^3.0.2",
     "snazzy": "^9.0.0",
     "standardx": "^7.0.0",
-    "sucrase": "^3.16.0",
     "typescript": "^4.0.5"
   },
   "eslintConfig": {
