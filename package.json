@@ -9,7 +9,7 @@
     "transpile": "sucrase ./src -d ./dist --transforms typescript,imports",
     "lint": "standardx src/**/*.{ts,js} | snazzy",
     "lint:fix": "standardx -fix src/**/*.{ts,js} | snazzy",
-    "install": "npm run transpile"
+    "install": "npm run --silent transpile -- -q"
   },
   "repository": {
     "type": "git",
