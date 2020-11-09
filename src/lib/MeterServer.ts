@@ -13,13 +13,13 @@ export default function (port) {
     throw Error('Invalid port number')
   }
 
-  console.log(instanceCount);
+  console.log(instanceCount)
   if (instanceCount++ > 0) {
     throw Error('Meter server is already running')
   }
 
   // Create UDP Server to listen to metering data
-  let UDPserver = dgram.createSocket('udp4')
+  const UDPserver = dgram.createSocket('udp4')
   const emitter = this || UDPserver
 
   UDPserver.on('error', err => {
@@ -32,7 +32,7 @@ export default function (port) {
 
     if (
       !data.slice(0, 4).equals(PacketHeader) ||
-      data.slice(6, 8).toString() != 'MS'
+      data.slice(6, 8).toString() !== 'MS'
     ) {
       console.warn('Ignoring irrelevant packet')
       return
@@ -41,55 +41,52 @@ export default function (port) {
     // var length = data.slice(4, 6); // length is given as cf08 = 53000, but the payload is only 1041 long
     // var conn = data.slice(8, 12);
 
-    var text = data.slice(12, 16)
-    if (text.toString() != 'levl') return // Only 'levl' (partially) implemented
+    const text = data.slice(12, 16)
+    if (text.toString() !== 'levl') return // Only 'levl' (partially) implemented
     // head, length, code, conn, levl, SPACER, data = x[:4], x[4:6], x[6:8], x[8:12], x[12:16], x[16:20], x[20:]
 
-    var _ = data.slice(16, 20)
+    // eslint-disable-next-line
+    const _ = data.slice(16, 20)
 
     data = data.slice(20)
 
-    if (data.length != 1041) return
+    if (data.length !== 1041) return
 
-    console.log('continue');
+    console.log('continue')
     {
       console.log('aye')
-      let valArray = []
+      const valArray = []
       for (let i = 0; i < 32; i++) valArray.push(data.readUInt16LE(i * 2))
-      this.metering['chain1input'] = this.metering['input'] = valArray
+      this.metering.chain1input = this.metering.input = valArray
       // looks like it's the same as 041-072
     }
 
     {
-      let valArray = []
+      const valArray = []
       const offset = 72
-      for (let i = 0 + offset; i < 32 + offset; i++)
-        valArray.push(data.readUInt16LE(i * 2))
-      this.metering['chain2input'] = this.metering['chain1output'] = valArray
+      for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
+      this.metering.chain2input = this.metering.chain1output = valArray
     }
 
     {
-      let valArray = []
+      const valArray = []
       const offset = 104
-      for (let i = 0 + offset; i < 32 + offset; i++)
-        valArray.push(data.readUInt16LE(i * 2))
-      this.metering['chain3input'] = this.metering['chain2output'] = valArray
+      for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
+      this.metering.chain3input = this.metering.chain2output = valArray
     }
 
     {
-      let valArray = []
+      const valArray = []
       const offset = 136
-      for (let i = 0 + offset; i < 32 + offset; i++)
-        valArray.push(data.readUInt16LE(i * 2))
-      this.metering['chain4input'] = this.metering['chain3output'] = valArray
+      for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
+      this.metering.chain4input = this.metering.chain3output = valArray
     }
 
     {
-      let valArray = []
+      const valArray = []
       const offset = 168
-      for (let i = 0 + offset; i < 32 + offset; i++)
-        valArray.push(data.readUInt16LE(i * 2))
-      this.metering['level'] = this.metering['chain4output'] = valArray
+      for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
+      this.metering.level = this.metering.chain4output = valArray
     }
 
     console.log('emit')
@@ -97,9 +94,9 @@ export default function (port) {
   })
 
   UDPserver.on('listening', () => {
-    var address = UDPserver.address()
+    const address = UDPserver.address()
     console.info(`Meter server started on: ${address.address}:${address.port}`)
-    if (emitter != UDPserver) {
+    if (emitter !== UDPserver) {
       emitter.emit('listening')
     }
   })

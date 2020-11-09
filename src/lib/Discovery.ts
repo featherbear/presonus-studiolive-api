@@ -1,4 +1,3 @@
-import { PacketHeader } from './constants'
 import { analysePacket } from './MessageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
@@ -28,7 +27,7 @@ export default class extends EventEmitter {
   }
 
   _setup () {
-    let socket = dgram.createSocket('udp4')
+    const socket = dgram.createSocket('udp4')
     socket.bind(47809, '0.0.0.0')
 
     socket.on('listening', function () {
@@ -36,12 +35,12 @@ export default class extends EventEmitter {
     })
 
     socket.on('message', (packet, rinfo) => {
-      let [code, data] = analysePacket(packet, true)
+      const [code, data] = analysePacket(packet, true)
       if (code === null) {
         return
       }
 
-      let fragments = []
+      const fragments = []
       for (
         let payload = data.slice(20), cur = 0, f;
         cur < payload.length;
@@ -52,7 +51,9 @@ export default class extends EventEmitter {
         )
       }
 
+      // eslint-disable-next-line
       const [nameA, _, serial, nameB] = fragments
+      
       // nameA: Model number for device image identification
       // nameB: ???
       this.emit('discover', {

@@ -27,7 +27,7 @@ export default class Client extends EventEmitter {
   conn: any
   meterListener: any
   metering: any
-  
+
   constructor (host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
@@ -83,7 +83,7 @@ export default class Client extends EventEmitter {
   async connect (subscribeData = undefined) {
     return new Promise((resolve, reject) => {
       this.conn.once('error', reject)
-      
+
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
         this._sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
@@ -104,14 +104,14 @@ export default class Client extends EventEmitter {
         })
 
         // Send a KeepAlive packet every second
-        let keepAliveFn = () => {
+        const keepAliveFn = () => {
           if (this.conn.destroyed) {
             clearInterval(keepAliveLoop)
             return
           }
           this._sendPacket(MessageTypes.KeepAlive)
         }
-        let keepAliveLoop = setInterval(keepAliveFn, 1000)
+        const keepAliveLoop = setInterval(keepAliveFn, 1000)
       })
     })
   }
@@ -167,7 +167,7 @@ export default class Client extends EventEmitter {
     )
   }
 
-  _sendPacket (messageCode: Buffer | string, data ?: Buffer | string , customA ?: any, customB ?: any) {
+  _sendPacket (messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
     if (!data) data = Buffer.allocUnsafe(0)
     const connIdentity = Buffer.from([
       customA || CByte.A,
@@ -184,16 +184,16 @@ export default class Client extends EventEmitter {
 
     const b = Buffer.alloc(
       PacketHeader.length +
-        lengthLE.length +
-        messageCode.length +
-        connIdentity.length +
-        data.length
+      lengthLE.length +
+      messageCode.length +
+      connIdentity.length +
+      data.length
     )
 
     let cursor = 0
     b.fill(PacketHeader)
     b.fill(lengthLE, (cursor += PacketHeader.length))
-    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode , (cursor += lengthLE.length))
+    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
     b.fill(connIdentity, (cursor += messageCode.length))
 
     if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
@@ -220,7 +220,7 @@ export default class Client extends EventEmitter {
     this.setMuteState(ch, false)
   }
 
-  close() {
+  close () {
     this.discoveryUnsubscribe()
     this.meterUnsubscribe()
     this.conn.destroy()
