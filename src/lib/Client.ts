@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
+import { ACTIONS, CHANNELS, PacketHeader, CByte } from './constants'
 
 import {
   MessageTypes,
@@ -14,8 +15,6 @@ import {
 
 import { shortToLE } from './util'
 import KVTree from './KVTree'
-
-import { PacketHeader, CByte } from './constants'
 
 export default class Client extends EventEmitter {
   serverHost: string
@@ -202,22 +201,22 @@ export default class Client extends EventEmitter {
     this.conn.write(b)
   }
 
-  setMuteState (ch, state) {
+  setMuteState (channel: CHANNELS, state) {
     this.sendPacket(
       MessageTypes.Setting,
       Buffer.concat([
-        Buffer.from(`line/ch${ch}/mute\x00\x00\x00`),
+        Buffer.from(`${channel}/${ACTIONS.MUTE}\x00\x00\x00`),
         onOffCode(state)
       ])
     )
   }
 
-  mute (ch) {
-    this.setMuteState(ch, true)
+  mute (channel: CHANNELS) {
+    this.setMuteState(channel, true)
   }
 
-  unmute (ch) {
-    this.setMuteState(ch, false)
+  unmute (channel: CHANNELS) {
+    this.setMuteState(channel, false)
   }
 
   close () {
