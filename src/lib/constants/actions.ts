@@ -2,6 +2,10 @@
 
 export enum ACTIONS {
     MUTE = 'mute',
+    VOLUME = 'dca/volume',
+    GAIN = 'preampgain',
+    SELECT = 'select',
+    RTA = 'rta_active',
 
     ASSIGN_FX1 = 'assign_fx1',
     ASSIGN_FX2 = 'assign_fx2',
