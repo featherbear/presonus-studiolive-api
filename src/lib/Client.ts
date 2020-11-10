@@ -219,6 +219,29 @@ export default class Client extends EventEmitter {
     this.setMuteState(channel, false)
   }
 
+  // toggleMuteState (channel: CHANNELS) {
+    
+  // }
+
+  /* IDEA: Force get channel state 
+    If we are unable to figure out how to get initial channel data
+    then we could do a hackish method to query the information.
+
+    A. Send an unmute command and see if there is a response (Will be unmuted regardless now)
+    * If there is a unmute event, then we know that the channel was originally muted
+      * Then send a mute event
+    * If there was no unmute event, then we know the channel was already unmuted
+    
+    B. Send a mute command and see if there is a response (Will be muted regardless now)
+    * If there is a mute event, then we know that the channel was originally unmuted
+      * Then send an unmute event
+    * If there was no mute event, then we know that the channel was already muted
+    
+    C. Some commands cause a list of channel mute statuses to be send (TODO: Add the event code here).
+    * Send that command 
+
+  */
+
   close () {
     this.discoveryUnsubscribe()
     this.meterUnsubscribe()
