@@ -1,9 +1,11 @@
+/* eslint no-unused-vars: "off" */
+
 /**
  * These values seem to be related to request-response matching
  */
-export const CByte = {
-  A: 0x68,
-  B: 0x65
+export enum CByte {
+  A = 0x68,
+  B = 0x65
 }
 
 /**
