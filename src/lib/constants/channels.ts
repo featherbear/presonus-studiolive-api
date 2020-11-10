@@ -34,19 +34,10 @@ export enum CHANNELS {
     CHANNEL_31 = 'line/ch31',
     CHANNEL_32 = 'line/ch32',
 
-    FX_1 = 'fxbus/ch1',
-    FX_2 = 'fxbus/ch2',
-    FX_3 = 'fxbus/ch3',
-    FX_4 = 'fxbus/ch4',
-    FXRETURN_1 = 'fxbus/ch1',
-    FXRETURN_2 = 'fxbus/ch2',
-    FXRETURN_3 = 'fxbus/ch3',
-    FXRETURN_4 = 'fxbus/ch4',
-
     MAIN = 'main/ch1',
 
     TALKBACK = 'talkback/ch1',
-    
+
     AUX_1 = 'aux/ch1',
     AUX_2 = 'aux/ch2',
     AUX_3 = 'aux/ch3',
@@ -68,4 +59,15 @@ export enum CHANNELS {
     SUB_B = 'sub/ch2',
     SUB_C = 'sub/ch3',
     SUB_D = 'sub/ch4',
+
+    FX_1 = 'fxbus/ch1',
+    FX_2 = 'fxbus/ch2',
+    FX_3 = 'fxbus/ch3',
+    FX_4 = 'fxbus/ch4',
+
+    FXRETURN_1 = 'fxbus/ch1',
+    FXRETURN_2 = 'fxbus/ch2',
+    FXRETURN_3 = 'fxbus/ch3',
+    FXRETURN_4 = 'fxbus/ch4',
+
 }
