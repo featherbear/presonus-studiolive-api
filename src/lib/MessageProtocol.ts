@@ -1,22 +1,5 @@
 import { PacketHeader } from './constants'
 
-const MessageTypes = {
-  KeepAlive: 'KA',
-  Hello: 'UM',
-  JSON: 'JM',
-  Setting: 'PV',
-  DeviceList: 'PL',
-  FileResource: 'FR',
-  FileResource2: 'FD',
-  
-  Unknown1: 'BO',
-  Unknown2: 'CK', // compressed
-  Unknown3: 'MS' // fader position
-}
-// for (let str in MessageTypes) MessageTypes[MessageTypes[str]] = str
-for (const [k, v] of Object.entries(MessageTypes)) MessageTypes[v] = k
-export { MessageTypes }
-
 export function analysePacket (
   packet /* Buffer */,
   ignoreLengthMismatch = false

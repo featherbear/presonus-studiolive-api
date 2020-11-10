@@ -3,10 +3,9 @@ import { EventEmitter } from 'events'
 import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
-import { ACTIONS, CHANNELS, PacketHeader, CByte } from './constants'
+import { ACTIONS, CHANNELS, MessageTypes, PacketHeader, CByte } from './constants'
 
 import {
-  MessageTypes,
   analysePacket,
   craftSubscribe,
   onOffCode,
@@ -121,7 +120,7 @@ export default class Client extends EventEmitter {
       return
     }
 
-    if (!(messageCode in MessageTypes)) {
+    if (!Object.values(MessageTypes).includes(messageCode)) {
       console.log('Unhandled message code', messageCode)
     }
 
