@@ -42,7 +42,7 @@ export default class Client extends EventEmitter {
     this.discovery = new Discovery()
     this.discovery.on('discover', data => this.emit('discover', data))
 
-    this.conn = DataClient(this._handleRecvPacket.bind(this))
+    this.conn = DataClient(this.handleRecvPacket.bind(this))
 
     this.state = new KVTree()
   }
@@ -71,7 +71,7 @@ export default class Client extends EventEmitter {
   meterSubscribe (port) {
     port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
-    this._sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
+    this.sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
   }
 
   meterUnsubscribe () {
@@ -86,7 +86,7 @@ export default class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
-        this._sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
+        this.sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
 
         const subscribeCallback = data => {
           if (data.id === 'SubscriptionReply') {
@@ -109,14 +109,14 @@ export default class Client extends EventEmitter {
             clearInterval(keepAliveLoop)
             return
           }
-          this._sendPacket(MessageTypes.KeepAlive)
+          this.sendPacket(MessageTypes.KeepAlive)
         }
         const keepAliveLoop = setInterval(keepAliveFn, 1000)
       })
     })
   }
 
-  _handleRecvPacket (packet) {
+  private handleRecvPacket (packet) {
     let [messageCode, data] = analysePacket(packet)
     if (messageCode === null) {
       return
@@ -157,7 +157,7 @@ export default class Client extends EventEmitter {
   }
 
   sendList (key) {
-    this._sendPacket(
+    this.sendPacket(
       MessageTypes.FileResource,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
@@ -167,7 +167,7 @@ export default class Client extends EventEmitter {
     )
   }
 
-  _sendPacket (messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
+  private sendPacket (messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
     if (!data) data = Buffer.allocUnsafe(0)
     const connIdentity = Buffer.from([
       customA || CByte.A,
@@ -203,7 +203,7 @@ export default class Client extends EventEmitter {
   }
 
   setMuteState (ch, state) {
-    this._sendPacket(
+    this.sendPacket(
       MessageTypes.Setting,
       Buffer.concat([
         Buffer.from(`line/ch${ch}/mute\x00\x00\x00`),
