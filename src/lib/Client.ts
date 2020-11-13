@@ -236,7 +236,7 @@ export default class Client extends EventEmitter {
       * Then send an unmute event
     * If there was no mute event, then we know that the channel was already muted
     
-    C. Some commands cause a list of channel mute statuses to be send (TODO: Add the event code here).
+    C. Some commands cause a list of channel mute statuses to be send (Link Aux Mute - MB: mt64).
     * Send that command 
 
   */
