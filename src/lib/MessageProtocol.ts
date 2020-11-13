@@ -1,22 +1,5 @@
 import { PacketHeader } from './constants'
 
-let MessageTypes = {
-  KeepAlive: 'KA',
-  Hello: 'UM',
-  JSON: 'JM',
-  Setting: 'PV',
-  DeviceList: 'PL',
-  FileResource: 'FR',
-  FileResource2: 'FD',
-  
-  Unknown1: 'BO',
-  Unknown2: 'CK', // compressed
-  Unknown3: 'MS'  //fader position
-}
-// for (let str in MessageTypes) MessageTypes[MessageTypes[str]] = str
-for (let [k, v] of Object.entries(MessageTypes)) MessageTypes[v] = k
-export { MessageTypes }
-
 export function analysePacket (
   packet /* Buffer */,
   ignoreLengthMismatch = false
@@ -26,9 +9,9 @@ export function analysePacket (
     return [null, null]
   }
 
-  let note = false
-  let payloadLength = packet.slice(4, 6).readUInt16LE()
-  if (payloadLength + 6 != packet.length) {
+  const note = false
+  const payloadLength = packet.slice(4, 6).readUInt16LE()
+  if (payloadLength + 6 !== packet.length) {
     if (!ignoreLengthMismatch) {
       console.warn(
         `Packet is meant to be ${payloadLength +
@@ -38,15 +21,15 @@ export function analysePacket (
     }
   }
 
-  let messageCode = packet.slice(6, 8).toString()
+  const messageCode = packet.slice(6, 8).toString()
   // Skip bytes 8-11 (pair)
-  let data = packet.slice(12)
+  const data = packet.slice(12)
 
   return [messageCode, data, note]
 }
 
 export function craftSubscribe (overrides = {}) {
-  let data = {
+  const data = {
     id: 'Subscribe',
     clientName: 'UC-Surface',
     clientInternalName: 'ucremoteapp',

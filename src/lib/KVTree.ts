@@ -7,7 +7,6 @@ Tree
   Tree
 */
 
-
 export default class Tree {
   constructor (base = '/', parent = null) {
     this[BaseSymbol] = base

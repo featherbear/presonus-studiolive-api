@@ -1,10 +1,11 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
+
 import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
+import { ACTIONS, CHANNELS, MessageTypes, PacketHeader, CByte } from './constants'
 
 import {
-  MessageTypes,
   analysePacket,
   craftSubscribe,
   onOffCode,
@@ -14,16 +15,24 @@ import {
 import { shortToLE } from './util'
 import KVTree from './KVTree'
 
-import { PacketHeader, CByte } from './constants'
-
 export default class Client extends EventEmitter {
-  constructor (host, port = 53000) {
+  serverHost: string
+  serverPort: number
+  serverPortUDP: number
+  discovery: Discovery
+  state: KVTree
+
+  conn: any
+  meterListener: any
+  metering: any
+
+  constructor (host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
     this.serverHost = host
     this.serverPort = port
 
-    this._UdpServerPort = 52704
+    this.serverPortUDP = 52704
     this.meterListener = null
     this.metering = {}
 
@@ -31,7 +40,7 @@ export default class Client extends EventEmitter {
     this.discovery = new Discovery()
     this.discovery.on('discover', data => this.emit('discover', data))
 
-    this.conn = DataClient(this._handleRecvPacket.bind(this))
+    this.conn = DataClient(this.handleRecvPacket.bind(this))
 
     this.state = new KVTree()
   }
@@ -58,9 +67,9 @@ export default class Client extends EventEmitter {
   }
 
   meterSubscribe (port) {
-    port = port || this._UdpServerPort
+    port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
-    this._sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
+    this.sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
   }
 
   meterUnsubscribe () {
@@ -72,10 +81,10 @@ export default class Client extends EventEmitter {
   async connect (subscribeData = undefined) {
     return new Promise((resolve, reject) => {
       this.conn.once('error', reject)
-      
+
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
-        this._sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
+        this.sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
 
         const subscribeCallback = data => {
           if (data.id === 'SubscriptionReply') {
@@ -93,25 +102,25 @@ export default class Client extends EventEmitter {
         })
 
         // Send a KeepAlive packet every second
-        let keepAliveFn = () => {
+        const keepAliveFn = () => {
           if (this.conn.destroyed) {
             clearInterval(keepAliveLoop)
             return
           }
-          this._sendPacket(MessageTypes.KeepAlive)
+          this.sendPacket(MessageTypes.KeepAlive)
         }
-        let keepAliveLoop = setInterval(keepAliveFn, 1000)
+        const keepAliveLoop = setInterval(keepAliveFn, 1000)
       })
     })
   }
 
-  _handleRecvPacket (packet) {
+  private handleRecvPacket (packet) {
     let [messageCode, data] = analysePacket(packet)
     if (messageCode === null) {
       return
     }
 
-    if (!(messageCode in MessageTypes)) {
+    if (!Object.values(MessageTypes).includes(messageCode)) {
       console.log('Unhandled message code', messageCode)
     }
 
@@ -146,7 +155,7 @@ export default class Client extends EventEmitter {
   }
 
   sendList (key) {
-    this._sendPacket(
+    this.sendPacket(
       MessageTypes.FileResource,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
@@ -156,7 +165,7 @@ export default class Client extends EventEmitter {
     )
   }
 
-  _sendPacket (messageCode, data, customA, customB) {
+  private sendPacket (messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
     if (!data) data = Buffer.allocUnsafe(0)
     const connIdentity = Buffer.from([
       customA || CByte.A,
@@ -173,16 +182,16 @@ export default class Client extends EventEmitter {
 
     const b = Buffer.alloc(
       PacketHeader.length +
-        lengthLE.length +
-        messageCode.length +
-        connIdentity.length +
-        data.length
+      lengthLE.length +
+      messageCode.length +
+      connIdentity.length +
+      data.length
     )
 
     let cursor = 0
     b.fill(PacketHeader)
     b.fill(lengthLE, (cursor += PacketHeader.length))
-    b.write(messageCode, (cursor += lengthLE.length))
+    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
     b.fill(connIdentity, (cursor += messageCode.length))
 
     if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
@@ -191,25 +200,48 @@ export default class Client extends EventEmitter {
     this.conn.write(b)
   }
 
-  setMuteState (ch, state) {
-    this._sendPacket(
+  setMuteState (channel: CHANNELS, state) {
+    this.sendPacket(
       MessageTypes.Setting,
       Buffer.concat([
-        Buffer.from(`line/ch${ch}/mute\x00\x00\x00`),
+        Buffer.from(`${channel}/${ACTIONS.MUTE}\x00\x00\x00`),
         onOffCode(state)
       ])
     )
   }
 
-  mute (ch) {
-    this.setMuteState(ch, true)
+  mute (channel: CHANNELS) {
+    this.setMuteState(channel, true)
   }
 
-  unmute (ch) {
-    this.setMuteState(ch, false)
+  unmute (channel: CHANNELS) {
+    this.setMuteState(channel, false)
   }
 
-  close() {
+  // toggleMuteState (channel: CHANNELS) {
+    
+  // }
+
+  /* IDEA: Force get channel state 
+    If we are unable to figure out how to get initial channel data
+    then we could do a hackish method to query the information.
+
+    A. Send an unmute command and see if there is a response (Will be unmuted regardless now)
+    * If there is a unmute event, then we know that the channel was originally muted
+      * Then send a mute event
+    * If there was no unmute event, then we know the channel was already unmuted
+    
+    B. Send a mute command and see if there is a response (Will be muted regardless now)
+    * If there is a mute event, then we know that the channel was originally unmuted
+      * Then send an unmute event
+    * If there was no mute event, then we know that the channel was already muted
+    
+    C. Some commands cause a list of channel mute statuses to be send (Link Aux Mute - MB: mt64).
+    * Send that command 
+
+  */
+
+  close () {
     this.discoveryUnsubscribe()
     this.meterUnsubscribe()
     this.conn.destroy()

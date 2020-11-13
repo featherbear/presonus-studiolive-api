@@ -1,2 +1,2 @@
 export { default, default as Client } from './lib/Client'
-export * from './lib/MessageProtocol'
+export { CHANNELS, MessageTypes } from './lib/constants'
