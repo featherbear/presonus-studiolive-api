@@ -204,7 +204,7 @@ export default class Client extends EventEmitter {
     this.sendPacket(
       MessageTypes.Setting,
       Buffer.concat([
-        Buffer.from(`${channel}/${ACTIONS.MUTE}\x00\x00\x00`),
+        Buffer.from(`${CHANNELS['CHANNEL_' + channel]}/${ACTIONS.MUTE}\x00\x00\x00`),
         onOffCode(state)
       ])
     )
