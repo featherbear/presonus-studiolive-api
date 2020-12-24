@@ -177,6 +177,11 @@ However, for keys related to filter groups, `partA` is `0x00 0x01` and `partB` i
 
 *Console Model: Used to identify the icon in [UC Surface]
 
+> When a client (Universal Control, etc) receives this broadcast, it will attempt to communicate with the console
+
+```
+55 43 00 01 07 c2 44 51 00 00 65 00  UC....DQ..e.
+```
 
 ---
 
