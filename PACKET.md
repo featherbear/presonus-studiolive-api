@@ -183,6 +183,13 @@ However, for keys related to filter groups, `partA` is `0x00 0x01` and `partB` i
 55 43 00 01 07 c2 44 51 00 00 65 00  UC....DQ..e.
 ```
 
+or
+
+```
+55 43 00 01 00 00 44 51 00 00 65 00  UC....DQ..e.
+```
+
+
 ---
 
 Author: [Andrew Wong](https://github.com/featherbear)
