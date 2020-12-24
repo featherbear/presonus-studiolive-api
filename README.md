@@ -3,7 +3,7 @@ PreSonus StudioLive III API
 
 An unofficial API for the StudioLive III consoles from PreSonus.  
 
-Protocol research was done in Python, and can be found in the [`research_python`](https://github.com/featherbear/presonus-studiolive-api/tree/research_python) branch.  
+Initial protocol research was done in Python, and can be found in the [`research_python`](https://github.com/featherbear/presonus-studiolive-api/tree/research_python) branch.  
 The Python client currently has more functionality than the Node.js API.
 
 # Install
