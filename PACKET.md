@@ -175,7 +175,7 @@ However, for keys related to filter groups, `partA` is `0x00 0x01` and `partB` i
 |6-23|???|
 |24->?|Console Model*|
 
-*Console Model: Used to identify the icon in [UC Surface]
+*The first "StudioLLive 24R" is used to identify the icon in [UC Surface]. The second instance appears to be some sort of friendly name
 
 > When a client (Universal Control, etc) receives this broadcast, it will attempt to communicate with the console
 
