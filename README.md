@@ -22,9 +22,10 @@ The majority of you probably have stumbled upon this page because you've wanted 
 
 ## Research
 
-Protocol research was performed on a _StudioLive Series III 24R rack mixer_ and a _StudioLive Series III 16 console_, using the [UC Surface](https://www.presonus.com/products/UC-Surface) application on an Android and Windows device. You can read more about my research at the link below
+Protocol research was performed on a _StudioLive Series III 24R rack mixer_ and a _StudioLive Series III 16 console_, using the [UC Surface](https://www.presonus.com/products/UC-Surface) application on Android and Windows. You can read more about my research at the link below
 
 * [Protocol Research](https://featherbear.cc/presonus-studiolive-api/protocol.html)
+* [Console Advertisment Spoofing](https://github.com/featherbear/presonus-studiolive-console-advertisement)
 * [(Git) Python research code](https://github.com/featherbear/presonus-studiolive-api/tree/research_python)
 
 ---
