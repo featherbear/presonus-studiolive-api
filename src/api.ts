@@ -1,2 +1,7 @@
 export { default, default as Client } from './lib/Client'
-export { CHANNELS, MessageTypes } from './lib/constants'
+export {
+  // @deprecated: Deprecating `CHANNELS` in favour of `Channels`
+  CHANNELS,
+  CHANNELS as Channels,
+  CHANNELTYPES as ChannelTypes, MESSAGETYPES as MessageTypes
+} from './lib/constants'

@@ -1,73 +1,92 @@
 /* eslint no-unused-vars: "off" */
 
-export enum CHANNELS {
-    CHANNEL_1 = 'line/ch1',
-    CHANNEL_2 = 'line/ch2',
-    CHANNEL_3 = 'line/ch3',
-    CHANNEL_4 = 'line/ch4',
-    CHANNEL_5 = 'line/ch5',
-    CHANNEL_6 = 'line/ch6',
-    CHANNEL_7 = 'line/ch7',
-    CHANNEL_8 = 'line/ch8',
-    CHANNEL_9 = 'line/ch9',
-    CHANNEL_10 = 'line/ch10',
-    CHANNEL_11 = 'line/ch11',
-    CHANNEL_12 = 'line/ch12',
-    CHANNEL_13 = 'line/ch13',
-    CHANNEL_14 = 'line/ch14',
-    CHANNEL_15 = 'line/ch15',
-    CHANNEL_16 = 'line/ch16',
-    CHANNEL_17 = 'line/ch17',
-    CHANNEL_18 = 'line/ch18',
-    CHANNEL_19 = 'line/ch19',
-    CHANNEL_20 = 'line/ch20',
-    CHANNEL_21 = 'line/ch21',
-    CHANNEL_22 = 'line/ch22',
-    CHANNEL_23 = 'line/ch23',
-    CHANNEL_24 = 'line/ch24',
-    CHANNEL_25 = 'line/ch25',
-    CHANNEL_26 = 'line/ch26',
-    CHANNEL_27 = 'line/ch27',
-    CHANNEL_28 = 'line/ch28',
-    CHANNEL_29 = 'line/ch29',
-    CHANNEL_30 = 'line/ch30',
-    CHANNEL_31 = 'line/ch31',
-    CHANNEL_32 = 'line/ch32',
+export enum LINE {
+    CHANNEL_1 = 1,
+    CHANNEL_2 = 2,
+    CHANNEL_3 = 3,
+    CHANNEL_4 = 4,
+    CHANNEL_5 = 5,
+    CHANNEL_6 = 6,
+    CHANNEL_7 = 7,
+    CHANNEL_8 = 8,
+    CHANNEL_9 = 9,
+    CHANNEL_10 = 10,
+    CHANNEL_11 = 11,
+    CHANNEL_12 = 12,
+    CHANNEL_13 = 13,
+    CHANNEL_14 = 14,
+    CHANNEL_15 = 15,
+    CHANNEL_16 = 16,
+    CHANNEL_17 = 17,
+    CHANNEL_18 = 18,
+    CHANNEL_19 = 19,
+    CHANNEL_20 = 20,
+    CHANNEL_21 = 21,
+    CHANNEL_22 = 22,
+    CHANNEL_23 = 23,
+    CHANNEL_24 = 24,
+    CHANNEL_25 = 25,
+    CHANNEL_26 = 26,
+    CHANNEL_27 = 27,
+    CHANNEL_28 = 28,
+    CHANNEL_29 = 29,
+    CHANNEL_30 = 30,
+    CHANNEL_31 = 31,
+    CHANNEL_32 = 32,
+}
 
-    MAIN = 'main/ch1',
+export enum AUX {
 
-    TALKBACK = 'talkback/ch1',
+    AUX_1 = 1,
+    AUX_2 = 2,
+    AUX_3 = 3,
+    AUX_4 = 4,
+    AUX_5 = 5,
+    AUX_6 = 6,
+    AUX_7 = 7,
+    AUX_8 = 8,
+    AUX_9 = 9,
+    AUX_10 = 10,
+    AUX_11 = 11,
+    AUX_12 = 12,
+    AUX_13 = 13,
+    AUX_14 = 14,
+    AUX_15 = 15,
+    AUX_16 = 16,
+}
 
-    AUX_1 = 'aux/ch1',
-    AUX_2 = 'aux/ch2',
-    AUX_3 = 'aux/ch3',
-    AUX_4 = 'aux/ch4',
-    AUX_5 = 'aux/ch5',
-    AUX_6 = 'aux/ch6',
-    AUX_7 = 'aux/ch7',
-    AUX_8 = 'aux/ch8',
-    AUX_9 = 'aux/ch9',
-    AUX_10 = 'aux/ch10',
-    AUX_11 = 'aux/ch11',
-    AUX_12 = 'aux/ch12',
-    AUX_13 = 'aux/ch13',
-    AUX_14 = 'aux/ch14',
-    AUX_15 = 'aux/ch15',
-    AUX_16 = 'aux/ch16',
+export enum SUB {
 
-    SUB_A = 'sub/ch1',
-    SUB_B = 'sub/ch2',
-    SUB_C = 'sub/ch3',
-    SUB_D = 'sub/ch4',
+    SUB_A = 1,
+    SUB_B = 2,
+    SUB_C = 3,
+    SUB_D = 4,
+}
 
-    FX_1 = 'fxbus/ch1',
-    FX_2 = 'fxbus/ch2',
-    FX_3 = 'fxbus/ch3',
-    FX_4 = 'fxbus/ch4',
+export enum FX {
+    FX_1 = 1,
+    FX_2 = 2,
+    FX_3 = 3,
+    FX_4 = 4,
+}
 
-    FXRETURN_1 = 'fxbus/ch1',
-    FXRETURN_2 = 'fxbus/ch2',
-    FXRETURN_3 = 'fxbus/ch3',
-    FXRETURN_4 = 'fxbus/ch4',
+export enum FXRETURN {
+
+    FXRETURN_1 = 1,
+    FXRETURN_2 = 2,
+    FXRETURN_3 = 3,
+    FXRETURN_4 = 4,
+}
+
+export enum MAIN {
+
+    MAIN = 1,
 
 }
+
+export enum TALKBACK {
+
+    TALKBACK = 1,
+
+}
+export type CHANNELS = LINE | AUX | SUB | FX | FXRETURN | MAIN | TALKBACK
