@@ -36,7 +36,7 @@ export function parseChannelString (
     [CHANNELTYPES.TALKBACK]: CHANNELS.TALKBACK
   }
 
-  if (Number.isInteger(channel)) channel = Number(channel)
+  if (!isNaN(channel)) channel = Number(channel)
   for (const [ckey, cval] of Object.entries(map)) {
     if (type === ckey) {
       if (!Object.values(cval).includes(channel)) {
