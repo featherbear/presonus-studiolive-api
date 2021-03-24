@@ -1,6 +1,6 @@
 /* eslint no-unused-vars: "off" */
 
-export enum MessageTypes {
+export enum MESSAGETYPES {
     KeepAlive = 'KA',
     Hello = 'UM',
     JSON = 'JM',
