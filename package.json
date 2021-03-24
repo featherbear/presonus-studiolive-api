@@ -37,7 +37,8 @@
   },
   "eslintConfig": {
     "rules": {
-      "no-trailing-spaces": "off"
+      "no-trailing-spaces": "off",
+      "no-dupe-class-members": "off"
     }
   },
   "standardx": {

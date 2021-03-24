@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
-import { ACTIONS, CHANNELS, MessageTypes, PacketHeader, CByte } from './constants'
+import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
 
 import {
   analysePacket,
@@ -12,7 +12,7 @@ import {
   onOffEval
 } from './MessageProtocol'
 
-import { shortToLE } from './util'
+import { parseChannelString, shortToLE } from './util'
 import KVTree from './KVTree'
 
 export default class Client extends EventEmitter {
@@ -69,7 +69,7 @@ export default class Client extends EventEmitter {
   meterSubscribe (port) {
     port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
-    this.sendPacket(MessageTypes.Hello, shortToLE(port), 0x00)
+    this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   meterUnsubscribe () {
@@ -84,19 +84,19 @@ export default class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
-        this.sendPacket(MessageTypes.JSON, craftSubscribe(subscribeData))
+        this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
 
         const subscribeCallback = data => {
           if (data.id === 'SubscriptionReply') {
-            this.removeListener(MessageTypes.JSON, subscribeCallback)
+            this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
             this.conn.removeListener('error', reject)
             resolve(this)
             this.emit('connected')
           }
         }
-        this.on(MessageTypes.JSON, subscribeCallback)
+        this.on(MESSAGETYPES.JSON, subscribeCallback)
 
-        this.on(MessageTypes.Setting, ({ name, value }) => {
+        this.on(MESSAGETYPES.Setting, ({ name, value }) => {
           this.state.register(name, value)
           // console.log(JSON.stringify(this.state, undefined, 2))
         })
@@ -107,7 +107,7 @@ export default class Client extends EventEmitter {
             clearInterval(keepAliveLoop)
             return
           }
-          this.sendPacket(MessageTypes.KeepAlive)
+          this.sendPacket(MESSAGETYPES.KeepAlive)
         }
         const keepAliveLoop = setInterval(keepAliveFn, 1000)
       })
@@ -120,15 +120,15 @@ export default class Client extends EventEmitter {
       return
     }
 
-    if (!Object.values(MessageTypes).includes(messageCode)) {
+    if (!Object.values(MESSAGETYPES).includes(messageCode)) {
       console.log('Unhandled message code', messageCode)
     }
 
     switch (messageCode) {
-      case MessageTypes.JSON:
+      case MESSAGETYPES.JSON:
         data = JSON.parse(data.slice(4))
         break
-      case MessageTypes.Setting: {
+      case MESSAGETYPES.Setting: {
         const idx = data.indexOf(0x00) // Find the NULL terminator of the key string
         if (idx !== -1) {
           const key = data.slice(0, idx).toString()
@@ -156,7 +156,7 @@ export default class Client extends EventEmitter {
 
   sendList (key) {
     this.sendPacket(
-      MessageTypes.FileResource,
+      MESSAGETYPES.FileResource,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
         Buffer.from('List' + key.toString()),
@@ -200,25 +200,42 @@ export default class Client extends EventEmitter {
     this.conn.write(b)
   }
 
-  setMuteState (channel: CHANNELS, state) {
+  private setMuteState (raw: string, state) {
     this.sendPacket(
-      MessageTypes.Setting,
+      MESSAGETYPES.Setting,
       Buffer.concat([
-        Buffer.from(`${channel}/${ACTIONS.MUTE}\x00\x00\x00`),
+        Buffer.from(`${raw}/${ACTIONS.MUTE}\x00\x00\x00`),
         onOffCode(state)
       ])
     )
   }
 
-  mute (channel: CHANNELS) {
-    this.setMuteState(channel, true)
+  mute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
+  mute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
+  mute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
+  mute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
+  mute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
+  mute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
+  mute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
+
+  mute (channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
+    const target = parseChannelString(channel, type)
+    this.setMuteState(target, true)
   }
 
-  unmute (channel: CHANNELS) {
-    this.setMuteState(channel, false)
+  unmute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
+  unmute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
+  unmute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
+  unmute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
+  unmute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
+  unmute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
+  unmute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
+  unmute (channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
+    const target = parseChannelString(channel, type)
+    this.setMuteState(target, false)
   }
 
-  // toggleMuteState (channel: CHANNELS) {
+  // toggleMuteState (channel: Channels) {
     
   // }
 
