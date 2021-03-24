@@ -79,14 +79,12 @@ export enum FXRETURN {
 }
 
 export enum MAIN {
-
-    MAIN = 1,
-
+  MAIN_CH = 1
 }
 
 export enum TALKBACK {
-
-    TALKBACK = 1,
+  TALKBACK_CH = 1
+}
 
 }
 export type CHANNELS = LINE | AUX | SUB | FX | FXRETURN | MAIN | TALKBACK
