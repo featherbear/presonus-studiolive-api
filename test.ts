@@ -7,8 +7,8 @@ client.on('data', function ({ code, data }) {
 })
 
 client.on(MESSAGETYPES.ZLIB, function (zlib) {
-  writeFileSync('zlib.dump', zlib)
   console.log(zlib);
+  writeFileSync('zlib.parsed', JSON.stringify(zlib, null, 4))
 })
 
 // client.on('discover', console.table)

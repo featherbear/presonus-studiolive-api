@@ -15,6 +15,7 @@ import {
 
 import { parseChannelString, shortToLE } from './util'
 import KVTree from './KVTree'
+import zlibParser from './zlib'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -158,7 +159,7 @@ class Client extends EventEmitter implements CustomEventEmitterTypes {
         break
       }
       case MESSAGETYPES.ZLIB: {
-        data = zlib.inflateSync(data.slice(4))
+        data = zlibParser(zlib.inflateSync(data.slice(4)))
         break
       }
     }
