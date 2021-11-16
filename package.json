@@ -9,8 +9,9 @@
     "clean": "rimraf dist",
     "transpile": "tsc",
     "lint": "standardx src/**/*.{ts,js} | snazzy",
-    "lint:fix": "standardx -fix src/**/*.{ts,js} | snazzy",
-    "install": "npm run --silent transpile -- -q"
+    "lint:fix": "standardx --fix src/**/*.{ts,js} | snazzy",
+    "install": "npm run --silent transpile",
+    "test": "sucrase-node test.ts"
   },
   "repository": {
     "type": "git",
