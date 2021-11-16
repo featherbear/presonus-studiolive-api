@@ -1,12 +1,12 @@
 {
   "name": "presonus-studiolive-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
   "main": "dist/api.js",
   "scripts": {
     "build": "npm-run-all lint clean transpile",
     "clean": "rimraf dist",
-    "transpile": "sucrase ./src -d ./dist --transforms typescript,imports",
+    "transpile": "tsc",
     "lint": "standardx src/**/*.{ts,js} | snazzy",
     "lint:fix": "standardx -fix src/**/*.{ts,js} | snazzy",
     "install": "npm run --silent transpile -- -q"
@@ -22,8 +22,7 @@
   },
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
-    "queue": "^6.0.1",
-    "sucrase": "^3.16.0"
+    "queue": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
