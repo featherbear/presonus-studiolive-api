@@ -69,6 +69,10 @@
 <td style="text-align: left;"><code>CK</code></td>
 <td style="text-align: left;">Compressed Data ??????</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><code>ZB</code></td>
+<td style="text-align: left;">ZLIB Compressed Data</td>
+</tr>
 </tbody>
 </table>
 <h2 id="payload-packing">Payload Packing</h2>
@@ -318,6 +322,62 @@ The first byte will be known as <strong>C-Byte A</strong> and the third as <stro
 </tr>
 </tbody>
 </table>
+<h2 id="zlib-compressed-data">ZLIB Compressed Data</h2>
+<p><code>ZB</code> payloads contain a zlib-compressed copy of the mixer state.<br />
+These payloads have their own 4-byte little-endian size header.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Bytes</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0-3</td>
+<td style="text-align: left;">Header</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4-5</td>
+<td style="text-align: left;">Payload Size</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6-7</td>
+<td style="text-align: left;">Payload Type</td>
+<td style="text-align: left;"><code>ZB</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8-&gt;11</td>
+<td style="text-align: left;">Compressed Payload Size (LE)</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">12-?</td>
+<td style="text-align: left;">Compressed Payload</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>The decompressed payload is stored in a type-prefixed and length-prefixed dictionary, delimited by an <code>i</code> (<code>0x69</code>) character.</p>
+<h3 id="keys">Keys</h3>
+<p>Keys are prefixed with <code>i_</code> where <code>_</code> is the key string length.</p>
+<blockquote>
+<p>e.g. <code>i(0x05)ABCDE</code> is the key <code>ABCDE</code> (length 5)</p>
+</blockquote>
+<h3 id="values">Values</h3>
+<ul>
+<li><code>Si_XXXXX</code> - String of length <code>_</code> (0-255), values contained in <code>XXXXX</code></li>
+<li><code>dXXXX</code> - 32-bit integer (signedness unknown), value in <code>XXXX</code></li>
+<li><code>iX</code> - Single byte (signedness unknown), value in <code>X</code></li>
+<li><code>{...}</code> - Dictionary</li>
+<li><code>[...]</code> - Array (TBC: only of strings???)</li>
+</ul>
+<p>Example decompressed payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/documentation/zlib.dump">zlib.dump</a><br />
+Example decoded payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/documentation/zlib.parsed">zlib.parsed</a></p>
+<hr />
 <h1 id="response-packets">Response Packets</h1>
 <p>(Maybe they’re the same?)</p>
 <h2 id="settings">Settings</h2>
