@@ -25,6 +25,7 @@ There are different formats of payloads, identified by a two byte preamble prece
 |`FD`|FileResource 2|
 |`BO`|?????????|
 |`CK`|Compressed Data ??????|
+|`ZB`|ZLIB Compressed Data|
 
 ## Payload Packing
 
@@ -134,6 +135,40 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |12-13|??|`01 00`|
 |14->?|Request path||
 |?->?|Null byte||
+
+## ZLIB Compressed Data
+
+`ZB` payloads contain a zlib-compressed copy of the mixer state.  
+These payloads have their own 4-byte little-endian size header.
+
+|Bytes|Description|Note|
+|:----|:----------|:---|
+|0-3|Header||
+|4-5|Payload Size||
+|6-7|Payload Type|`ZB`|
+|8->11|Compressed Payload Size (LE)||
+|12-?|Compressed Payload||
+
+The decompressed payload is stored in a type-prefixed and length-prefixed dictionary, delimited by an `i` (`0x69`) character.  
+
+### Keys
+
+Keys are prefixed with `i_` where `_` is the key string length.
+
+> e.g. `i(0x05)ABCDE` is the key `ABCDE` (length 5)
+
+### Values
+
+* `Si_XXXXX` - String of length `_` (0-255), values contained in `XXXXX`
+* `dXXXX` - 32-bit integer (signedness unknown), value in `XXXX`
+* `iX` - Single byte (signedness unknown), value in `X`
+* `{...}` - Dictionary
+* `[...]` - Array (TBC: only of strings???)
+
+Example decompressed payload: [zlib.dump](https://github.com/featherbear/presonus-studiolive-api/blob/documentation/zlib.dump)  
+Example decoded payload: [zlib.parsed](https://github.com/featherbear/presonus-studiolive-api/blob/documentation/zlib.parsed)
+
+---
 
 # Response Packets
 
