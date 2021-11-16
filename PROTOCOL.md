@@ -21,5 +21,4 @@ Refer to the [PACKET.md](https://featherbear.cc/presonus-studiolive-api/packet.h
 
 ---
 
-Author: [Andrew Wong](https://github.com/featherbear)
-
+Author: [Andrew Wong](https://featherbear.cc)
