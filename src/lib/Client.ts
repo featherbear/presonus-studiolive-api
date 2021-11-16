@@ -4,6 +4,7 @@ import Discovery from './Discovery'
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
+import zlib from 'zlib'
 
 import {
   analysePacket,
@@ -18,7 +19,28 @@ import KVTree from './KVTree'
 // Forward discovery events
 const discovery = new Discovery()
 
-class Client extends EventEmitter {
+type fnCallback = (obj: any) => void;
+type dataFnCallback = (obj: {
+  code: any,
+  data: any
+}) => void;
+
+interface CustomEventEmitterTypes {
+  on(event: MESSAGETYPES, listener: fnCallback): this;
+  on(event: 'data', listener: dataFnCallback): this;
+  once(event: MESSAGETYPES, listener: fnCallback): this;
+  once(event: 'data', listener: dataFnCallback): this;
+  off(event: MESSAGETYPES, listener: fnCallback): this;
+  off(event: 'data', listener: dataFnCallback): this;
+  addListener(event: MESSAGETYPES, listener: fnCallback): this;
+  addListener(event: 'data', listener: dataFnCallback): this;
+  removeListener(event: MESSAGETYPES, listener: fnCallback): this;
+  removeListener(event: 'data', listener: dataFnCallback): this;
+  removeAllListeners(event: MESSAGETYPES): this;
+  removeAllListeners(event: 'data'): this;
+}
+
+class Client extends EventEmitter implements CustomEventEmitterTypes {
   serverHost: string
   serverPort: number
   serverPortUDP: number
@@ -38,7 +60,6 @@ class Client extends EventEmitter {
     this.serverPortUDP = 52704
     this.meterListener = null
     this.metering = {}
-
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
@@ -136,10 +157,10 @@ class Client extends EventEmitter {
         }
         break
       }
-    }
-
-    if (data instanceof Buffer) {
-      data = { data }
+      case MESSAGETYPES.ZLIB: {
+        data = zlib.inflateSync(data.slice(4))
+        break
+      }
     }
 
     this.emit(messageCode, data)
@@ -255,27 +276,6 @@ class Client extends EventEmitter {
     this.conn.destroy()
     // TODO: Send unsubscribe
   }
-}
-
-type fnCallback = (obj: any) => void;
-type dataFnCallback = (obj: {
-  code: any,
-  data: any
-}) => void;
-
-declare interface Client {
-  on(event: MESSAGETYPES, listener: fnCallback): this;
-  on(event: 'data', listener: dataFnCallback): this;
-  once(event: MESSAGETYPES, listener: fnCallback): this;
-  once(event: 'data', listener: dataFnCallback): this;
-  off(event: MESSAGETYPES, listener: fnCallback): this;
-  off(event: 'data', listener: dataFnCallback): this;
-  addListener(event: MESSAGETYPES, listener: fnCallback): this;
-  addListener(event: 'data', listener: dataFnCallback): this;
-  removeListener(event: MESSAGETYPES, listener: fnCallback): this;
-  removeListener(event: 'data', listener: dataFnCallback): this;
-  removeAllListener(event: MESSAGETYPES): this;
-  removeAllListener(event: 'data'): this;
 }
 
 export default Client

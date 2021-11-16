@@ -9,6 +9,8 @@ export enum MESSAGETYPES {
     FileResource = 'FR',
     FileResource2 = 'FD',
 
+    ZLIB = 'ZB',
+
     Unknown1 = 'BO',
     Unknown2 = 'CK', // compressed
     Unknown3 = 'MS' // fader position
