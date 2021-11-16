@@ -1,7 +1,4 @@
-import { readFileSync } from "fs";
-
-
-function zlibParser(buf: Buffer) {
+export default function zlibParser(buf: Buffer) {
   let idx = 0;
   if (buf[idx++] != 0x7b) return null
 
@@ -145,9 +142,3 @@ function zlibParser(buf: Buffer) {
   return rootTree
 
 }
-
-
-
-let d = readFileSync('./zlib.dump')
-let result = zlibParser(d)
-console.log(JSON.stringify(result, null, 4));
