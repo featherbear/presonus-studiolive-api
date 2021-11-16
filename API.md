@@ -92,7 +92,7 @@ Metering is currently unavailable in the Node.js version -->
 
 ## License
 
-Copyright © 2019 - 2020 [Andrew Wong](https://featherbear.cc)  
+Copyright © 2019 - 2021 [Andrew Wong](https://featherbear.cc)  
 
 This software is licensed under the [MIT License](https://opensource.org/licenses/MIT).  
 You are free to redistribute it and/or modify it under the [terms](https://opensource.org/licenses/MIT) of the [license](https://opensource.org/licenses/MIT).
