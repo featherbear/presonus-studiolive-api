@@ -227,5 +227,4 @@ or
 
 ---
 
-Author: [Andrew Wong](https://github.com/featherbear)
-
+Author: [Andrew Wong](https://featherbear.cc)
