@@ -5,6 +5,7 @@
   "main": "dist/api.js",
   "scripts": {
     "build": "npm-run-all lint clean transpile",
+    "build:fix": "npm-run-all lint:fix clean transpile",
     "clean": "rimraf dist",
     "transpile": "tsc",
     "lint": "standardx src/**/*.{ts,js} | snazzy",
@@ -37,7 +38,8 @@
   "eslintConfig": {
     "rules": {
       "no-trailing-spaces": "off",
-      "no-dupe-class-members": "off"
+      "no-dupe-class-members": "off",
+      "space-before-function-paren": "off"
     }
   },
   "standardx": {

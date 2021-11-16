@@ -2,7 +2,7 @@ console.log(require('./index.js'))
 const { Client, MessageTypes } = require('./index.js')
 
 // let client = new Client('10.185.192.10', 53000)
-let client = new Client('192.168.0.50', 53000)
+const client = new Client('192.168.0.50', 53000)
 
 // client.on(MessageTypes.Setting, function (data) {
 //   console.log(data)

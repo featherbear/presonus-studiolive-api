@@ -6,7 +6,7 @@ export default class extends EventEmitter {
   socket: dgram.Socket
 
   async start (timeout = null) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.stop()
       this._setup()
 

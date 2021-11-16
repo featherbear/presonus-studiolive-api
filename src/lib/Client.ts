@@ -15,7 +15,10 @@ import {
 import { parseChannelString, shortToLE } from './util'
 import KVTree from './KVTree'
 
-export default class Client extends EventEmitter {
+// Forward discovery events
+const discovery = new Discovery()
+
+class Client extends EventEmitter {
   serverHost: string
   serverPort: number
   serverPortUDP: number
@@ -26,7 +29,7 @@ export default class Client extends EventEmitter {
   meterListener: any
   metering: any
 
-  constructor (host: string, port: number = 53000) {
+  constructor(host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
     this.serverHost = host
@@ -36,49 +39,38 @@ export default class Client extends EventEmitter {
     this.meterListener = null
     this.metering = {}
 
-    // Forward discovery events
-    this.discovery = new Discovery()
-    this.discovery.on('discover', data => this.emit('discover', data))
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
     this.state = new KVTree()
   }
 
-  async discover (timeout = 10 * 1000) {
+  static async discover(timeout = 10 * 1000) {
     const devices = {}
     const func = device => {
       devices[device.serial] = device
     }
 
-    this.discovery.on('discover', func)
-    await this.discoverySubscribe(timeout)
-    this.discovery.off('discover', func)
+    discovery.on('discover', func)
+    await discovery.start(timeout)
+    discovery.off('discover', func)
 
     return Object.values(devices)
   }
 
-  async discoverySubscribe (timeout = null) {
-    return this.discovery.start(timeout)
-  }
-
-  discoveryUnsubscribe () {
-    this.discovery.stop()
-  }
-
-  meterSubscribe (port) {
+  meterSubscribe(port) {
     port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
     this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
-  meterUnsubscribe () {
+  meterUnsubscribe() {
     if (!this.meterListener) return
     this.meterListener.close()
     this.meterListener = null
   }
 
-  async connect (subscribeData = undefined) {
+  async connect(subscribeData = undefined) {
     return new Promise((resolve, reject) => {
       this.conn.once('error', reject)
 
@@ -114,7 +106,7 @@ export default class Client extends EventEmitter {
     })
   }
 
-  private handleRecvPacket (packet) {
+  private handleRecvPacket(packet) {
     let [messageCode, data] = analysePacket(packet)
     if (messageCode === null) {
       return
@@ -150,11 +142,11 @@ export default class Client extends EventEmitter {
       data = { data }
     }
 
-    this.emit('data', { code: messageCode, ...data })
     this.emit(messageCode, data)
+    this.emit('data', { code: messageCode, data })
   }
 
-  sendList (key) {
+  sendList(key) {
     this.sendPacket(
       MESSAGETYPES.FileResource,
       Buffer.concat([
@@ -165,7 +157,7 @@ export default class Client extends EventEmitter {
     )
   }
 
-  private sendPacket (messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
+  private sendPacket(messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
     if (!data) data = Buffer.allocUnsafe(0)
     const connIdentity = Buffer.from([
       customA || CByte.A,
@@ -200,7 +192,7 @@ export default class Client extends EventEmitter {
     this.conn.write(b)
   }
 
-  private setMuteState (raw: string, state) {
+  private setMuteState(raw: string, state) {
     this.sendPacket(
       MESSAGETYPES.Setting,
       Buffer.concat([
@@ -218,7 +210,7 @@ export default class Client extends EventEmitter {
   mute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
   mute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
 
-  mute (channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
+  mute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
     const target = parseChannelString(channel, type)
     this.setMuteState(target, true)
   }
@@ -230,13 +222,13 @@ export default class Client extends EventEmitter {
   unmute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
   unmute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
   unmute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-  unmute (channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
+  unmute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
     const target = parseChannelString(channel, type)
     this.setMuteState(target, false)
   }
 
   // toggleMuteState (channel: Channels) {
-    
+
   // }
 
   /* IDEA: Force get channel state 
@@ -258,10 +250,32 @@ export default class Client extends EventEmitter {
 
   */
 
-  close () {
-    this.discoveryUnsubscribe()
+  close() {
     this.meterUnsubscribe()
     this.conn.destroy()
     // TODO: Send unsubscribe
   }
 }
+
+type fnCallback = (obj: any) => void;
+type dataFnCallback = (obj: {
+  code: any,
+  data: any
+}) => void;
+
+declare interface Client {
+  on(event: MESSAGETYPES, listener: fnCallback): this;
+  on(event: 'data', listener: dataFnCallback): this;
+  once(event: MESSAGETYPES, listener: fnCallback): this;
+  once(event: 'data', listener: dataFnCallback): this;
+  off(event: MESSAGETYPES, listener: fnCallback): this;
+  off(event: 'data', listener: dataFnCallback): this;
+  addListener(event: MESSAGETYPES, listener: fnCallback): this;
+  addListener(event: 'data', listener: dataFnCallback): this;
+  removeListener(event: MESSAGETYPES, listener: fnCallback): this;
+  removeListener(event: 'data', listener: dataFnCallback): this;
+  removeAllListener(event: MESSAGETYPES): this;
+  removeAllListener(event: 'data'): this;
+}
+
+export default Client
