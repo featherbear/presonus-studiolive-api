@@ -27,7 +27,7 @@ export default class extends EventEmitter {
   }
 
   _setup () {
-    const socket = dgram.createSocket('udp4')
+    const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
     socket.bind(47809, '0.0.0.0')
 
     socket.on('listening', function () {
