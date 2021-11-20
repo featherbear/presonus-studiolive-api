@@ -67,6 +67,7 @@ export default function zlibParser(buf: Buffer) {
           throw new Error('(B) failed to find delimiter')
         }
 
+        // Possibly a zero-length (aka null) string
         length = buf[idx++]
         break
       }
@@ -85,10 +86,6 @@ export default function zlibParser(buf: Buffer) {
       default: {
         throw new Error('Unknown type ' + type)
       }
-    }
-
-    if (length === 0) {
-      throw new Error('Invalid length value')
     }
 
     const valueData = buf.slice(idx, idx + length)
