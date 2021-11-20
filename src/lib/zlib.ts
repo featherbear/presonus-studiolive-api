@@ -1,57 +1,46 @@
 export default function zlibParser(buf: Buffer) {
-  let idx = 0;
-  if (buf[idx++] != 0x7b) return null
+  let idx = 0
+  if (buf[idx++] !== 0x7b) return null
 
-  let rootTree = {}
-  let workingSet = [rootTree]
+  const rootTree = {}
+  const workingSet: Array<[] | {}> = [rootTree]
 
-  while (idx != buf.length) {
-    // console.log('----- NEW PASS ------');
-    // console.log('current IDX', idx, "0x" + idx.toString(16));
-
+  while (idx !== buf.length) {
     let keyData: Buffer | null
     if (Array.isArray(workingSet[0])) {
       // nested !important
-      if (buf[idx] == 0x5D /* ] */) {
-        idx++;
+      if (buf[idx] === 0x5D /* ] */) {
+        idx++
         workingSet.shift()
         continue
       }
     } else {
-      let controlCharacter = buf[idx++]
+      const controlCharacter = buf[idx++]
 
-      if (controlCharacter == 0x7D /* } */) {
+      if (controlCharacter === 0x7D /* } */) {
         // Exit leaf node
         workingSet.shift()
         continue
-
       }
 
-      if (controlCharacter != 0x69 /* i */) {
-        // console.error('(A) failed to find delimiter')
+      if (controlCharacter !== 0x69 /* i */) {
         throw new Error('(A) failed to find delimiter')
-        break
       }
 
-      var length = buf[idx++]
-      // console.log("keyLength:", length);
-
+      const length = buf[idx++]
       keyData = buf.slice(idx, idx + length)
-      // console.log("keyData", keyData.toString());
       idx += length
-
     }
 
-    let type = buf[idx++]
-    // console.log("type", type, "0x" + type.toString(16));
-
+    const type = buf[idx++]
+    let length = 0
     switch (type) {
       case 0x7B /* { */: {
         // Create new leaf dictionary
-        let leaf = {}
+        const leaf = {}
 
         if (Array.isArray(workingSet[0])) {
-          workingSet[0].push(leaf)
+          (workingSet[0] as any[]).push(leaf)
         } else {
           workingSet[0][keyData.toString()] = leaf
         }
@@ -61,10 +50,10 @@ export default function zlibParser(buf: Buffer) {
 
       case 0x5B /* [ */: {
         // Create new leaf array
-        let leaf = []
+        const leaf = []
 
         if (Array.isArray(workingSet[0])) {
-          workingSet[0].push(leaf)
+          (workingSet[0] as any[]).push(leaf)
         } else {
           workingSet[0][keyData.toString()] = leaf
         }
@@ -73,55 +62,54 @@ export default function zlibParser(buf: Buffer) {
         continue
       }
 
-
       case 0x53 /* S */: {
-        if (buf[idx++] != 0x69) {
-          // console.error('(B) failed to find delimiter')
+        if (buf[idx++] !== 0x69) {
           throw new Error('(B) failed to find delimiter')
-
-          break
         }
 
-        var length = buf[idx++]
-        // console.log("String length:", length);
-        break;
+        length = buf[idx++]
+        break
       }
 
       case 0x64 /* d */: {
-        var length = 4;
-        break;
+        length = 4
+        break
       }
 
       case 0x69 /* i */: {
         // Single byte?
-        var length = 1;
-        break;
+        length = 1
+        break
       }
 
       default: {
-        throw new Error("Unknown type " + type)
-        break
+        throw new Error('Unknown type ' + type)
       }
     }
 
-    let valueData = buf.slice(idx, idx + length)
-    let value;
+    if (length === 0) {
+      throw new Error('Invalid length value')
+    }
+
+    const valueData = buf.slice(idx, idx + length)
+    
+    let value
 
     switch (type) {
       case 0x53 /* S */: {
         value = valueData.toString()
-        break;
+        break
       }
       case 0x64 /* d */: {
-        // TODO:
+        // FIXME: ?
         value = valueData.readUInt32LE()
-        break;
+        break
       }
 
       case 0x69 /* i */: {
-        // Single byte?
+        // FIXME: Single byte?
         value = valueData.readUInt8()
-        break;
+        break
       }
 
       default: {
@@ -132,13 +120,11 @@ export default function zlibParser(buf: Buffer) {
     idx += length
 
     if (Array.isArray(workingSet[0])) {
-      workingSet[0].push(value)
+      (workingSet[0] as any[]).push(value)
     } else {
       workingSet[0][keyData.toString()] = value
     }
-
   }
 
   return rootTree
-
 }
