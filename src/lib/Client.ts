@@ -20,13 +20,13 @@ import zlibParser from './zlib'
 // Forward discovery events
 const discovery = new Discovery()
 
-type fnCallback = (obj: any) => void;
-type dataFnCallback = (obj: {
+type fnCallback<T = any> = (obj: T) => void;
+type dataFnCallback<T = any> = (obj: {
   code: any,
-  data: any
+  data: T
 }) => void;
 
-interface CustomEventEmitterTypes {
+declare interface Client {
   on(event: MESSAGETYPES, listener: fnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MESSAGETYPES, listener: fnCallback): this;
@@ -41,7 +41,7 @@ interface CustomEventEmitterTypes {
   removeAllListeners(event: 'data'): this;
 }
 
-class Client extends EventEmitter implements CustomEventEmitterTypes {
+class Client extends EventEmitter {
   serverHost: string
   serverPort: number
   serverPortUDP: number

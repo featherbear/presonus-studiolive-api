@@ -1,4 +1,8 @@
-export default function zlibParser(buf: Buffer) {
+import { ZlibPayload as _ZlibPayload } from './zlibType'
+
+export type ZlibPayload = _ZlibPayload
+
+export default function zlibParser(buf: Buffer): _ZlibPayload {
   let idx = 0
   if (buf[idx++] !== 0x7b) return null
 
@@ -123,5 +127,5 @@ export default function zlibParser(buf: Buffer) {
     }
   }
 
-  return rootTree
+  return rootTree as ZlibPayload
 }

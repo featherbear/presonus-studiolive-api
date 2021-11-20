@@ -48,6 +48,9 @@
     "parser": "@typescript-eslint/parser",
     "plugins": [
       "@typescript-eslint/eslint-plugin"
+    ],
+    "ignore": [
+      "src/lib/zlibType.ts"
     ]
   }
 }
