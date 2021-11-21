@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
+import type { DiscoveryType } from './Discovery'
+
 import DataClient from './DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
@@ -68,7 +70,7 @@ class Client extends EventEmitter implements CustomEventTypes {
   }
 
   static async discover(timeout = 10 * 1000) {
-    const devices = {}
+    const devices: {[serial: string]: DiscoveryType} = {}
     const func = device => {
       devices[device.serial] = device
     }

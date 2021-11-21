@@ -2,13 +2,21 @@ import { analysePacket } from './MessageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
 
+export interface DiscoveryType {
+    name: string,
+    serial: string
+    ip: string
+    port: number
+    timestamp: Date
+}
+
 export default class extends EventEmitter {
   socket: dgram.Socket
 
   async start (timeout = null) {
     return new Promise<void>((resolve, reject) => {
       this.stop()
-      this._setup()
+      this.setup()
 
       if (timeout !== null) {
         setTimeout(() => {
@@ -26,7 +34,7 @@ export default class extends EventEmitter {
     }
   }
 
-  _setup () {
+  private setup () {
     const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
     socket.bind(47809, '0.0.0.0')
 
@@ -60,8 +68,9 @@ export default class extends EventEmitter {
         name: nameA,
         serial,
         ip: rinfo.address,
-        port: rinfo.port
-      })
+        port: rinfo.port,
+        timestamp: new Date()
+      } as DiscoveryType)
     })
 
     this.socket = socket
