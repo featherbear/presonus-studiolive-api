@@ -12,7 +12,8 @@ import {
   analysePacket,
   craftSubscribe,
   onOffCode,
-  onOffEval
+  onOffEval,
+  SubscriptionOptions
 } from './MessageProtocol'
 
 import { parseChannelString, shortToLE } from './util'
@@ -54,6 +55,8 @@ class Client extends EventEmitter implements CustomEventTypes {
   meterListener: any
   metering: any
 
+  private connectPromise: Promise<Client>
+
   constructor(host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
@@ -70,7 +73,7 @@ class Client extends EventEmitter implements CustomEventTypes {
   }
 
   static async discover(timeout = 10 * 1000) {
-    const devices: {[serial: string]: DiscoveryType} = {}
+    const devices: { [serial: string]: DiscoveryType } = {}
     const func = device => {
       devices[device.serial] = device
     }
@@ -94,9 +97,14 @@ class Client extends EventEmitter implements CustomEventTypes {
     this.meterListener = null
   }
 
-  async connect(subscribeData = undefined) {
-    return new Promise((resolve, reject) => {
-      this.conn.once('error', reject)
+  async connect(subscribeData?: SubscriptionOptions) {
+    if (this.connectPromise) return this.connectPromise
+    return (this.connectPromise = new Promise((resolve, reject) => {
+      const rejectHandler = (...args) => {
+        this.connectPromise = null
+        return reject(...args)
+      }
+      this.conn.once('error', rejectHandler)
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
@@ -105,9 +113,9 @@ class Client extends EventEmitter implements CustomEventTypes {
         const subscribeCallback = data => {
           if (data.id === 'SubscriptionReply') {
             this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
-            this.conn.removeListener('error', reject)
-            resolve(this)
+            this.conn.removeListener('error', rejectHandler)
             this.emit('connected')
+            resolve(this)
           }
         }
         this.on(MESSAGETYPES.JSON, subscribeCallback)
@@ -127,7 +135,7 @@ class Client extends EventEmitter implements CustomEventTypes {
         }
         const keepAliveLoop = setInterval(keepAliveFn, 1000)
       })
-    })
+    }))
   }
 
   private handleRecvPacket(packet) {
