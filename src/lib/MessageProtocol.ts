@@ -28,7 +28,34 @@ export function analysePacket (
   return [messageCode, data, note]
 }
 
-export function craftSubscribe (overrides = {}) {
+export interface SubscriptionOptions {
+  /**
+   * Application name
+   */
+  clientName?: string
+
+  /**
+   * Application internal name
+   */
+  clientInternalName?: string
+
+  /**
+   * Device name
+   */
+  clientDescription?: string // Name
+
+  /**
+   * Device ID
+   */
+  clientIdentifier?: string
+
+  /**
+   * ???
+   */
+  clientOptions?: string
+}
+
+export function craftSubscribe(overrides: SubscriptionOptions = {}) {
   const data = {
     id: 'Subscribe',
     clientName: 'UC-Surface',
