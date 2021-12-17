@@ -59,11 +59,11 @@ export default function createServer(port) {
 
     // eslint-disable-next-line
     const _ = data.slice(16, 20) // 00 00 c0 00
-    console.log(_.join(', '),data.length);
+    console.log(_.join(', '), data.length);
 
     // 192
 
-    data = data.slice(20, 20 + 192 * 2  - 8)
+    data = data.slice(20, 20 + 192 * 2 - 8)
 
     function colFmt(v: number) {
       v = v.toString().padStart(5, ' ')
@@ -106,38 +106,28 @@ export default function createServer(port) {
 
 
 
-      console.log('Master\t\t\t', range(16 * 11 + 1, 16 * 11 + 2 + (((((1))))), 'main').join(', '));
-
-      // this.metering.chain1input = this.metering.input = valArray
-      // looks like it's the same as 041-072
-
-
       // StudioLive 16R
-      // 1-16, ?, ?, ?, 1-16 input to chain 1 (gate), 1-16 output of chain 1
+      // 1-16, ?, ?, ?, 1-16 input to strip 1 (gate), 1-16 output of strip 1
       let input = range(0, 0 + 16, 'input')
       let idk = range(16, 16 + 3, '?')
-      let chain1_in = range(16 + 3 + (0 * 16), 16 + 3 + (0 * 16) + 16, 'chain')
-      let chain1_out = range(16 + 3 + (1 * 16), 16 + 3 + (1 * 16) + 16, 'chain')
-      let chain2_in = range(16 + 3 + (2 * 16), 16 + 3 + (2 * 16) + 16, 'chain')
-      let chain2_out = range(16 + 3 + (3 * 16), 16 + 3 + (3 * 16) + 16, 'chain')
-      let chain3_in = range(16 + 3 + (4 * 16), 16 + 3 + (4 * 16) + 16, 'chain')
+      let strip1_in = range(16 + 3 + (0 * 16), 16 + 3 + (0 * 16) + 16, 'strip')
+      let strip1_out = range(16 + 3 + (1 * 16), 16 + 3 + (1 * 16) + 16, 'strip')
+      let strip2_in = range(16 + 3 + (2 * 16), 16 + 3 + (2 * 16) + 16, 'strip')
+      let strip2_out = range(16 + 3 + (3 * 16), 16 + 3 + (3 * 16) + 16, 'strip')
+      let strip3_in = range(16 + 3 + (4 * 16), 16 + 3 + (4 * 16) + 16, 'strip')
 
-      console.log('input\t\t\t', input.join(', '))
-      console.log('chain1_in\t\t', chain1_in.join(', '))
-      console.log('chain1_out/chain2_in\t', chain1_out.join(', '))
-      console.log('chain2_out/chain3_in\t', chain2_in.join(', '))
-      console.log('chain3_out/chain4_in\t', chain2_out.join(', '))
-      console.log('chain4_out\t\t', chain3_in.join(', '))
+      console.log('input channels\t\t', input.join(', '))
+      console.log('stripA\t\t\t', strip1_in.join(', '))
+      console.log('stripB\t\t\t', strip1_out.join(', '))
+      console.log('stripC\t\t\t', strip2_in.join(', '))
+      console.log('stripD\t\t\t', strip2_out.join(', '))
+      console.log('stripE\t\t\t', strip3_in.join(', '))
 
+      let main = range(16 + 3 + (4 * 16) + 16, 16 + 3 + (4 * 16) + 16 + 16, 'main')
+      console.log('main mix\t\t', main.join(', '))
 
-      ///// levels for fx for each mix?, levels for auxes, chain for auxes, fx
-
-
-
-      let fx_chain = range(3 + 16 * 7 + 8, 3 + 16 * 7 + 8 + 16,'fxCHN')
-      console.log('fx_chain\t\t', fx_chain.join(', '))
-
-
+      console.log('main levels\t\t', range(16 * 11 + 1, 16 * 11 + 2 + (((((1))))), 'main').join(', '));
+      console.log('main fx\t\t\t', range(16 * 11 + 2 + (((((1))))), 16 * 11 + 2 + (((((1))))) + 8, 'mainC').join(', '));
 
 
       // let aux_mtx_1 = valArray[3  + 16 * 8 + 8]
@@ -146,35 +136,35 @@ export default function createServer(port) {
       console.log('aux_mtx\t\t\t', aux_mtx.join(', '))
 
 
-      let aux_chainA = range(3 + 16 * 8 + 8 + 6, 3 + 16 * 8 + 8 + 6 + 6, 'auxCH')
-      let aux_chainB = range(3 + 16 * 8 + 8 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6, 'auxCH')
-      let aux_chainC = range(3 + 16 * 8 + 8 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 'auxCH')
-      let aux_chainD = range(3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6 + 6, 'auxCH')
-      console.log('aux_chainA\t\t', aux_chainA.join(', '))
-      console.log('aux_chainB\t\t', aux_chainB.join(', '))
-      console.log('aux_chainC\t\t', aux_chainC.join(', '))
+      let aux_stripA = range(3 + 16 * 8 + 8 + 6, 3 + 16 * 8 + 8 + 6 + 6, 'auxCH')
+      let aux_stripB = range(3 + 16 * 8 + 8 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6, 'auxCH')
+      let aux_stripC = range(3 + 16 * 8 + 8 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 'auxCH')
+      let aux_stripD = range(3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6 + 6, 'auxCH')
+      console.log('aux_stripA\t\t', aux_stripA.join(', '))
+      console.log('aux_stripB\t\t', aux_stripB.join(', '))
+      console.log('aux_stripC\t\t', aux_stripC.join(', '))
 
 
 
       let fx1_input = valArray[3 + 16 * 10 + 6]
-      let fx1_chainA = valArray[3 + 16 * 10 + 6 + 2]
-      let fx1_chainB = valArray[3 + 16 * 10 + 6 + 2 + 2]
-      let fx1_chainC = valArray[3 + 16 * 10 + 6 + 2 + 2 + 2]
-      console.log('fx1\t\t\t', [fx1_input, fx1_chainA, fx1_chainB, fx1_chainC].join(', '))
+      let fx1_stripA = valArray[3 + 16 * 10 + 6 + 2]
+      let fx1_stripB = valArray[3 + 16 * 10 + 6 + 2 + 2]
+      let fx1_stripC = valArray[3 + 16 * 10 + 6 + 2 + 2 + 2]
+      console.log('fx1\t\t\t', [fx1_input, fx1_stripA, fx1_stripB, fx1_stripC].join(', '))
 
       let fx2_input = valArray[3 + 16 * 10 + 6 + 1]
-      let fx2_chainA = valArray[3 + 16 * 10 + 6 + 2 + 1]
-      let fx2_chainB = valArray[3 + 16 * 10 + 6 + 2 + 2 + 1]
-      let fx2_chainC = valArray[3 + 16 * 10 + 6 + 2 + 2 + 2 + 1]
-      console.log('fx2\t\t\t', [fx2_input, fx2_chainA, fx2_chainB, fx2_chainC].join(', '))
+      let fx2_stripA = valArray[3 + 16 * 10 + 6 + 2 + 1]
+      let fx2_stripB = valArray[3 + 16 * 10 + 6 + 2 + 2 + 1]
+      let fx2_stripC = valArray[3 + 16 * 10 + 6 + 2 + 2 + 2 + 1]
+      console.log('fx2\t\t\t', [fx2_input, fx2_stripA, fx2_stripB, fx2_stripC].join(', '))
 
+      //
       range(3 + 16 * 10 + 6, 3 + 16 * 10 + 6 + 2 + 2 + 2 + 1 + ((((1)))), 'fx_chn')
+      //
 
+      let fx_strip = range(3 + 16 * 7 + 8, 3 + 16 * 7 + 8 + 16, 'fxCHN')
+      console.log('fx_strip\t\t', fx_strip.join(', '))
 
-      let main = range(16 + 3 + (4 * 16) + 16, 16 + 3 + (4 * 16) + 16 + 16, 'main')
-      console.log('main\t\t\t', main.join(', '))
-      
-      console.log('main_fx\t\t\t', range(16 * 11 + 2 + (((((1))))), 16 * 11 + 2 + (((((1))))) + 8, 'mainC').join(', '));
 
 
 
@@ -193,28 +183,28 @@ export default function createServer(port) {
     //   const valArray = []
     //   const offset = 72
     //   for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
-    //   this.metering.chain2input = this.metering.chain1output = valArray
+    //   this.metering.strip2input = this.metering.strip1output = valArray
     // }
 
     // {
     //   const valArray = []
     //   const offset = 104
     //   for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
-    //   this.metering.chain3input = this.metering.chain2output = valArray
+    //   this.metering.strip3input = this.metering.strip2output = valArray
     // }
 
     // {
     //   const valArray = []
     //   const offset = 136
     //   for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
-    //   this.metering.chain4input = this.metering.chain3output = valArray
+    //   this.metering.strip4input = this.metering.strip3output = valArray
     // }
 
     // {
     //   const valArray = []
     //   const offset = 168
     //   for (let i = 0 + offset; i < 32 + offset; i++) { valArray.push(data.readUInt16LE(i * 2)) }
-    //   this.metering.level = this.metering.chain4output = valArray
+    //   this.metering.level = this.metering.strip4output = valArray
     // }
 
     // emitter.emit('meter', this.metering)
