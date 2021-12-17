@@ -143,6 +143,7 @@ export default function createServer(port) {
       console.log('aux_stripA\t\t', aux_stripA.join(', '))
       console.log('aux_stripB\t\t', aux_stripB.join(', '))
       console.log('aux_stripC\t\t', aux_stripC.join(', '))
+      console.log('aux_stripD\t\t', aux_stripD.join(', '))
 
 
 
