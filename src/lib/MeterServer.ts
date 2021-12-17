@@ -64,7 +64,7 @@ export default function createServer(port) {
 
     function colFmt(v: number) {
       v = v.toString().padStart(5, ' ')
-    
+
       if (v > 1000) {
         return chalk.red(v)
       }
@@ -84,13 +84,8 @@ export default function createServer(port) {
       console.log("Columns of", n);
 
 
-      console.log('Master', valArray[16 * 11 + 1]);
-      console.log('Master', valArray[16 * 11 + 2]);
-      // this.metering.chain1input = this.metering.input = valArray
-      // looks like it's the same as 041-072
-
       let colourIter = 0;
-      const colour = [  'yellow', 'magenta', 'cyan', 'gray', 'blue'];
+      const colour = ['yellow', 'magenta', 'cyan', 'gray', 'blue'];
 
       let lastLabel = ""
       function range(start, stop, label?: string) {
@@ -105,6 +100,15 @@ export default function createServer(port) {
         }
         return r
       }
+
+
+
+      console.log('Master\t\t\t', range(16 * 11 + 1, 16 * 11 + 2 + (((((1))))), 'main').join(', '));
+
+      // this.metering.chain1input = this.metering.input = valArray
+      // looks like it's the same as 041-072
+
+
       // StudioLive 16R
       // 1-16, ?, ?, ?, 1-16 input to chain 1 (gate), 1-16 output of chain 1
       let input = range(0, 0 + 16, 'input')
@@ -125,15 +129,21 @@ export default function createServer(port) {
 
       ///// levels for fx for each mix?, levels for auxes, chain for auxes, fx
 
-      let main = range(16 + 3 + (4 * 16) + 16, 16 + 3 + (4 * 16) + 16 + 16, 'main')
-      console.log('main\t\t\t', main.join(', '))
-
-
 
       // let aux_mtx_1 = valArray[3  + 16 * 8 + 8]
       // console.log('aux1\t\t\t', aux_mtx_1);
       let aux_mtx = range(3 + 16 * 8 + 8, 3 + 16 * 8 + 8 + 6, 'auxMT')
       console.log('aux_mtx\t\t\t', aux_mtx.join(', '))
+
+
+      let aux_chainA = range(3 + 16 * 8 + 8 + 6, 3 + 16 * 8 + 8 + 6 + 6, 'auxCH')
+      let aux_chainB = range(3 + 16 * 8 + 8 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6, 'auxCH')
+      let aux_chainC = range(3 + 16 * 8 + 8 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 'auxCH')
+      let aux_chainD = range(3 + 16 * 8 + 8 + 6 + 6 + 6 + 6, 3 + 16 * 8 + 8 + 6 + 6 + 6 + 6 + 6, 'auxCH')
+      console.log('aux_chainA\t\t', aux_chainA.join(', '))
+      console.log('aux_chainB\t\t', aux_chainB.join(', '))
+      console.log('aux_chainC\t\t', aux_chainC.join(', '))
+
 
 
       let fx1_input = valArray[3 + 16 * 10 + 6]
@@ -148,7 +158,16 @@ export default function createServer(port) {
       let fx2_chainC = valArray[3 + 16 * 10 + 6 + 2 + 2 + 2 + 1]
       console.log('fx2\t\t\t', [fx2_input, fx2_chainA, fx2_chainB, fx2_chainC].join(', '))
 
-      range(3 + 16 * 10 + 6, 3 + 16 * 10 + 6 + 2 + 2 + 2 + 1  + ((((1)))) , 'fx_chn')
+      range(3 + 16 * 10 + 6, 3 + 16 * 10 + 6 + 2 + 2 + 2 + 1 + ((((1)))), 'fx_chn')
+
+
+      let main = range(16 + 3 + (4 * 16) + 16, 16 + 3 + (4 * 16) + 16 + 16, 'main')
+      console.log('main\t\t\t', main.join(', '))
+      
+      console.log('main_fx\t\t\t', range(16 * 11 + 2 + (((((1))))), 16 * 11 + 2 + (((((1))))) + 8, 'mainC').join(', '));
+
+
+
 
       // The rest
       for (let x = 0; x < valArray.length; x += n) {
