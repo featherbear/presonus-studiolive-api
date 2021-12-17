@@ -87,7 +87,7 @@ class Client extends EventEmitter implements CustomEventTypes {
 
   meterSubscribe(port) {
     port = port || this.serverPortUDP
-    this.meterListener = MeterServer(port)
+    this.meterListener = MeterServer.call(this, port)
     this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
@@ -258,35 +258,58 @@ class Client extends EventEmitter implements CustomEventTypes {
     const target = parseChannelString(channel, type)
     this.setMuteState(target, false)
   }
+  
+  // muteFade
+
+  // unmuteFade
+
 
   // toggleMuteState (channel: Channels) {
 
   // }
 
-  /* IDEA: Force get channel state 
-    If we are unable to figure out how to get initial channel data
-    then we could do a hackish method to query the information.
-
-    A. Send an unmute command and see if there is a response (Will be unmuted regardless now)
-    * If there is a unmute event, then we know that the channel was originally muted
-      * Then send a mute event
-    * If there was no unmute event, then we know the channel was already unmuted
-    
-    B. Send a mute command and see if there is a response (Will be muted regardless now)
-    * If there is a mute event, then we know that the channel was originally unmuted
-      * Then send an unmute event
-    * If there was no mute event, then we know that the channel was already muted
-    
-    C. Some commands cause a list of channel mute statuses to be send (Link Aux Mute - MB: mt64).
-    * Send that command 
-
-  */
 
   close() {
     this.meterUnsubscribe()
     this.conn.destroy()
     // TODO: Send unsubscribe
   }
+
+
+  /**
+   * Set volume
+   * 
+   * @param channel 
+   * @param level 
+   */
+  async setChannelTo(channel, level) {
+    
+  }
+
+   /**
+   * Adjust volume over time
+   * 
+   * @param channel 
+   * @param level 
+   * @param duration 
+   */
+  async fadeChannelTo(channel, level, duration?: number) {
+
+  }
+
+  /**
+   * Look at metering data and adjust channel fader so that the level is of a certain loudness
+   * NOTE: This is not perceived loudness. Not very practical, but useful in a pinch?
+   * 
+   * @param channel 
+   * @param level 
+   * @param duration 
+   */
+  async normaliseChannelTo(channel, level, duration?: number) {
+
+  }
+
+
 }
 
 export default Client
