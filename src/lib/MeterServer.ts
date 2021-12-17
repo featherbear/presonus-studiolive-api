@@ -133,6 +133,13 @@ export default function createServer(port) {
       ///// levels for fx for each mix?, levels for auxes, chain for auxes, fx
 
 
+
+      let fx_chain = range(3 + 16 * 7 + 8, 3 + 16 * 7 + 8 + 16,'fxCHN')
+      console.log('fx_chain\t\t', fx_chain.join(', '))
+
+
+
+
       // let aux_mtx_1 = valArray[3  + 16 * 8 + 8]
       // console.log('aux1\t\t\t', aux_mtx_1);
       let aux_mtx = range(3 + 16 * 8 + 8, 3 + 16 * 8 + 8 + 6, 'auxMT')
