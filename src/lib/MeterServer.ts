@@ -59,8 +59,11 @@ export default function createServer(port) {
 
     // eslint-disable-next-line
     const _ = data.slice(16, 20) // 00 00 c0 00
+    console.log(_.join(', '),data.length);
 
-    data = data.slice(20)
+    // 192
+
+    data = data.slice(20, 20 + 192 * 2  - 8)
 
     function colFmt(v: number) {
       v = v.toString().padStart(5, ' ')
