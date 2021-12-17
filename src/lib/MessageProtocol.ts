@@ -1,6 +1,6 @@
 import { PacketHeader } from './constants'
 
-export function analysePacket (
+export function analysePacket(
   packet /* Buffer */,
   ignoreLengthMismatch = false
 ) {
@@ -15,7 +15,7 @@ export function analysePacket (
     if (!ignoreLengthMismatch) {
       console.warn(
         `Packet is meant to be ${payloadLength +
-          6} bytes long, but is actually ${packet.length} bytes long`
+        6} bytes long, but is actually ${packet.length} bytes long`
       )
       return [null, null]
     }
@@ -75,11 +75,11 @@ export function craftSubscribe(overrides: SubscriptionOptions = {}) {
   ])
 }
 
-export function onOffCode (bool) {
+export function onOffCode(bool) {
   return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
 }
 
-export function onOffEval (bytes) {
+export function onOffEval(bytes) {
   if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
     return true
   } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {

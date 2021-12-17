@@ -62,6 +62,8 @@ export default class extends EventEmitter {
       // eslint-disable-next-line
       const [nameA, _, serial, nameB] = fragments
       
+      if (!serial) return
+      
       // nameA: Model number for device image identification
       // nameB: ???
       this.emit('discover', {

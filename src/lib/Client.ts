@@ -85,7 +85,7 @@ class Client extends EventEmitter implements CustomEventTypes {
     return Object.values(devices)
   }
 
-  meterSubscribe(port) {
+  meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
     this.meterListener = MeterServer(port)
     this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
@@ -102,7 +102,7 @@ class Client extends EventEmitter implements CustomEventTypes {
     return (this.connectPromise = new Promise((resolve, reject) => {
       const rejectHandler = (...args) => {
         this.connectPromise = null
-        return reject(...args)
+        return reject(new Error(...args))
       }
       this.conn.once('error', rejectHandler)
 
