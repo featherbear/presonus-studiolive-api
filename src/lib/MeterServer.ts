@@ -64,6 +64,9 @@ export default function createServer(port) {
 
     function colFmt(v: number) {
       v = v.toString().padStart(5, ' ')
+      if (v > 60000) {
+        return chalk.yellow(v)
+      }
       if (v > 1000) {
         return chalk.red(v)
       }
@@ -110,8 +113,13 @@ export default function createServer(port) {
       console.log('chain4_out\t\t', chain3_in.join(', '))
 
 
-      //middle - sends?
+      ///// levels for fx for each mix?, levels for auxes, chain for auxes, fx
 
+
+      // let aux_mtx_1 = valArray[3  + 16 * 8 + 8]
+      // console.log('aux1\t\t\t', aux_mtx_1);
+      let aux_mtx = valArray.slice(3 + 16 * 8 + 8, 3 + 16 * 8 + 8 + 6)
+      console.log('aux_mtx\t\t\t', aux_mtx.join(', '))
 
 
       let fx1_input = valArray[3 + 16 * 10 + 6]
