@@ -29,7 +29,7 @@ type dataFnCallback<T = any> = (obj: {
   data: T
 }) => void;
 
-declare interface CustomEventTypes {
+export declare interface Client {
   on(event: MESSAGETYPES, listener: fnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MESSAGETYPES, listener: fnCallback): this;
@@ -44,7 +44,9 @@ declare interface CustomEventTypes {
   removeAllListeners(event: 'data'): this;
 }
 
-class Client extends EventEmitter implements CustomEventTypes {
+// TODO: FIX
+/* eslint no-redeclare: "off" */
+export class Client extends EventEmitter {
   serverHost: string
   serverPort: number
   serverPortUDP: number
