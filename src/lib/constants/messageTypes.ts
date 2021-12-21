@@ -13,5 +13,9 @@ export enum MESSAGETYPES {
 
     Unknown1 = 'BO',
     Unknown2 = 'CK', // compressed
-    Unknown3 = 'MS' // fader position
+    Unknown3 = 'MB', // mute // mt64 ?
+
+    // More sensical value; 0x00 - 0xFF for a given channel
+    // Only message sent for main fader changes
+    FaderPosition = 'MS'
 }
