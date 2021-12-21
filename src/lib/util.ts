@@ -1,6 +1,6 @@
 import { CHANNELS, CHANNELTYPES } from './constants'
 
-export function shortToLE (i) {
+export function shortToLE(i) {
   const res = Buffer.allocUnsafe(2)
   res.writeUInt16LE(i)
   return res
@@ -24,23 +24,22 @@ Buffer.prototype.matches = function (buffer) {
 
 export function parseChannelString(
   type: keyof typeof CHANNELTYPES,
-  channel: CHANNELS.CHANNELS,
+  channel: CHANNELS.CHANNELS
 ) {
-
   // `type` must be a valid enum key
   if (!Object.keys(CHANNELTYPES).includes(type as CHANNELTYPES)) {
-    throw new Error("Invalid channel type provided")
+    throw new Error('Invalid channel type provided')
   }
 
   if (
     // `channel` must be a whole number larger than zero
-    !(Math.trunc(channel) > 0)
-    || (channel !== (channel = Math.trunc(channel)))
+    !(Math.trunc(channel) > 0) ||
+    (channel !== (channel = Math.trunc(channel))) ||
 
     // `channel` must also exist for a given `type`
-    || !Object.values(CHANNELS[type]).includes(channel)
+    !Object.values(CHANNELS[type]).includes(channel)
   ) {
-    throw new Error("Invalid channel provided")
+    throw new Error('Invalid channel provided')
   }
 
   return `${CHANNELTYPES[type]}/ch${channel}`
