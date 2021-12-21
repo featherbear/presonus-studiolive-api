@@ -19,6 +19,7 @@ import {
 import { parseChannelString, shortToLE } from './util'
 import KVTree from './KVTree'
 import zlibParser from './zlib'
+import { SettingType } from './types/settingType'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -102,9 +103,9 @@ export class Client extends EventEmitter {
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (...args) => {
+      const rejectHandler = (err: Error) => {
         this.connectPromise = null
-        return reject(...args)
+        return reject(err)
       }
       this.conn.once('error', rejectHandler)
 
@@ -166,7 +167,7 @@ export class Client extends EventEmitter {
           data = {
             name: key,
             value: partB.length ? onOffEval(partB) : partA
-          }
+          } as SettingType
         }
         break
       }
@@ -242,17 +243,17 @@ export class Client extends EventEmitter {
    * @param channel Channel number of type - channel is optional for MAIN and TALKBACK
    */
   mute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
-  mute(type: "MAIN" | "TALKBACK");
+  mute(type: 'MAIN' | 'TALKBACK');
   mute(type, channel: CHANNELS.CHANNELS = 0) {
-    if (["MAIN", "TALKBACK"].includes(type)) channel = 1
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
     const target = parseChannelString(type, channel)
     this.setMuteState(target, true)
   }
 
   unmute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
-  unmute(type: "MAIN" | "TALKBACK");
+  unmute(type: 'MAIN' | 'TALKBACK');
   unmute(type, channel: CHANNELS.CHANNELS = 0) {
-    if (["MAIN", "TALKBACK"].includes(type)) channel = 1
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
     const target = parseChannelString(type, channel)
     this.setMuteState(target, false)
   }
@@ -261,18 +262,15 @@ export class Client extends EventEmitter {
 
   // unmuteFade
 
-
   // toggleMuteState (channel: Channels) {
 
   // }
-
 
   close() {
     this.meterUnsubscribe()
     this.conn.destroy()
     // TODO: Send unsubscribe
   }
-
 
   /**
    * Set volume
@@ -281,16 +279,16 @@ export class Client extends EventEmitter {
    * @param level 
    */
   async setChannelTo(channel, level) {
-    
+
   }
 
-   /**
-   * Adjust volume over time
-   * 
-   * @param channel 
-   * @param level 
-   * @param duration 
-   */
+  /**
+  * Adjust volume over time
+  * 
+  * @param channel 
+  * @param level 
+  * @param duration 
+  */
   async fadeChannelTo(channel, level, duration?: number) {
 
   }
@@ -306,8 +304,6 @@ export class Client extends EventEmitter {
   async normaliseChannelTo(channel, level, duration?: number) {
 
   }
-
-
 }
 
 export default Client

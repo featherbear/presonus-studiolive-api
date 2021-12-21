@@ -1,4 +1,4 @@
-import { ZlibPayload as _ZlibPayload } from './zlibType'
+import { ZlibPayload as _ZlibPayload } from './types/zlibType'
 
 export type ZlibPayload = _ZlibPayload
 
