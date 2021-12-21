@@ -22,30 +22,26 @@ Buffer.prototype.matches = function (buffer) {
   )
 }
 
-export function parseChannelString (
+export function parseChannelString(
+  type: keyof typeof CHANNELTYPES,
   channel: CHANNELS.CHANNELS,
-  type: CHANNELTYPES
 ) {
-  const map = {
-    [CHANNELTYPES.LINE]: CHANNELS.LINE,
-    [CHANNELTYPES.AUX]: CHANNELS.AUX,
-    [CHANNELTYPES.FX]: CHANNELS.FX,
-    [CHANNELTYPES.FXRETURN]: CHANNELS.FXRETURN,
-    [CHANNELTYPES.SUB]: CHANNELS.SUB,
-    [CHANNELTYPES.MAIN]: CHANNELS.MAIN,
-    [CHANNELTYPES.TALKBACK]: CHANNELS.TALKBACK
+
+  // `type` must be a valid enum key
+  if (!Object.keys(CHANNELTYPES).includes(type as CHANNELTYPES)) {
+    throw new Error("Invalid channel type provided")
   }
 
-  if (!isNaN(channel)) channel = Number(channel)
-  for (const [ckey, cval] of Object.entries(map)) {
-    if (type === ckey) {
-      if (!Object.values(cval).includes(channel)) {
-        throw new Error('Invalid channel provided')
-      }
+  if (
+    // `channel` must be a whole number larger than zero
+    !(Math.trunc(channel) > 0)
+    || (channel !== (channel = Math.trunc(channel)))
 
-      return `${type}/ch${channel}`
-    }
+    // `channel` must also exist for a given `type`
+    || !Object.values(CHANNELS[type]).includes(channel)
+  ) {
+    throw new Error("Invalid channel provided")
   }
 
-  throw new Error('Invalid channel type provided')
+  return `${CHANNELTYPES[type]}/ch${channel}`
 }

@@ -234,31 +234,27 @@ class Client extends EventEmitter implements CustomEventTypes {
     )
   }
 
-  mute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  mute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  mute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  mute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  mute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  mute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  mute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-
-  mute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
+  /**
+   * Mute a given channel
+   * @param type Channel type
+   * @param channel Channel number of type - channel is optional for MAIN and TALKBACK
+   */
+  mute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
+  mute(type: "MAIN" | "TALKBACK");
+  mute(type, channel: CHANNELS.CHANNELS = 0) {
+    if (["MAIN", "TALKBACK"].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
     this.setMuteState(target, true)
   }
 
-  unmute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  unmute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  unmute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  unmute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  unmute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  unmute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  unmute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-  unmute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
+  unmute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
+  unmute(type: "MAIN" | "TALKBACK");
+  unmute(type, channel: CHANNELS.CHANNELS = 0) {
+    if (["MAIN", "TALKBACK"].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
     this.setMuteState(target, false)
   }
-  
+
   // muteFade
 
   // unmuteFade
