@@ -1,8 +1,10 @@
-import { ZlibPayload as _ZlibPayload } from '../types/zlibType'
+/**
+ * Parse Zlib packets
+ */
 
-export type ZlibPayload = _ZlibPayload
+import ZlibPayload from '../types/ZlibPayload'
 
-export default function zlibParser(buf: Buffer): _ZlibPayload {
+export default function zlibParser(buf: Buffer): ZlibPayload {
   let idx = 0
   if (buf[idx++] !== 0x7b) return null
 
@@ -93,7 +95,7 @@ export default function zlibParser(buf: Buffer): _ZlibPayload {
     }
 
     const valueData = buf.slice(idx, idx + length)
-    
+
     let value
 
     switch (type) {

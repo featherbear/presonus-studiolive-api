@@ -1,24 +1,18 @@
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
-import type { DiscoveryType } from './Discovery'
 
-import type { SettingType } from './types/settingType'
+import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
 
-import zlib from 'zlib'
 import KVTree from './util/KVTree'
-import zlibParser from './util/zlibUtil'
 
 import {
   analysePacket,
-  craftSubscribe,
-  onOffCode,
-  onOffEval,
-  SubscriptionOptions
+  onOff_encode,
 } from './util/MessageProtocol'
 
 import { parseChannelString } from './util/channelUtil'
@@ -27,7 +21,11 @@ import { shortToLE } from './util/bufferUtil'
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
 import handlePVPacket from './packetParser/PV'
+
+import SubscriptionOptions from './types/SubscriptionOptions'
+import { craftSubscribe } from './util/subscriptionUtil'
 import handleMSPacket from './packetParser/MS'
+
 // Forward discovery events
 const discovery = new Discovery()
 
@@ -221,7 +219,7 @@ export class Client extends EventEmitter {
       MESSAGETYPES.Setting,
       Buffer.concat([
         Buffer.from(`${raw}/${ACTIONS.MUTE}\x00\x00\x00`),
-        onOffCode(state)
+        onOff_encode(state)
       ])
     )
   }

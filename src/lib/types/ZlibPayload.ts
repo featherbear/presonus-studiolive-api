@@ -9,6 +9,7 @@ export interface ZlibPayload {
     children: ZlibPayloadChildren;
     shared: Shared;
 }
+export default ZlibPayload
 
 export interface ZlibPayloadChildren {
     global: Global;

@@ -1,4 +1,4 @@
-export interface SettingType {
+export default interface SettingType {
     name: string,
     value: any
 }

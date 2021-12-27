@@ -1,19 +1,29 @@
+/**
+ * Recursive tree builder for '/'-delimited property strings
+ */
+
 const Parent = Symbol('parent')
 const BaseSymbol = Symbol('base')
-/*
+/**
 
-Tree
-  Value
   Tree
-*/
+  +-Value
+  +-Value
+  +-Tree
+  | +-Value
+  | \-Tree
+  |   \-Value   
+  +-Value
+
+**/
 
 export default class Tree {
-  constructor (base = '/', parent = null) {
+  constructor(base = '/', parent = null) {
     this[BaseSymbol] = base
     this[Parent] = parent
   }
 
-  register (path, value) {
+  register(path, value) {
     const newPath = path.split('/')
     const base = newPath.shift()
 
@@ -27,7 +37,7 @@ export default class Tree {
     this[base].register(newPath.join('/'), value)
   }
 
-  get path () {
+  get path() {
     if (!this[Parent]) return ''
     return [this[Parent].path, this[BaseSymbol]].join('/')
   }

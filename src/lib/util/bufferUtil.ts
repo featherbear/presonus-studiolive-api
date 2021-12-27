@@ -1,3 +1,6 @@
+/**
+ * Convert an unsigned short (16-bit) to a 2-byte buffer
+ */
 export function shortToLE(i) {
   const res = Buffer.allocUnsafe(2)
   res.writeUInt16LE(i)
