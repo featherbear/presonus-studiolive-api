@@ -23,12 +23,11 @@ export function analysePacket(
     }
   }
 
-  const messageCode = packet.slice(6, 8).toString()
-  
-  // Skip bytes 8-11 (identifier pair)
-  const data = packet.slice(12)
-
-  return [messageCode, data]
+  return [
+    packet.slice(6, 8).toString(),
+    // Skip bytes 8-11 (identifier pair)
+    packet.slice(12)
+  ]
 }
 
 export function onOff_encode(bool) {
