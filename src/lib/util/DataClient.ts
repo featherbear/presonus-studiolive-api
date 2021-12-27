@@ -1,5 +1,5 @@
 import { Socket } from 'net'
-import { PacketHeader } from './constants'
+import { PacketHeader } from '../constants'
 import Queue from 'queue'
 
 export default function (callback) {

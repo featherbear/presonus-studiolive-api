@@ -3,10 +3,15 @@ import { EventEmitter } from 'events'
 import Discovery from './Discovery'
 import type { DiscoveryType } from './Discovery'
 
-import DataClient from './DataClient'
+import type { SettingType } from './types/settingType'
+
+import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
+
 import zlib from 'zlib'
+import KVTree from './util/KVTree'
+import zlibParser from './util/zlibUtil'
 
 import {
   analysePacket,
@@ -14,12 +19,10 @@ import {
   onOffCode,
   onOffEval,
   SubscriptionOptions
-} from './MessageProtocol'
+} from './util/MessageProtocol'
 
-import { parseChannelString, shortToLE } from './util'
-import KVTree from './KVTree'
-import zlibParser from './zlib'
-import { SettingType } from './types/settingType'
+import { parseChannelString } from './util/channelUtil'
+import { shortToLE } from './util/bufferUtil'
 
 // Forward discovery events
 const discovery = new Discovery()

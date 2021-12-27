@@ -1,4 +1,4 @@
-import { PacketHeader } from './constants'
+import { PacketHeader } from '../constants'
 
 export function analysePacket (
   packet /* Buffer */,

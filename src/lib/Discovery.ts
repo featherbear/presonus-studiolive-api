@@ -1,4 +1,4 @@
-import { analysePacket } from './MessageProtocol'
+import { analysePacket } from './util/MessageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
 
