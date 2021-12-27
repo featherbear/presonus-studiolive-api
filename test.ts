@@ -1,11 +1,13 @@
 import { Client, MESSAGETYPES } from './src/api'
+import ZlibPayload from './src/lib/types/ZlibPayload'
 
 const client = new Client('192.168.0.18', 53000)
 client.on('data', function ({ code, data }) {
-    console.log('Got payload with code', code)
+    // console.log('Got payload with code', code, data)
 })
 
 client.on(MESSAGETYPES.FaderPosition, function (MS) {
+    // LINEAR
     function OPLog(d: { [a: string]: number | number[] }) {
         console.log(
             Object.entries(d).reduce(
@@ -19,24 +21,28 @@ client.on(MESSAGETYPES.FaderPosition, function (MS) {
         )
     }
 
-    OPLog(MS)
-    console.log(MS.length, MS);
+    // OPLog(MS)
+    // console.log(MS.length, MS);
 })
 
 client.on(MESSAGETYPES.Setting, function (PV) {
+    // LOGARITHMIC
+    const { name, value }: { name: string, value: Buffer } = PV
+    console.log(name, value);
+    if (name.endsWith('/volume')) {
+        // Here, have some random constants
 
-    // const { name, value }: { name: string, value: Buffer } = PV
-    // console.log(name, value, value.toString());
-    // if (name.endsWith('/volume')) {
-    //     console.info((value.readUInt32LE(0) - 1063699898) / 143369)
-    // }
-    // writeFileSync('zlib.parsed', JSON.stringify(zlib, null, 4))
+        console.info("S", value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
+    }
 })
 
-// client.on(MESSAGETYPES.Unknown3, function (MS) {
-//   console.log(MS);
-//   // writeFileSync('zlib.parsed', JSON.stringify(zlib, null, 4))
-// })
+client.on(MESSAGETYPES.ZLIB, function (ZB: ZlibPayload) {
+    if (ZB.id !== 'Synchronize') return
+
+    const { chnum, name, username, color, select, solo, volume, mute, pan } = ZB.children.line.children.ch1.values
+    console.log({ chnum, name, username, color, select, solo, volume, mute, pan });
+
+})
 
 // client.on('discover', console.table)
 // client.discoverySubscribe()
