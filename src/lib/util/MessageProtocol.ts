@@ -1,4 +1,5 @@
-import { PacketHeader } from '../constants'
+import { CByte, PacketHeader } from '../constants'
+import { shortToLE } from './bufferUtil'
 
 type MessageCode = string
 /**
@@ -41,4 +42,48 @@ export function onOff_decode(bytes) {
     return false
   }
   return bytes
+}
+
+/**
+ * Craft a packet
+ * 
+ * @param messageCode 
+ * @param data 
+ * @param customA 
+ * @param customB 
+ * @returns 
+ */
+export function createPacket(messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
+  if (!data) data = Buffer.allocUnsafe(0)
+  const connIdentity = Buffer.from([
+    customA || CByte.A,
+    0x00,
+    customB || CByte.B,
+    0x00
+  ])
+  if (connIdentity.length !== 4) throw Error('connIdentity')
+
+  const lengthLE = shortToLE(
+    messageCode.length + connIdentity.length + data.length
+  )
+  if (lengthLE.length !== 2) throw Error('lengthLE')
+
+  const b = Buffer.alloc(
+    PacketHeader.length +
+    lengthLE.length +
+    messageCode.length +
+    connIdentity.length +
+    data.length
+  )
+
+  let cursor = 0
+  b.fill(PacketHeader)
+  b.fill(lengthLE, (cursor += PacketHeader.length))
+  b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
+  b.fill(connIdentity, (cursor += messageCode.length))
+
+  if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
+  else b.fill(data, (cursor += connIdentity.length))
+
+  return b
 }

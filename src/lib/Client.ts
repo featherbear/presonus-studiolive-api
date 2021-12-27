@@ -1,17 +1,17 @@
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
-
 import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
-import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
+import { ACTIONS, CHANNELS, MESSAGETYPES, CHANNELTYPES } from './constants'
 
 import KVTree from './util/KVTree'
 
 import {
   analysePacket,
+  createPacket,
   onOff_encode,
 } from './util/MessageProtocol'
 
@@ -179,39 +179,9 @@ export class Client extends EventEmitter {
     )
   }
 
-  private sendPacket(messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
-    if (!data) data = Buffer.allocUnsafe(0)
-    const connIdentity = Buffer.from([
-      customA || CByte.A,
-      0x00,
-      customB || CByte.B,
-      0x00
-    ])
-    if (connIdentity.length !== 4) throw Error('connIdentity')
-
-    const lengthLE = shortToLE(
-      messageCode.length + connIdentity.length + data.length
-    )
-    if (lengthLE.length !== 2) throw Error('lengthLE')
-
-    const b = Buffer.alloc(
-      PacketHeader.length +
-      lengthLE.length +
-      messageCode.length +
-      connIdentity.length +
-      data.length
-    )
-
-    let cursor = 0
-    b.fill(PacketHeader)
-    b.fill(lengthLE, (cursor += PacketHeader.length))
-    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
-    b.fill(connIdentity, (cursor += messageCode.length))
-
-    if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
-    else b.fill(data, (cursor += connIdentity.length))
-
-    this.conn.write(b)
+  private sendPacket(...params: Parameters<typeof createPacket>) {
+    const bytes = createPacket(...params)
+    this.conn.write(bytes)
   }
 
   private setMuteState(raw: string, state) {
