@@ -129,6 +129,7 @@ export class Client extends EventEmitter {
         this.on(MESSAGETYPES.JSON, subscribeCallback)
 
         this.on(MESSAGETYPES.Setting, ({ name, value }) => {
+          // console.log(name, value);
           this.state.register(name, value)
           // console.log(JSON.stringify(this.state, undefined, 2))
         })
