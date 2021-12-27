@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: "off" */
 
+// Values are set by PreSonus
 export enum CHANNELTYPES {
     LINE = 'line',
     MAIN = 'main',

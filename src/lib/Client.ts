@@ -3,10 +3,15 @@ import { EventEmitter } from 'events'
 import Discovery from './Discovery'
 import type { DiscoveryType } from './Discovery'
 
-import DataClient from './DataClient'
+import type { SettingType } from './types/settingType'
+
+import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
+
 import zlib from 'zlib'
+import KVTree from './util/KVTree'
+import zlibParser from './util/zlibUtil'
 
 import {
   analysePacket,
@@ -14,11 +19,10 @@ import {
   onOffCode,
   onOffEval,
   SubscriptionOptions
-} from './MessageProtocol'
+} from './util/MessageProtocol'
 
-import { parseChannelString, shortToLE } from './util'
-import KVTree from './KVTree'
-import zlibParser from './zlib'
+import { parseChannelString } from './util/channelUtil'
+import { shortToLE } from './util/bufferUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -29,7 +33,7 @@ type dataFnCallback<T = any> = (obj: {
   data: T
 }) => void;
 
-declare interface CustomEventTypes {
+export declare interface Client {
   on(event: MESSAGETYPES, listener: fnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MESSAGETYPES, listener: fnCallback): this;
@@ -44,7 +48,9 @@ declare interface CustomEventTypes {
   removeAllListeners(event: 'data'): this;
 }
 
-class Client extends EventEmitter implements CustomEventTypes {
+// TODO: FIX
+/* eslint no-redeclare: "off" */
+export class Client extends EventEmitter {
   serverHost: string
   serverPort: number
   serverPortUDP: number
@@ -87,7 +93,7 @@ class Client extends EventEmitter implements CustomEventTypes {
 
   meterSubscribe(port) {
     port = port || this.serverPortUDP
-    this.meterListener = MeterServer(port)
+    this.meterListener = MeterServer.call(this, port)
     this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
@@ -100,9 +106,9 @@ class Client extends EventEmitter implements CustomEventTypes {
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (...args) => {
+      const rejectHandler = (err: Error) => {
         this.connectPromise = null
-        return reject(...args)
+        return reject(err)
       }
       this.conn.once('error', rejectHandler)
 
@@ -164,7 +170,7 @@ class Client extends EventEmitter implements CustomEventTypes {
           data = {
             name: key,
             value: partB.length ? onOffEval(partB) : partA
-          }
+          } as SettingType
         }
         break
       }
@@ -234,58 +240,72 @@ class Client extends EventEmitter implements CustomEventTypes {
     )
   }
 
-  mute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  mute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  mute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  mute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  mute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  mute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  mute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-
-  mute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
+  /**
+   * Mute a given channel
+   * @param type Channel type
+   * @param channel Channel number of type - channel is optional for MAIN and TALKBACK
+   */
+  mute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
+  mute(type: 'MAIN' | 'TALKBACK');
+  mute(type, channel: CHANNELS.CHANNELS = 0) {
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
     this.setMuteState(target, true)
   }
 
-  unmute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  unmute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  unmute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  unmute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  unmute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  unmute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  unmute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-  unmute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
+  unmute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
+  unmute(type: 'MAIN' | 'TALKBACK');
+  unmute(type, channel: CHANNELS.CHANNELS = 0) {
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
     this.setMuteState(target, false)
   }
+
+  // muteFade
+
+  // unmuteFade
 
   // toggleMuteState (channel: Channels) {
 
   // }
 
-  /* IDEA: Force get channel state 
-    If we are unable to figure out how to get initial channel data
-    then we could do a hackish method to query the information.
-
-    A. Send an unmute command and see if there is a response (Will be unmuted regardless now)
-    * If there is a unmute event, then we know that the channel was originally muted
-      * Then send a mute event
-    * If there was no unmute event, then we know the channel was already unmuted
-    
-    B. Send a mute command and see if there is a response (Will be muted regardless now)
-    * If there is a mute event, then we know that the channel was originally unmuted
-      * Then send an unmute event
-    * If there was no mute event, then we know that the channel was already muted
-    
-    C. Some commands cause a list of channel mute statuses to be send (Link Aux Mute - MB: mt64).
-    * Send that command 
-
-  */
-
   close() {
     this.meterUnsubscribe()
     this.conn.destroy()
     // TODO: Send unsubscribe
+  }
+
+  /**
+   * Set volume
+   * 
+   * @param channel 
+   * @param level 
+   */
+  async setChannelTo(channel, level) {
+
+  }
+
+  /**
+  * Adjust volume over time
+  * 
+  * @param channel 
+  * @param level 
+  * @param duration 
+  */
+  async fadeChannelTo(channel, level, duration?: number) {
+
+  }
+
+  /**
+   * Look at metering data and adjust channel fader so that the level is of a certain loudness
+   * NOTE: This is not perceived loudness. Not very practical, but useful in a pinch?
+   * 
+   * @param channel 
+   * @param level 
+   * @param duration 
+   */
+  async normaliseChannelTo(channel, level, duration?: number) {
+
   }
 }
 
