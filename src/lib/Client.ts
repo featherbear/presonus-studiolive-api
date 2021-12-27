@@ -24,6 +24,10 @@ import {
 import { parseChannelString } from './util/channelUtil'
 import { shortToLE } from './util/bufferUtil'
 
+import handleZBPacket from './packetParser/ZB'
+import handleJMPacket from './packetParser/JM'
+import handlePVPacket from './packetParser/PV'
+import handleMSPacket from './packetParser/MS'
 // Forward discovery events
 const discovery = new Discovery()
 
@@ -146,38 +150,20 @@ export class Client extends EventEmitter {
 
   private handleRecvPacket(packet) {
     let [messageCode, data] = analysePacket(packet)
-    if (messageCode === null) {
-      return
+    if (messageCode === null) return
+
+    // Handle message types
+    const handlers: { [k in MESSAGETYPES]?: (data) => any } = {
+      [MESSAGETYPES.JSON]: handleJMPacket,
+      [MESSAGETYPES.Setting]: handlePVPacket,
+      [MESSAGETYPES.ZLIB]: handleZBPacket,
+      [MESSAGETYPES.FaderPosition]: handleMSPacket
     }
 
-    if (!Object.values(MESSAGETYPES).includes(messageCode)) {
-      console.log('Unhandled message code', messageCode)
-    }
-
-    switch (messageCode) {
-      case MESSAGETYPES.JSON:
-        data = JSON.parse(data.slice(4))
-        break
-      case MESSAGETYPES.Setting: {
-        const idx = data.indexOf(0x00) // Find the NULL terminator of the key string
-        if (idx !== -1) {
-          const key = data.slice(0, idx).toString()
-
-          // Most setting packets are `key\x00\x00\x00...`
-          // but some (i.e. filter groups) have `key\x00\x00\x01`
-          const partA = data.slice(idx + 1, idx + 3 /* 1+2 */)
-          const partB = data.slice(idx + 3)
-          data = {
-            name: key,
-            value: partB.length ? onOffEval(partB) : partA
-          } as SettingType
-        }
-        break
-      }
-      case MESSAGETYPES.ZLIB: {
-        data = zlibParser(zlib.inflateSync(data.slice(4)))
-        break
-      }
+    if (handlers[messageCode]) {
+      data = handlers[messageCode](data)
+    } else {
+      console.warn('Unhandled message code', messageCode)
     }
 
     this.emit(messageCode, data)
