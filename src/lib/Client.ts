@@ -155,11 +155,12 @@ export class Client extends EventEmitter {
       [MESSAGETYPES.JSON]: handleJMPacket,
       [MESSAGETYPES.Setting]: handlePVPacket,
       [MESSAGETYPES.ZLIB]: handleZBPacket,
-      [MESSAGETYPES.FaderPosition]: handleMSPacket
+      [MESSAGETYPES.FaderPosition]: handleMSPacket,
+      [MESSAGETYPES.DeviceList]: null
     }
 
-    if (handlers[messageCode]) {
-      data = handlers[messageCode](data)
+    if (handlers.hasOwnProperty(messageCode)) {
+      data = handlers[messageCode]?.(data) ?? data
     } else {
       console.warn('Unhandled message code', messageCode)
     }
