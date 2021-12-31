@@ -1,9 +1,7 @@
-import { readFileSync, writeFileSync } from 'fs'
-import { exit } from 'process'
-import nodeParser, { InputNode } from './nodeParser'
+
 import { Client, MESSAGETYPES } from './src/api'
-import ZlibPayload from './src/lib/types/ZlibPayload'
-import { ZlibNode } from './src/lib/util/zlibNodeParser'
+import { ZlibNode } from './src/lib/util/zlib/zlibNodeParser'
+import { getZlibValue } from './src/lib/util/zlib/zlibUtil'
 
 const client = new Client('192.168.0.18', 53000)
 // client.on('data', function ({ code, data }) {
@@ -42,7 +40,7 @@ const client = new Client('192.168.0.18', 53000)
 // })
 
 client.on(MESSAGETYPES.ZLIB, function (ZB: ZlibNode) {
-  console.log(JSON.stringify(ZB))
+  console.log(getZlibValue(ZB, 'global'))
   // )
   //   function intToLE(i) {
   //     const res = Buffer.allocUnsafe(4)

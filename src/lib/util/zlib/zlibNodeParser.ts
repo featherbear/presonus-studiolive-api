@@ -1,7 +1,7 @@
-const ZlibValueSymbol = Symbol('value')
-const ZlibRangeSymbol = Symbol('range')
-const ZlibStringEnumSymbol = Symbol('string')
-const ZlibKeySymbol = Symbol('key')
+export const ZlibValueSymbol = Symbol('value')
+export const ZlibRangeSymbol = Symbol('range')
+export const ZlibStringEnumSymbol = Symbol('string')
+export const ZlibKeySymbol = Symbol('key')
 
 type Obj<T = any> = { [key: string]: T }
 
@@ -43,8 +43,9 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
     root[key] = { ...root[key], [type]: value }
   }
 
-  const keyHandlers: { [k in keyof ZlibInputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
+  // #region Tree generation
 
+  const keyHandlers: { [k in keyof ZlibInputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
     children(data) {
       for (const [key, value] of Object.entries(data)) {
         root[key] = zlibParseNode(value, {
@@ -75,9 +76,9 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
     shared: null,
     classId: null,
     states: null
-
   }
 
+  // Use key handler lookup to operate on child key values
   for (const [key, data] of Object.entries(node)) {
     if (Object.prototype.hasOwnProperty.call(keyHandlers, key)) {
       keyHandlers[key]?.(data)
@@ -85,7 +86,19 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
       console.warn(`[${root[ZlibKeySymbol]?.join('/') ?? []}] unexpected child key ${key}`)
     }
   }
+  // #endregion
 
+  // Now, check that all added elements have a key, and therefore also
+  // have a value as keys are only added on child nodes and value methods
+  for (const [key, value] of Object.entries(root)) {
+    if (!Object.prototype.hasOwnProperty.call(value, ZlibKeySymbol)) {
+      console.warn(`[${root[ZlibKeySymbol].join('/')}] finished building, but ${key} did not have a value`)
+    }
+
+    // Delete the key, as we've finished building
+    delete value[ZlibKeySymbol]
+  }
+  
   return root
 }
 
