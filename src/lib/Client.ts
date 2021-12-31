@@ -12,7 +12,7 @@ import KVTree from './util/KVTree'
 import {
   analysePacket,
   createPacket,
-  onOff_encode,
+  onOff
 } from './util/MessageProtocol'
 
 import { parseChannelString } from './util/channelUtil'
@@ -152,6 +152,7 @@ export class Client extends EventEmitter {
     if (messageCode === null) return
 
     // Handle message types
+    // eslint-disable-next-line
     const handlers: { [k in MESSAGETYPES]?: (data) => any } = {
       [MESSAGETYPES.JSON]: handleJMPacket,
       [MESSAGETYPES.Setting]: handlePVPacket,
@@ -191,7 +192,7 @@ export class Client extends EventEmitter {
       MESSAGETYPES.Setting,
       Buffer.concat([
         Buffer.from(`${raw}/${ACTIONS.MUTE}\x00\x00\x00`),
-        onOff_encode(state)
+        onOff.encode(state)
       ])
     )
   }

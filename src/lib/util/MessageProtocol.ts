@@ -31,17 +31,18 @@ export function analysePacket(
   ]
 }
 
-export function onOff_encode(bool) {
-  return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
-}
-
-export function onOff_decode(bytes) {
-  if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
-    return true
-  } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
-    return false
+export const onOff = {
+  encode(bool) {
+    return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
+  },  
+  decode(bytes) {
+    if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
+      return true
+    } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
+      return false
+    }
+    return bytes
   }
-  return bytes
 }
 
 /**

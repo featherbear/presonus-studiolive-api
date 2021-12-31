@@ -31,7 +31,7 @@ type zlibNodeParserOptArgs = Partial<{ parent?: ZlibNode, base: Partial<ZlibNode
 /**
  * Parse deserialised zlib data into an object tree
  */
-export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNodeParserOptArgs = {}): ZlibNode {
+export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParserOptArgs = {}): ZlibNode {
   const root = { ...base } as ZlibNode
 
   function setMetadata(key, value, type: symbol) {
@@ -44,8 +44,9 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
   }
 
   // #region Tree generation
-
-  const keyHandlers: { [k in keyof ZlibInputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
+  
+  // eslint-disable-next-line
+  const keyHandlers: { [_ in keyof ZlibInputNode]: (data) => void } = { 
     children(data) {
       for (const [key, value] of Object.entries(data)) {
         root[key] = zlibParseNode(value, {

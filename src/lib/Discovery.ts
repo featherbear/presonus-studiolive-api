@@ -6,8 +6,7 @@
 import { analysePacket } from './util/MessageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
-
-
+import DiscoveryType from './types/DiscoveryType'
 
 export default class extends EventEmitter {
   socket: dgram.Socket
@@ -52,7 +51,6 @@ export default class extends EventEmitter {
     socket.on('listening', function () {
       this.setBroadcast(true)
     })
-
 
     socket.on('message', (packet, rinfo) => {
       const [code, data] = analysePacket(packet, true)
