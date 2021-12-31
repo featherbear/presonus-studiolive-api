@@ -62,7 +62,7 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
         root[key] = {
           ...root[key],
           [ZlibKeySymbol]: [...(root?.[ZlibKeySymbol] ?? []), key],
-          [ZlibValueSymbol]: value
+          [ZlibValueSymbol]: value // FIXME: Put this through some sort of endian converter / scaler?
         }
       }
     },
@@ -70,6 +70,7 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
       for (const entry of Object.entries(data)) setMetadata(...entry, ZlibStringEnumSymbol)
     },
     ranges(data) {
+      // FIXME: Put this through some sort of endian converter / scaler?
       for (const entry of Object.entries(data)) setMetadata(...entry, ZlibRangeSymbol)
     },
     id: null,
@@ -98,7 +99,7 @@ export function zlibParseNode(node: ZlibInputNode, { parent, base = {} }: zlibNo
     // Delete the key, as we've finished building
     delete value[ZlibKeySymbol]
   }
-  
+
   return root
 }
 
