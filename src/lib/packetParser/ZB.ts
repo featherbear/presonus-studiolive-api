@@ -1,6 +1,6 @@
-import zlibParser from "../util/zlibUtil"
 import zlib from 'zlib'
+import zlibParse from '../util/zlibUtil'
 
 export default function handleZBPacket(data) {
-    return zlibParser(zlib.inflateSync(data.slice(4)))
+  return zlibParse(zlib.inflateSync(data.slice(4)))
 }

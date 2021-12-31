@@ -3,8 +3,12 @@
  */
 
 import ZlibPayload from '../types/ZlibPayload'
+import zlibParseNode, { ZlibInputNode } from './zlibNodeParser'
 
-export default function zlibParser(buf: Buffer): ZlibPayload {
+/**
+ * Deserialise a zlib buffer into a raw object payload
+ */
+export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
   let idx = 0
   if (buf[idx++] !== 0x7b) return null
 
@@ -131,3 +135,18 @@ export default function zlibParser(buf: Buffer): ZlibPayload {
 
   return rootTree as ZlibPayload
 }
+
+/**
+ * Deserialise and parse a zlib buffer into an object tree
+ */
+export function zlibParse(zlib: Buffer) {
+  const payload = zlibDeserialiseBuffer(zlib)
+  if (payload.id !== 'Synchronize') {
+    console.warn('Unexpected zlib payload id', payload.id)
+    return
+  }
+  
+  return zlibParseNode(payload as unknown as ZlibInputNode)
+}
+
+export default zlibParse
