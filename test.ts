@@ -28,19 +28,23 @@ const client = new Client('192.168.0.18', 53000)
 //   // console.log(MS.length, MS);
 // })
 
-// client.on(MESSAGETYPES.Setting, function (PV) {
-//   // LOGARITHMIC
-//   const { name, value }: { name: string, value: Buffer } = PV
-//   console.log(name, value)
-//   if (name.endsWith('/volume')) {
-//     // Here, have some random constants
+client.on(MESSAGETYPES.Setting, function (PV) {
+  // LOGARITHMIC
+  const { name, value }: { name: string, value: Buffer } = PV
+  if (ZB) {
+    console.log(name, value, getZlibValue(ZB, name))
+  } 
+  // if (name.endsWith('/volume')) {
+  //   // Here, have some random constants
 
-//     console.info('S', value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
-//   }
-// })
+  //   console.info('S', value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
+  // }
+})
 
-client.on(MESSAGETYPES.ZLIB, function (ZB: ZlibNode) {
-  console.log(getZlibValue(ZB, 'global'))
+let ZB = null
+client.on(MESSAGETYPES.ZLIB, function (_ZB) {
+  ZB = _ZB
+  // console.log(getZlibValue(ZB, 'global'))
   // )
   //   function intToLE(i) {
   //     const res = Buffer.allocUnsafe(4)
