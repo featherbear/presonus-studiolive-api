@@ -48,31 +48,42 @@ function nodeParser(node: InputNode, { parent, base = {} }: nodeParserArgs = {})
     root[key] = { ...root[key], [type]: value }
   }
 
-  if (node.children) {
-    for (const [key, value] of Object.entries(node.children)) {
-      root[key] = nodeParser(value, {
-        base: {
-          [KeySymbol]: [...(root?.[KeySymbol] ?? []), key]
-        },
-        parent: root
-      })
+  const keyHandlers: { [k in keyof InputNode]: (data) => any } = {
+    children(data) {
+      for (const [key, value] of Object.entries(data)) {
+        root[key] = nodeParser(value, {
+          base: {
+            [KeySymbol]: [...(root?.[KeySymbol] ?? []), key]
+          },
+          parent: root
+        })
+      }
+    },
+    values(data) {
+      for (const [key, value] of Object.entries(data)) {
+        if (Object.prototype.hasOwnProperty.call(root, key)) console.warn(`[${root[KeySymbol].join('/')}/${key}] already has value set, overriding`)
+        root[key] = {
+          ...root[key],
+          [KeySymbol]: [...(root?.[KeySymbol] ?? []), key],
+          [ValueSymbol]: value
+        }
+      }
+    },
+    strings(data) {
+      for (const entry of Object.entries(data)) setMetadata(...entry, StringEnumSymbol)
+    },
+    ranges(data) {
+      for (const entry of Object.entries(data)) setMetadata(...entry, RangeSymbol)
     }
   }
 
-  if (node.values) {
-    for (const [key, value] of Object.entries(node.values)) {
-      if (Object.prototype.hasOwnProperty.call(root, key)) console.warn(`[${root[KeySymbol].join('/')}/${key}] already has value set, overriding`)
-      root[key] = {
-        ...root[key],
-        [KeySymbol]: [...(root?.[KeySymbol] ?? []), key],
-        [ValueSymbol]: value
-      }
+  for (const [key, data] of Object.entries(node)) {
+    if (Object.prototype.hasOwnProperty.call(keyHandlers, key)) {
+      keyHandlers[key](data)
+    } else {
+      console.warn(`[${root[KeySymbol]?.join('/') ?? []}] unexpected child key ${key}`)
     }
   }
-  // Possible string enums
-  if (node.strings) for (const entry of Object.entries(node.strings)) setMetadata(...entry, StringEnumSymbol)
-  // Possible value range
-  if (node.ranges) for (const entry of Object.entries(node.ranges)) setMetadata(...entry, RangeSymbol)
 
   return root
 }
