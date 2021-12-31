@@ -48,7 +48,8 @@ function nodeParser(node: InputNode, { parent, base = {} }: nodeParserArgs = {})
     root[key] = { ...root[key], [type]: value }
   }
 
-  const keyHandlers: { [k in keyof InputNode]: (data) => any } = {
+  const keyHandlers: { [k in keyof InputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
+
     children(data) {
       for (const [key, value] of Object.entries(data)) {
         root[key] = nodeParser(value, {
@@ -74,12 +75,17 @@ function nodeParser(node: InputNode, { parent, base = {} }: nodeParserArgs = {})
     },
     ranges(data) {
       for (const entry of Object.entries(data)) setMetadata(...entry, RangeSymbol)
-    }
+    },
+    id: null,
+    shared: null,
+    classId: null,
+    states: null
+
   }
 
   for (const [key, data] of Object.entries(node)) {
     if (Object.prototype.hasOwnProperty.call(keyHandlers, key)) {
-      keyHandlers[key](data)
+      keyHandlers[key]?.(data)
     } else {
       console.warn(`[${root[KeySymbol]?.join('/') ?? []}] unexpected child key ${key}`)
     }
