@@ -160,7 +160,7 @@ export class Client extends EventEmitter {
       [MESSAGETYPES.DeviceList]: null
     }
 
-    if (handlers.hasOwnProperty(messageCode)) {
+    if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
       data = handlers[messageCode]?.(data) ?? data
     } else {
       console.warn('Unhandled message code', messageCode)
