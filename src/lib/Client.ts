@@ -116,8 +116,8 @@ export class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // Send control subscribe request
-        this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
 
+        this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
         const subscribeCallback = data => {
           if (data.id === 'SubscriptionReply') {
             this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
@@ -158,7 +158,8 @@ export class Client extends EventEmitter {
       [MESSAGETYPES.Setting]: handlePVPacket,
       [MESSAGETYPES.ZLIB]: handleZBPacket,
       [MESSAGETYPES.FaderPosition]: handleMSPacket,
-      [MESSAGETYPES.DeviceList]: null
+      [MESSAGETYPES.DeviceList]: null,
+      [MESSAGETYPES.Unknown1]: null
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {

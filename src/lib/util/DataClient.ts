@@ -72,9 +72,9 @@ export default function (callback) {
     })
   })
 
-  TCPclient.on('close', function () {
-    console.log('Connection closed')
-  })
+  // TCPclient.on('close', function () {
+  //   console.log('Connection closed')
+  // })
 
   return TCPclient
 }

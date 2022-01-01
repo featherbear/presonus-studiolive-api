@@ -78,6 +78,7 @@ export function createPacket(messageCode: Buffer | string, data?: Buffer | strin
   )
   if (lengthLE.length !== 2) throw Error('lengthLE')
 
+  // Use allocUnsafe for performance improvements
   const b = Buffer.alloc(
     PacketHeader.length +
     lengthLE.length +
