@@ -67,5 +67,5 @@ export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: str
 
   if (cur === undefined) return null
 
-  return cur
+  return cur as RType
 }

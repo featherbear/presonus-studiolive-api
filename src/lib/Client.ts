@@ -27,7 +27,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import { dBto32, onOff } from './util/valueUtil'
+import { linearVolumeTo32, logVolumeTo32, onOff } from './util/valueUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -278,16 +278,37 @@ export class Client extends EventEmitter {
    * Set volume (decibels)
    * 
    * @param channel 
-   * @param level -84 to 10
+   * @param level range: -84 dB to 10 dB
    */
-  setChannelDb(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
+  setChannelVolumeDb(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
     if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
     const target = parseChannelString(type, channel)
-    this.setLevel(target, dBto32(level))
+    this.setLevel(target, logVolumeTo32(level))
   }
 
-  async setChannelLinear(channel, level) {
-    
+  /**
+   * Set volume (pseudo intensity)
+   * 
+   * @description Sound is difficult, so this function attempts to provide a "what-you-see-is-what-you-get" interface to control the volume levels.  
+   *              `100` Sets the fader to the top (aka +10 dB)  
+   *              `72` Sets the fader to unity (aka 0 dB) or a value close enough  
+   *              `0` Sets the fader to the bottom (aka -84 dB)
+   * @see http://www.sengpielaudio.com/calculator-levelchange.htm
+   */
+  setChannelVolumeLinear(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
+    /**
+     * 🚒 🧯 🧨 🚒 🧯 🧨 
+     * 🔥 this is fine 🔥 
+     * 🚒 🧯 🧨 🚒 🧯 🧨
+     * https://preview.redd.it/j4886fi37yh71.gif?format=mp4&s=df2258d4a78e0933515e0c445a96c8ee7b3f89c4
+     * 
+     * Every 10dB is a 10x change
+     * 20dB means 100x
+     * 30dB means 1000x
+     */
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
+    this.setLevel(target, linearVolumeTo32(level))
   }
 
   /**
@@ -298,7 +319,7 @@ export class Client extends EventEmitter {
   * @param duration 
   */
   async fadeChannelTo(channel, level, duration?: number) {
-
+    // TODO: Easing algorithm
   }
 
   /**
@@ -310,7 +331,7 @@ export class Client extends EventEmitter {
    * @param duration 
    */
   async normaliseChannelTo(channel, level, duration?: number) {
-
+    // TODO:
   }
 }
 
