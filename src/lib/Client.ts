@@ -23,7 +23,7 @@ import handleJMPacket from './packetParser/JM'
 import handlePVPacket from './packetParser/PV'
 
 import SubscriptionOptions from './types/SubscriptionOptions'
-import { craftSubscribe } from './util/subscriptionUtil'
+import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
 import handleMSPacket from './packetParser/MS'
 
 // Forward discovery events
@@ -182,9 +182,13 @@ export class Client extends EventEmitter {
     )
   }
 
-  private sendPacket(...params: Parameters<typeof createPacket>) {
-    const bytes = createPacket(...params)
-    this.conn.write(bytes)
+  private async sendPacket(...params: Parameters<typeof createPacket>) {
+    return new Promise((resolve) => {
+      const bytes = createPacket(...params)
+      this.conn.write(bytes, null, (resp) => {
+        resolve(resp)
+      })
+    })
   }
 
   private setMuteState(raw: string, state) {
@@ -226,10 +230,12 @@ export class Client extends EventEmitter {
 
   // }
 
-  close() {
+  async close() {
     this.meterUnsubscribe()
-    this.conn.destroy()
-    // TODO: Send unsubscribe
+    await this.sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
+      this.conn.destroy()
+      // console.log('Disconnected')
+    })
   }
 
   /**
