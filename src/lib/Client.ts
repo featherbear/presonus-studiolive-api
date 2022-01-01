@@ -59,14 +59,16 @@ export class Client extends EventEmitter {
   serverHost: string
   serverPort: number
   serverPortUDP: number
-  discovery: Discovery
-  state: KVTree
 
-  conn: any
+  discovery: Discovery
+
   meterListener: any
   metering: any
 
+  state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
+
+  private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
   constructor(host: string, port: number = 53000) {
@@ -126,36 +128,44 @@ export class Client extends EventEmitter {
         this.connectPromise = null
         return reject(err)
       }
+
       this.conn.once('error', rejectHandler)
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
-        // Send control subscribe request
+        // #region Connection handshake
+        {
+          // Send subscription request
+          this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
 
-        this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
-        const subscribeCallback = data => {
-          if (data.id === 'SubscriptionReply') {
-            this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
-            this.conn.removeListener('error', rejectHandler)
-            this.emit('connected')
-            resolve(this)
+          const subscribeCallback = data => {
+            if (data.id === 'SubscriptionReply') {
+              this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
+              this.conn.removeListener('error', rejectHandler)
+              this.emit('connected')
+              resolve(this)
+            }
           }
+          this.on(MESSAGETYPES.JSON, subscribeCallback)
         }
-        this.on(MESSAGETYPES.JSON, subscribeCallback)
+        // #endregion
 
         // #region Keep alive
         // Send a KeepAlive packet every second
-        const keepAliveFn = () => {
+        const keepAliveLoop = setInterval(() => {
           if (this.conn.destroyed) {
             clearInterval(keepAliveLoop)
             return
           }
           this.sendPacket(MESSAGETYPES.KeepAlive)
-        }
-        const keepAliveLoop = setInterval(keepAliveFn, 1000)
+        }, 1000)
+        // #endregion
       })
     }))
   }
 
+  /**
+   * Analyse, decode and emit packets
+   */
   private handleRecvPacket(packet) {
     let [messageCode, data] = analysePacket(packet)
     if (messageCode === null) return
@@ -168,7 +178,8 @@ export class Client extends EventEmitter {
       [MESSAGETYPES.ZLIB]: handleZBPacket,
       [MESSAGETYPES.FaderPosition]: handleMSPacket,
       [MESSAGETYPES.DeviceList]: null,
-      [MESSAGETYPES.Unknown1]: null
+      [MESSAGETYPES.Unknown1]: null,
+      [MESSAGETYPES.Unknown3]: null
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
