@@ -36,11 +36,20 @@ export const onOff = {
     return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
   },  
   decode(bytes) {
-    if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
+    let temp = bytes
+    
+    if (!Buffer.isBuffer(bytes)) {
+      const buff = Buffer.allocUnsafe(4)
+      buff.writeUInt32BE(bytes)
+      temp = buff
+    }
+
+    if (temp.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
       return true
-    } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
+    } else if (temp.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
       return false
     }
+    
     return bytes
   }
 }
