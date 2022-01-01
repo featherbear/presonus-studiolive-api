@@ -7,6 +7,15 @@ export function shortToLE(i) {
   return res
 }
 
+/**
+ * Convert an unsigned integer (32-bit) to a 4-byte buffer
+ */
+export function intToLE(i) {
+  const res = Buffer.allocUnsafe(4)
+  res.writeUInt32LE(i)
+  return res
+}
+
 // Hacky mc hack hack
 declare global {
     interface Buffer {

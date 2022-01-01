@@ -127,8 +127,9 @@ function doIt() {
   // client.discoverySubscribe()
 
   client.connect().then(() => {
-    setInterval(function() {
-      client.toggleMute('LINE', CHANNELS.LINE.CHANNEL_1)
+    setTimeout(function() {
+      console.log('DO')
+      client.setChannelDb('LINE', CHANNELS.LINE.CHANNEL_1, -84)
     }, 2000)
     // let i = 1
     // let direction = true

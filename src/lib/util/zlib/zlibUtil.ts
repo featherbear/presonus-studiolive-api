@@ -2,8 +2,8 @@
  * Parse Zlib packets
  */
 
-import { onOff } from '../MessageProtocol'
 import { tokenisePath } from '../treeUtil'
+import { onOff } from '../valueUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibValueSymbol } from './zlibNodeParser'
 

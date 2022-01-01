@@ -11,12 +11,11 @@ import KVTree from './util/KVTree'
 
 import {
   analysePacket,
-  createPacket,
-  onOff
+  createPacket
 } from './util/MessageProtocol'
 
 import { parseChannelString } from './util/channelUtil'
-import { shortToLE } from './util/bufferUtil'
+import { intToLE, shortToLE } from './util/bufferUtil'
 
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
@@ -28,6 +27,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
+import { dBto32, onOff } from './util/valueUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -222,6 +222,16 @@ export class Client extends EventEmitter {
     )
   }
 
+  private setLevel(raw: string, level) {
+    this.sendPacket(
+      MESSAGETYPES.Setting,
+      Buffer.concat([
+        Buffer.from(`${raw}/${ACTIONS.VOLUME}\x00\x00\x00`),
+        intToLE(level)
+      ])
+    )
+  }
+
   /**
    * Mute a given channel
    * @param type Channel type
@@ -265,13 +275,19 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * Set volume
+   * Set volume (decibels)
    * 
    * @param channel 
-   * @param level 
+   * @param level -84 to 10
    */
-  async setChannelTo(channel, level) {
+  setChannelDb(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
+    this.setLevel(target, dBto32(level))
+  }
 
+  async setChannelLinear(channel, level) {
+    
   }
 
   /**

@@ -1,5 +1,5 @@
 import type SettingType from '../types/SettingType'
-import { onOff } from '../util/MessageProtocol'
+import { onOff } from '../util/valueUtil'
 
 export default function handlePVPacket(data) {
   const idx = data.indexOf(0x00) // Find the NULL terminator of the key string

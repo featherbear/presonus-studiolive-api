@@ -31,29 +31,6 @@ export function analysePacket(
   ]
 }
 
-export const onOff = {
-  encode(bool) {
-    return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
-  },  
-  decode(bytes) {
-    let temp = bytes
-    
-    if (!Buffer.isBuffer(bytes)) {
-      const buff = Buffer.allocUnsafe(4)
-      buff.writeUInt32BE(bytes)
-      temp = buff
-    }
-
-    if (temp.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
-      return true
-    } else if (temp.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
-      return false
-    }
-    
-    return bytes
-  }
-}
-
 /**
  * Craft a packet
  * 
