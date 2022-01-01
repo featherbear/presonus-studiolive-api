@@ -49,8 +49,22 @@ export function tokenisePath(key: string | string[]): string[] {
   }
   return key
 }
+
 export function getZlibValue(node: ZlibNode, key: string | string[]) {
-  const tokens = [...tokenisePath(key)]
+  let tokens = [...tokenisePath(key)]
+  
+  /**
+   * Key replacements
+   */
+  {
+    // TODO: This occurs during control packets sent TO the mixer as well
+    const slice = tokens.slice(-2)
+    if (slice[0] === 'dca') {
+      const old = [...tokens]
+      tokens = [...tokens.slice(0, -2), ...slice.slice(1)]
+      console.log(`Converted ${old.join('/')} to ${tokens.join('/')}`)
+    }
+  }
 
   let cur = node
   while (cur && tokens.length > 0) {

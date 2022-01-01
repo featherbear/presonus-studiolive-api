@@ -31,17 +31,49 @@ const client = new Client('192.168.0.18', 53000)
 client.on(MESSAGETYPES.Setting, function (PV) {
   // LOGARITHMIC
   const { name, value }: { name: string, value: Buffer } = PV
-  if (ZB) {
-    console.log(name, {
-      newValue: value,
-      firstValue: getZlibValue(ZB, name)
-    })
+  const r = {
+    name
   }
-  // if (name.endsWith('/volume')) {
-  //   // Here, have some random constants
+  const R: any = r
+  const MS: any = {
+    value: value,
+    U32LE: value?.readUInt32LE?.(0),
+    U32LE_scaled: value?.readUInt32LE?.(0) - 1063699898 // 0x3f66c5ba
+  }
+  R.MS = MS
 
-  //   console.info('S', value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
-  // }
+  /* Volume controls are sent from 0x3af..... to 0x00000000 */
+
+  if (ZB) {
+    const PV: any = {}
+    PV.firstValue = getZlibValue(ZB, name)
+
+    if (name.includes('/dca/')) {
+      // Swap PV values from BE to LE
+
+      const U32BE = Buffer.allocUnsafe(4)
+      U32BE.writeUInt32BE(PV.firstValue)
+      PV.U32BE_LE = U32BE.readUInt32LE(0)
+
+      const U32LE = Buffer.allocUnsafe(4)
+      U32LE.writeUInt32LE(PV.firstValue)
+      PV.U32LE_BE = U32LE.readUInt32BE(0)
+
+      // R.S32BE = Buffer.allocUnsafe(4)
+      // R.S32BE.writeInt32BE(R.firstValue)
+
+      // R.S32LE = Buffer.allocUnsafe(4)
+      // R.S32LE.writeInt32LE(R.firstValue)
+      R.PV = PV
+    }
+  }
+  if (name.endsWith('/volume')) {
+    (r as any).type = 'volume'
+    // Here, have some random constants
+
+    // console.info('S', value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
+  }
+  console.log(r)
 })
 
 let ZB = null
