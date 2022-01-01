@@ -83,6 +83,8 @@ export function zlibParseNode(node: ZlibInputNode, { base = {}, valueTransformer
 
         const symbolPath = [...(root?.[ZlibKeySymbol] ?? []), key]
 
+        // TODO: Implement partial wildcard?
+        // e.g. aa.bb.cc* or aa.bb.*cc or aa.bb.c*c
         /**
          * Value transformers
          */

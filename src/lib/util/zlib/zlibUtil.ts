@@ -2,6 +2,7 @@
  * Parse Zlib packets
  */
 
+import { onOff } from '../MessageProtocol'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibValueSymbol } from './zlibNodeParser'
 
@@ -17,7 +18,21 @@ export function zlibParse(zlib: Buffer) {
 
   return zlibParseNode(payload as unknown as ZlibInputNode, {
     valueTransformers: {
-      
+      'permissions.access_code'() { return '*REDACTED*' },
+
+      ...[
+        // Add values which should be transformed with onOff byte decoding
+        'permissions.*',
+        'advancedscenefilters.*',
+        'projectfilters.*',
+        'channelfilters.*',
+        'line.*.select',
+        'line.*.mute',
+        'line.*.48v'
+      ].reduce((obj, val) => ({
+        ...obj,
+        [val]: (v) => Number.isFinite(v) ? onOff.decode(v) : v
+      }), {})
     }
   })
 }

@@ -32,8 +32,11 @@ client.on(MESSAGETYPES.Setting, function (PV) {
   // LOGARITHMIC
   const { name, value }: { name: string, value: Buffer } = PV
   if (ZB) {
-    console.log(name, value, getZlibValue(ZB, name))
-  } 
+    console.log(name, {
+      newValue: value,
+      firstValue: getZlibValue(ZB, name)
+    })
+  }
   // if (name.endsWith('/volume')) {
   //   // Here, have some random constants
 
@@ -44,6 +47,7 @@ client.on(MESSAGETYPES.Setting, function (PV) {
 let ZB = null
 client.on(MESSAGETYPES.ZLIB, function (_ZB) {
   ZB = _ZB
+  console.log('access code', getZlibValue(ZB, 'permissions.access_code'))
   // console.log(getZlibValue(ZB, 'global'))
   // )
   //   function intToLE(i) {
