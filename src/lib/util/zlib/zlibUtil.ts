@@ -47,9 +47,6 @@ export function getZlibValue(node: ZlibNode, key: string | string[]) {
   cur = cur?.[ZlibValueSymbol] ?? cur
 
   if (cur === undefined) return null
-    // console.warn(`Could not get value of ${key.join('/')}`)
-    return null
-  }
 
   return cur
 }

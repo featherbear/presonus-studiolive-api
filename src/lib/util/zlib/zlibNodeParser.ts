@@ -8,24 +8,24 @@ export const ZlibKeySymbol = Symbol('key')
 type Obj<T = any> = { [key: string]: T }
 
 export interface Range {
-    min: number;
-    max: number;
-    def: number;
-    units?: string;
+  min: number;
+  max: number;
+  def: number;
+  units?: string;
 }
 
 export type ZlibInputNode = {
-    children?: Obj<ZlibInputNode>
-    values?: Obj<any>
-    strings?: Obj<string[]>
-    ranges?: Obj<Range>
+  children?: Obj<ZlibInputNode>
+  values?: Obj<any>
+  strings?: Obj<string[]>
+  ranges?: Obj<Range>
 }
 
 export type ZlibNode<T = any> = {
-    [ZlibKeySymbol]: string[]
-    [ZlibValueSymbol]: T
-    [ZlibRangeSymbol]?: ZlibInputNode['ranges']
-    [ZlibStringEnumSymbol]?: ZlibInputNode['strings']
+  [ZlibKeySymbol]: string[]
+  [ZlibValueSymbol]: T
+  [ZlibRangeSymbol]?: ZlibInputNode['ranges']
+  [ZlibStringEnumSymbol]?: ZlibInputNode['strings']
 }
 
 type zlibNodeParserOptArgs = Partial<{
@@ -63,7 +63,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {}, valueTransformer
   }
 
   // #region Tree generation
-  
+
   // eslint-disable-next-line
   const keyHandlers: { [k in keyof ZlibInputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
     children(data) {
