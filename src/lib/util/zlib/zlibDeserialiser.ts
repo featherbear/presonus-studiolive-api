@@ -104,7 +104,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       }
       case 0x64 /* d */: {
         // FIXME: ?
-        value = valueData.readUInt32LE()
+        value = valueData.readUInt32BE()
         break
       }
   

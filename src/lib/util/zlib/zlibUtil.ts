@@ -50,9 +50,9 @@ export function tokenisePath(key: string | string[]): string[] {
   return key
 }
 
-export function getZlibValue(node: ZlibNode, key: string | string[]) {
+export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: string | string[]): RType {
   let tokens = [...tokenisePath(key)]
-  
+
   /**
    * Key replacements
    */
@@ -66,7 +66,7 @@ export function getZlibValue(node: ZlibNode, key: string | string[]) {
     }
   }
 
-  let cur = node
+  let cur: ZlibNode<RType> | RType = node
   while (cur && tokens.length > 0) {
     const next = tokens.shift()
     cur = cur[next]
