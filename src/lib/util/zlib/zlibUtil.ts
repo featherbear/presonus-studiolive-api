@@ -14,13 +14,17 @@ export function zlibParse(zlib: Buffer) {
     console.warn('Unexpected zlib payload id', payload.id)
     return
   }
-  
-  return zlibParseNode(payload as unknown as ZlibInputNode)
+
+  return zlibParseNode(payload as unknown as ZlibInputNode, {
+    valueTransformers: {
+      
+    }
+  })
 }
 
 export default zlibParse
 
-export function getZlibValue(node: ZlibNode, key: string | string[]) {
+export function tokenisePath(key: string | string[]): string[] {
   if (typeof key === 'string') {
     if (key.includes('/')) {
       key = key.split('/')
@@ -28,8 +32,11 @@ export function getZlibValue(node: ZlibNode, key: string | string[]) {
       key = key.split('.')
     }
   }
+  return key
+}
+export function getZlibValue(node: ZlibNode, key: string | string[]) {
+  const tokens = [...tokenisePath(key)]
 
-  const tokens = [...key]
   let cur = node
   while (cur && tokens.length > 0) {
     const next = tokens.shift()
@@ -39,7 +46,7 @@ export function getZlibValue(node: ZlibNode, key: string | string[]) {
   // Peek into value if it has such property
   cur = cur?.[ZlibValueSymbol] ?? cur
 
-  if (cur === undefined) {
+  if (cur === undefined) return null
     // console.warn(`Could not get value of ${key.join('/')}`)
     return null
   }
