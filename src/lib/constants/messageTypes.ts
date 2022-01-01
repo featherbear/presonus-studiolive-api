@@ -12,10 +12,20 @@ export enum MESSAGETYPES {
     ZLIB = 'ZB',
 
     Unknown1 = 'BO',
-    Unknown2 = 'CK', // compressed
-    Unknown3 = 'MB', // mute // mt64 ?
 
-    // Linear position of faders
-    // Only message sent for main fader changes
+    /**
+     * Compressed content
+     */
+    Unknown2 = 'CK',
+
+    /**
+     * Mute? mt64?
+     */
+    Unknown3 = 'MB',
+
+    /**
+     * Linear position of faders
+     * Only message sent for main fader changes
+     */
     FaderPosition = 'MS'
 }

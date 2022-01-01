@@ -1,4 +1,4 @@
-import { tokenisePath } from './zlibUtil'
+import { tokenisePath } from '../treeUtil'
 
 export const ZlibValueSymbol = Symbol('value')
 export const ZlibRangeSymbol = Symbol('range')

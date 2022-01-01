@@ -2,6 +2,10 @@
  * Recursive tree builder for '/'-delimited property strings
  */
 
+import { tokenisePath } from './treeUtil'
+
+// This is kinda really badly written hahh..
+
 const Parent = Symbol('parent')
 const BaseSymbol = Symbol('base')
 /**
@@ -17,14 +21,14 @@ const BaseSymbol = Symbol('base')
 
 **/
 
-export default class Tree {
+export default class KVTree {
   constructor(base = '/', parent = null) {
     this[BaseSymbol] = base
     this[Parent] = parent
   }
 
-  register(path, value) {
-    const newPath = path.split('/')
+  register(path: string | string[], value) {
+    const newPath = tokenisePath(path)
     const base = newPath.shift()
 
     if (newPath.length === 0) {
@@ -32,9 +36,17 @@ export default class Tree {
       return
     }
     if (!(base in this)) {
-      this[base] = new Tree(base, this)
+      this[base] = new KVTree(base, this)
     }
     this[base].register(newPath.join('/'), value)
+  }
+
+  get(path: string | string[]) {
+    const newPath = tokenisePath(path)
+    const base = newPath.shift()
+
+    const val = this[base]
+    return (newPath.length > 0) ? val?.get?.(newPath) : val
   }
 
   get path() {

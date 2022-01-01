@@ -3,6 +3,7 @@
  */
 
 import { onOff } from '../MessageProtocol'
+import { tokenisePath } from '../treeUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibValueSymbol } from './zlibNodeParser'
 
@@ -38,17 +39,6 @@ export function zlibParse(zlib: Buffer) {
 }
 
 export default zlibParse
-
-export function tokenisePath(key: string | string[]): string[] {
-  if (typeof key === 'string') {
-    if (key.includes('/')) {
-      key = key.split('/')
-    } else {
-      key = key.split('.')
-    }
-  }
-  return key
-}
 
 export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: string | string[]): RType {
   let tokens = [...tokenisePath(key)]

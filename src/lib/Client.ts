@@ -25,6 +25,9 @@ import handlePVPacket from './packetParser/PV'
 import SubscriptionOptions from './types/SubscriptionOptions'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
 import handleMSPacket from './packetParser/MS'
+import CacheProvider from './util/CacheProvider'
+import { ZlibNode } from './util/zlib/zlibNodeParser'
+import { getZlibValue } from './util/zlib/zlibUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -63,6 +66,7 @@ export class Client extends EventEmitter {
   meterListener: any
   metering: any
 
+  private zlibData?: ZlibNode
   private connectPromise: Promise<Client>
 
   constructor(host: string, port: number = 53000) {
@@ -77,7 +81,17 @@ export class Client extends EventEmitter {
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
-    this.state = new KVTree()
+    this.state = CacheProvider({
+      get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
+    })
+
+    this.on(MESSAGETYPES.ZLIB, (ZB) => {
+      this.zlibData = ZB
+    })
+
+    this.on(MESSAGETYPES.Setting, ({ name, value }) => {
+      this.state.set(name, value)
+    })
   }
 
   static async discover(timeout = 10 * 1000) {
@@ -128,12 +142,7 @@ export class Client extends EventEmitter {
         }
         this.on(MESSAGETYPES.JSON, subscribeCallback)
 
-        this.on(MESSAGETYPES.Setting, ({ name, value }) => {
-          // console.log(name, value);
-          this.state.register(name, value)
-          // console.log(JSON.stringify(this.state, undefined, 2))
-        })
-
+        // #region Keep alive
         // Send a KeepAlive packet every second
         const keepAliveFn = () => {
           if (this.conn.destroyed) {
@@ -227,9 +236,14 @@ export class Client extends EventEmitter {
 
   // unmuteFade
 
-  // toggleMuteState (channel: Channels) {
-
-  // }
+  toggleMute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
+  toggleMute(type: 'MAIN' | 'TALKBACK');
+  toggleMute(type, channel: CHANNELS.CHANNELS = 0) {
+    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
+    const target = parseChannelString(type, channel)
+    const currentState = this.state.get(`${target}/${ACTIONS.MUTE}`)
+    this.setMuteState(target, !currentState)
+  }
 
   async close() {
     this.meterUnsubscribe()
