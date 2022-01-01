@@ -101,6 +101,8 @@ For most cases it looks like they're not too important to keep synchronised - Bu
 |12-15|JSON Size|4-byte LE|
 |16->?|JSON Data||
 
+The console will reply with a response JSON payload (`{"id": "SubscriptionReply"}`), and additionally a ZLIB payload
+
 ### JSON Fields
 
 |Key                 |Type     |Description|Known Values|
