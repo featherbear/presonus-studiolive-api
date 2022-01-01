@@ -7,8 +7,6 @@ import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
 import { ACTIONS, CHANNELS, MESSAGETYPES, CHANNELTYPES } from './constants'
 
-import KVTree from './util/KVTree'
-
 import {
   analysePacket,
   createPacket
