@@ -1,9 +1,15 @@
 PreSonus StudioLive III API
 ---
 
-An unofficial API for the StudioLive III consoles from PreSonus.  
+An unofficial API for the PreSonus StudioLive III consoles.
 
-Initial protocol research was done in Python, and can be found in the [`research_python`](https://github.com/featherbear/presonus-studiolive-api/tree/research_python) branch. The Python version is **not maintained**.
+Tested against the following models
+
+* StudioLive 16 Mixer
+* StudioLive 16R Rack Mixer
+* StudioLive 24R Rack Mixer
+
+---
 
 # Install
 
