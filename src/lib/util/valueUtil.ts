@@ -1,19 +1,16 @@
 type Bounds = [number, number]
 /**
- * Convert a logarithmic volume its respective number
+ * Convert a logarithmic volume to its respective number
  * https://github.com/featherbear/presonus-studiolive-api/blob/a864a2fb4d2838f8edc811c4d2f395e894df4408/PV%2CZB_analysis.xlsx
  */
 export function dBto32(db) {
-  const curveFunction = (x) => Math.trunc(1061494000 + 605705.3 * x - 4143.51 * Math.pow(x, 2) - 1213.2 * Math.pow(x, 3) - 44.53693 * Math.pow(x, 4) - 0.4019976 * Math.pow(x, 5))
-  
-  // These are the actual bounds but our curve function is approximate
-  // const inputBounds: Bounds = [-84, 10]
-  
-  const inputBounds: Bounds = [-70, 10]
-  const outputBounds: Bounds = [0, 0x3f800000]
+  // Gaussian / Bell Curve fit - https://mycurvefit.com/
+  const curveFunction = (x) => Math.trunc(
+    1064974000 * Math.exp((-Math.pow(x - 17.99124, 2) / (2 * Math.pow(238.1057, 2))))
+  )
 
-  // Mute
-  if (db <= inputBounds[0]) return outputBounds[0]
+  const inputBounds: Bounds = [-84, 10]
+  const outputBounds: Bounds = [0, 0x3f800000]
 
   db = clamp(db, inputBounds)
   const result = clamp(curveFunction(db), outputBounds)
