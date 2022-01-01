@@ -1,6 +1,6 @@
 
 import { createWriteStream } from 'fs'
-import { CHANNELS, Client, MESSAGETYPES } from './src/api'
+import { CHANNELS, CHANNELTYPES, Client, MESSAGETYPES } from './src/api'
 import { ZlibNode } from './src/lib/util/zlib/zlibNodeParser'
 import { getZlibValue } from './src/lib/util/zlib/zlibUtil'
 
@@ -129,7 +129,8 @@ function doIt() {
   client.connect().then(() => {
     setTimeout(function() {
       console.log('DO')
-      client.setChannelDb('LINE', CHANNELS.LINE.CHANNEL_1, -84)
+      // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
+      client.setChannelVolumeLinear('LINE', CHANNELS.LINE.CHANNEL_1, 100)
     }, 2000)
     // let i = 1
     // let direction = true
