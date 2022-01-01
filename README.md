@@ -17,7 +17,7 @@ Initial protocol research was done in Python, and can be found in the [`research
 
 ## License
 
-Copyright © 2019 - 2021 Andrew Wong  
+Copyright © 2019 - 2022 Andrew Wong  
 
 This software is licensed under the [MIT License](https://opensource.org/licenses/MIT).  
 You are free to redistribute it and/or modify it under the [terms](https://opensource.org/licenses/MIT) of the [license](https://opensource.org/licenses/MIT).
