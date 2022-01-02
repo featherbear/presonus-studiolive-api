@@ -5,3 +5,5 @@ export { default as MeterServer } from './lib/MeterServer'
 export {
   CHANNELS, CHANNELTYPES, MESSAGETYPES
 } from './lib/constants'
+
+export * from './lib/types'
