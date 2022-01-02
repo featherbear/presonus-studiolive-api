@@ -66,7 +66,7 @@ export const onOff = {
 
     if (!Buffer.isBuffer(bytes)) {
       const buff = Buffer.allocUnsafe(4)
-      buff.writeUInt32BE(bytes)
+      buff.writeUInt32BE(bytes) // TODO: Should this be LE?
       temp = buff
     } else {
       temp = bytes
