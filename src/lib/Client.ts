@@ -115,12 +115,18 @@ export class Client extends EventEmitter {
     return Object.values(devices)
   }
 
+  /**
+   * @deprecated Not implemented
+   */
   meterSubscribe(port) {
     port = port || this.serverPortUDP
     this.meteringClient = MeterServer.call(this, port)
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
+  /**
+   * @deprecated Not implemented
+   */
   meterUnsubscribe() {
     if (!this.meteringClient) return
     this.meteringClient.close()
