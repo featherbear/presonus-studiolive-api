@@ -29,7 +29,7 @@ export function linearVolumeTo32(level) {
 
   const inputBounds: Bounds = [0, 100]
   const outputBounds: Bounds = [0, 0x3f800000]
-    
+
   level = clamp(level, inputBounds)
 
   if (level === inputBounds[0]) return outputBounds[0]

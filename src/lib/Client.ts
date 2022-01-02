@@ -5,7 +5,7 @@ import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
-import { ACTIONS, CHANNELS, MESSAGETYPES, CHANNELTYPES } from './constants'
+import { ACTIONS, MESSAGETYPES } from './constants'
 
 import {
   analysePacket,
@@ -166,7 +166,7 @@ export class Client extends EventEmitter {
       this.conn.destroy()
     })
   }
-  
+
   /**
    * Analyse, decode and emit packets
    */

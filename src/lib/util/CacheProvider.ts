@@ -15,7 +15,7 @@ export default function CacheProvider(fallback?: FallbackInterface) {
     set(path: string, value: any) {
       return data.register(path, value)
     },
-    get(path: string, _default = null) {
+    get<T = any>(path: string, _default = null): T | typeof _default {
       return data.get(path) ?? fallback?.get(path) ?? _default
     }
   }
