@@ -43,9 +43,9 @@ export function analysePacket(
 export function createPacket(messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
   if (!data) data = Buffer.allocUnsafe(0)
   const connIdentity = Buffer.from([
-    customA || CByte.A,
+    customA ?? CByte.A,
     0x00,
-    customB || CByte.B,
+    customB ?? CByte.B,
     0x00
   ])
   if (connIdentity.length !== 4) throw Error('connIdentity')
