@@ -248,6 +248,17 @@ export class Client extends EventEmitter {
     const channelString = parseChannelString(selector)
     const target = `${channelString}/${ACTIONS.VOLUME}`
 
+    const assertReturn = () => {
+      // Additional time to wait for response
+      const stabilisationPeriod = 100
+      return new Promise<null>((resolve) => {
+        setTimeout(() => {
+          this.state.set(target, level)
+          resolve(null)
+        }, stabilisationPeriod)
+      })
+    }
+
     const set = (level) => {
       this.sendPacket(
         MESSAGETYPES.Setting,
@@ -260,19 +271,19 @@ export class Client extends EventEmitter {
 
     if (!duration) {
       set(level)
-      return new Promise((resolve) => resolve(null))
+      return assertReturn()
     }
 
     // Transitioning to zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
     // So if we see transition to/from 0, we transition to/from 0x3a...... first
     const currentLevel = this.state.get(target, 0)
 
-    console.log('Current level for', target, currentLevel)
+    // console.log(`Change ${target} from ${currentLevel} to ${level}`)
 
     // Don't do anything if we already are on the same level
     // Unlikely because of the approximation values
     if (currentLevel === level) {
-      return new Promise((resolve) => resolve(null))
+      return assertReturn()
     }
 
     const pseudoZeroLevel = linearVolumeTo32(1)
@@ -284,10 +295,10 @@ export class Client extends EventEmitter {
           pseudoZeroLevel,
           duration,
           (v) => set(v),
-          () => {
+          async () => {
             // After transition, finally set the level to 0
             set(0)
-            resolve(null)
+            resolve(await assertReturn())
           }
         )
       })
@@ -298,7 +309,10 @@ export class Client extends EventEmitter {
           currentLevel || pseudoZeroLevel,
           level, duration,
           (v) => set(v),
-          () => resolve(null)
+          async () => {
+            resolve(await assertReturn())
+          }
+
         )
       })
     }

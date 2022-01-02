@@ -1,9 +1,6 @@
 
-import { createWriteStream } from 'fs'
-import { CHANNELS, CHANNELTYPES, Client, MESSAGETYPES } from './src/api'
-import { transitionValue } from './src/lib/util/valueUtil'
-import { ZlibNode } from './src/lib/util/zlib/zlibNodeParser'
-import { getZlibValue } from './src/lib/util/zlib/zlibUtil'
+import { CHANNELS, ChannelSelector, Client, MESSAGETYPES } from './src/api'
+import { intToLE } from './src/lib/util/bufferUtil'
 
 // const stream = createWriteStream('100.csv', { flags: 'a' })
 
@@ -128,14 +125,43 @@ function doIt() {
   // client.discoverySubscribe()
 
   client.connect().then(() => {
-    setTimeout(function() {
-      console.log('DO')
-      // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
+    let again
+    again = function() {
+      console.log('Set to 0')
       client.setChannelVolumeLinear({
         type: 'LINE',
         channel: CHANNELS.LINE.CHANNEL_1
       }, 0,
-      5000)
+      2000).then(() => {
+        console.log('Set to 80')
+        client.setChannelVolumeLinear({
+          type: 'LINE',
+          channel: CHANNELS.LINE.CHANNEL_1
+        }, 80,
+        2000).then(() => {
+          console.log('Set to 20')
+          client.setChannelVolumeLinear({
+            type: 'LINE',
+            channel: CHANNELS.LINE.CHANNEL_1
+          }, 20,
+          2000).then(() => {
+            console.log('set to 100')
+            client.setChannelVolumeLinear({
+              type: 'LINE',
+              channel: CHANNELS.LINE.CHANNEL_1
+            }, 100,
+            2000).then(() => {
+              console.log('REPEAT')
+              again()
+            })
+          })
+        })
+      })
+    }
+    setTimeout(function() {
+      console.log('DO')
+      // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
+      again()
     }, 2000)
     // let i = 1
     // let direction = true
