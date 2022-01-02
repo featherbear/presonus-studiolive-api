@@ -4,6 +4,11 @@ interface FallbackInterface {
   get(path: string): any
 }
 
+/**
+ * Provides a function to set/get paths  
+ * Delimiter: `.` or `/`
+ * @param fallback Fallback method interface that is used if the path could not be found internally
+ */
 export default function CacheProvider(fallback?: FallbackInterface) {
   const data = new KVTree()
   return {

@@ -52,8 +52,7 @@ export declare interface Client {
   removeAllListeners(event: 'data'): this;
 }
 
-// TODO: FIX
-/* eslint no-redeclare: "off" */
+// eslint-disable-next-line no-redeclare
 export class Client extends EventEmitter {
   serverHost: string
   serverPort: number
@@ -202,6 +201,9 @@ export class Client extends EventEmitter {
     )
   }
 
+  /**
+   * Send bytes to the console
+   */
   private async sendPacket(...params: Parameters<typeof createPacket>) {
     return new Promise((resolve) => {
       const bytes = createPacket(...params)

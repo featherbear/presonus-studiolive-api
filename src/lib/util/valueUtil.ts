@@ -39,21 +39,37 @@ export function linearVolumeTo32(level) {
   return result
 }
 
+/**
+ * Restrict `val` between a `min` and `max`
+ */
 export function clamp(val: number, [min, max]: Bounds) {
   return Math.max(min, Math.min(max, val))
 }
 
+/**
+ * On / off code helpers
+ * 
+ * Technically these values are just the minimum and maximum values used in the system
+ */
 export const onOff = {
+  /**
+   * Provide the bytes for a boolean state
+   */
   encode(bool) {
     return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
   },
-  decode(bytes) {
-    let temp = bytes
+  /**
+   * Decodes bytes into a boolean state, or pass through the value if they do not match the on/off code signature
+   */
+  decode(bytes: Buffer | number) {
+    let temp: Buffer
 
     if (!Buffer.isBuffer(bytes)) {
       const buff = Buffer.allocUnsafe(4)
       buff.writeUInt32BE(bytes)
       temp = buff
+    } else {
+      temp = bytes
     }
 
     if (temp.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
