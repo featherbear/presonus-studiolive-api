@@ -1,12 +1,19 @@
 import { CHANNELS, CHANNELTYPES } from '../constants'
+import ChannelSelector from '../types/ChannelSelector'
 
 export function parseChannelString(
-  type: keyof typeof CHANNELTYPES,
-  channel: CHANNELS.CHANNELS
+  selector: ChannelSelector
 ) {
+  let { type, channel } = selector
+
   // `type` must be a valid enum key
-  if (!Object.keys(CHANNELTYPES).includes(type as CHANNELTYPES)) {
+  if (!Object.keys(CHANNELTYPES).includes(type)) {
     throw new Error('Invalid channel type provided')
+  }
+
+  if (['MAIN', 'TALKBACK'].includes(type)) {
+    // Force channel = 1 for main and talkback channels
+    channel = 1
   }
 
   if (

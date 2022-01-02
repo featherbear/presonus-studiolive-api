@@ -26,6 +26,7 @@ import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, onOff } from './util/valueUtil'
+import ChannelSelector from './types/ChannelSelector'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -210,21 +211,27 @@ export class Client extends EventEmitter {
     })
   }
 
-  private setMuteState(raw: string, state) {
+  /**
+   * **INTERNAL** Send a mute/unmute command to the target
+   */
+  private setMuteState(selector: ChannelSelector, state) {
     this.sendPacket(
       MESSAGETYPES.Setting,
       Buffer.concat([
-        Buffer.from(`${raw}/${ACTIONS.MUTE}\x00\x00\x00`),
+        Buffer.from(`${parseChannelString(selector)}/${ACTIONS.MUTE}\x00\x00\x00`),
         onOff.encode(state)
       ])
     )
   }
 
-  private setLevel(raw: string, level) {
+  /**
+   * **INTERNAL** Send a level command to the target
+   */
+  private setLevel(selector: ChannelSelector, level, duration: number = 0) {
     this.sendPacket(
       MESSAGETYPES.Setting,
       Buffer.concat([
-        Buffer.from(`${raw}/${ACTIONS.VOLUME}\x00\x00\x00`),
+        Buffer.from(`${parseChannelString(selector)}/${ACTIONS.VOLUME}\x00\x00\x00`),
         intToLE(level)
       ])
     )
@@ -232,44 +239,24 @@ export class Client extends EventEmitter {
 
   /**
    * Mute a given channel
-   * @param type Channel type
-   * @param channel Channel number of type - channel is optional for MAIN and TALKBACK
    */
-  mute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
-  mute(type: 'MAIN' | 'TALKBACK');
-  mute(type, channel: CHANNELS.CHANNELS = 0) {
-    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
-    const target = parseChannelString(type, channel)
-    this.setMuteState(target, true)
+  mute(selector: ChannelSelector) {
+    this.setMuteState(selector, true)
   }
 
-  unmute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
-  unmute(type: 'MAIN' | 'TALKBACK');
-  unmute(type, channel: CHANNELS.CHANNELS = 0) {
-    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
-    const target = parseChannelString(type, channel)
-    this.setMuteState(target, false)
+  /**
+   * Unmute a given channel
+   */
+  unmute(selector: ChannelSelector) {
+    this.setMuteState(selector, false)
   }
 
-  // muteFade
-
-  // unmuteFade
-
-  toggleMute(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS);
-  toggleMute(type: 'MAIN' | 'TALKBACK');
-  toggleMute(type, channel: CHANNELS.CHANNELS = 0) {
-    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
-    const target = parseChannelString(type, channel)
-    const currentState = this.state.get(`${target}/${ACTIONS.MUTE}`)
-    this.setMuteState(target, !currentState)
-  }
-
-  async close() {
-    this.meterUnsubscribe()
-    await this.sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
-      this.conn.destroy()
-      // console.log('Disconnected')
-    })
+  /**
+   * Toggle the mute status of a channel
+   */
+  toggleMute(selector: ChannelSelector) {
+    const currentState = this.state.get(`${parseChannelString(selector)}/${ACTIONS.MUTE}`)
+    this.setMuteState(selector, !currentState)
   }
 
   /**
@@ -278,10 +265,8 @@ export class Client extends EventEmitter {
    * @param channel 
    * @param level range: -84 dB to 10 dB
    */
-  setChannelVolumeDb(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
-    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
-    const target = parseChannelString(type, channel)
-    this.setLevel(target, logVolumeTo32(level))
+  setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
+    this.setLevel(selector, logVolumeTo32(decibel), duration)
   }
 
   /**
@@ -293,7 +278,7 @@ export class Client extends EventEmitter {
    *              `0` Sets the fader to the bottom (aka -84 dB)
    * @see http://www.sengpielaudio.com/calculator-levelchange.htm
    */
-  setChannelVolumeLinear(type: keyof typeof CHANNELTYPES, channel: CHANNELS.CHANNELS, level: number) {
+  setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
     /**
      * 🚒 🧯 🧨 🚒 🧯 🧨 
      * 🔥 this is fine 🔥 
@@ -304,20 +289,7 @@ export class Client extends EventEmitter {
      * 20dB means 100x
      * 30dB means 1000x
      */
-    if (['MAIN', 'TALKBACK'].includes(type)) channel = 1
-    const target = parseChannelString(type, channel)
-    this.setLevel(target, linearVolumeTo32(level))
-  }
-
-  /**
-  * Adjust volume over time
-  * 
-  * @param channel 
-  * @param level 
-  * @param duration 
-  */
-  async fadeChannelTo(channel, level, duration?: number) {
-    // TODO: Easing algorithm
+    this.setLevel(selector, linearVolumeTo32(linearLevel), duration)
   }
 
   /**
