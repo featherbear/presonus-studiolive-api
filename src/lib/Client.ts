@@ -55,14 +55,14 @@ export declare interface Client {
 
 // eslint-disable-next-line no-redeclare
 export class Client extends EventEmitter {
-  serverHost: string
-  serverPort: number
-  serverPortUDP: number
+  readonly serverHost: string
+  readonly serverPort: number
+  readonly serverPortUDP: number
 
   meteringClient: any
   meteringData: any
 
-  state: ReturnType<typeof CacheProvider>
+  readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
 
   private conn: ReturnType<typeof DataClient>
@@ -91,7 +91,7 @@ export class Client extends EventEmitter {
 
     this.on(MESSAGETYPES.Setting, ({ name, value }) => {
       name = simplifyPathTokens(tokenisePath(name))
-      
+
       value = valueTransform(name, value, {
         'line.*.volume'(value: Buffer) {
           return value.readInt32LE()
@@ -118,7 +118,7 @@ export class Client extends EventEmitter {
   meterSubscribe(port) {
     port = port || this.serverPortUDP
     this.meteringClient = MeterServer.call(this, port)
-    this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
+    this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   meterUnsubscribe() {
@@ -141,7 +141,7 @@ export class Client extends EventEmitter {
         // #region Connection handshake
         {
           // Send subscription request
-          this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
+          this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
 
           const subscribeCallback = data => {
             if (data.id === 'SubscriptionReply') {
@@ -162,7 +162,7 @@ export class Client extends EventEmitter {
             clearInterval(keepAliveLoop)
             return
           }
-          this.sendPacket(MESSAGETYPES.KeepAlive)
+          this._sendPacket(MESSAGETYPES.KeepAlive)
         }, 1000)
         // #endregion
       })
@@ -171,7 +171,7 @@ export class Client extends EventEmitter {
 
   async close() {
     this.meterUnsubscribe()
-    await this.sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
+    await this._sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
       this.conn.destroy()
     })
   }
@@ -206,7 +206,7 @@ export class Client extends EventEmitter {
   }
 
   sendList(key) {
-    this.sendPacket(
+    this._sendPacket(
       MESSAGETYPES.FileResource,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
@@ -219,7 +219,7 @@ export class Client extends EventEmitter {
   /**
    * Send bytes to the console
    */
-  private async sendPacket(...params: Parameters<typeof createPacket>) {
+  private async _sendPacket(...params: Parameters<typeof createPacket>) {
     return new Promise((resolve) => {
       const bytes = createPacket(...params)
       this.conn.write(bytes, null, (resp) => {
@@ -231,8 +231,8 @@ export class Client extends EventEmitter {
   /**
    * **INTERNAL** Send a mute/unmute command to the target
    */
-  private setMuteState(selector: ChannelSelector, state) {
-    this.sendPacket(
+  private _setMuteState(selector: ChannelSelector, state) {
+    this._sendPacket(
       MESSAGETYPES.Setting,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/${ACTIONS.MUTE}\x00\x00\x00`),
@@ -242,9 +242,31 @@ export class Client extends EventEmitter {
   }
 
   /**
+   * Mute a given channel
+   */
+  mute(selector: ChannelSelector) {
+    this._setMuteState(selector, true)
+  }
+
+  /**
+   * Unmute a given channel
+   */
+  unmute(selector: ChannelSelector) {
+    this._setMuteState(selector, false)
+  }
+
+  /**
+   * Toggle the mute status of a channel
+   */
+  toggleMute(selector: ChannelSelector) {
+    const currentState = this.state.get(`${parseChannelString(selector)}/${ACTIONS.MUTE}`)
+    this._setMuteState(selector, !currentState)
+  }
+
+  /**
    * **INTERNAL** Send a level command to the target
    */
-  private setLevel(selector: ChannelSelector, level, duration: number = 0): Promise<null> {
+  private _setLevel(this: Client, selector: ChannelSelector, level, duration: number = 0): Promise<null> {
     const channelString = parseChannelString(selector)
     const target = `${channelString}/${ACTIONS.VOLUME}`
 
@@ -260,7 +282,7 @@ export class Client extends EventEmitter {
     }
 
     const set = (level) => {
-      this.sendPacket(
+      this._sendPacket(
         MESSAGETYPES.Setting,
         Buffer.concat([
           Buffer.from(`${target}\x00\x00\x00`),
@@ -319,35 +341,13 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * Mute a given channel
-   */
-  mute(selector: ChannelSelector) {
-    this.setMuteState(selector, true)
-  }
-
-  /**
-   * Unmute a given channel
-   */
-  unmute(selector: ChannelSelector) {
-    this.setMuteState(selector, false)
-  }
-
-  /**
-   * Toggle the mute status of a channel
-   */
-  toggleMute(selector: ChannelSelector) {
-    const currentState = this.state.get(`${parseChannelString(selector)}/${ACTIONS.MUTE}`)
-    this.setMuteState(selector, !currentState)
-  }
-
-  /**
    * Set volume (decibels)
    * 
    * @param channel 
    * @param level range: -84 dB to 10 dB
    */
   async setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
-    return this.setLevel(selector, logVolumeTo32(decibel), duration)
+    return this._setLevel(selector, logVolumeTo32(decibel), duration)
   }
 
   /**
@@ -370,7 +370,7 @@ export class Client extends EventEmitter {
      * 20dB means 100x
      * 30dB means 1000x
      */
-    return this.setLevel(selector, linearVolumeTo32(linearLevel), duration)
+    return this._setLevel(selector, linearVolumeTo32(linearLevel), duration)
   }
 
   /**
