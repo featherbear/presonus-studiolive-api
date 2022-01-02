@@ -235,7 +235,7 @@ export class Client extends EventEmitter {
   /**
    * **INTERNAL** Send a level command to the target
    */
-  private setLevel(selector: ChannelSelector, level, duration: number = 0) {
+  private setLevel(selector: ChannelSelector, level, duration: number = 0): Promise<null> {
     const channelString = parseChannelString(selector)
     const target = `${channelString}/${ACTIONS.VOLUME}`
 
@@ -251,30 +251,47 @@ export class Client extends EventEmitter {
 
     if (!duration) {
       set(level)
-      return
+      return new Promise((resolve) => resolve(null))
     }
 
     // Transitioning to zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
     // So if we see transition to/from 0, we transition to/from 0x3a...... first
     const currentLevel = this.state.get(target, 0)
-    
+
+    console.log('Current level for', target, currentLevel)
+
     // Don't do anything if we already are on the same level
     // Unlikely because of the approximation values
-    if (currentLevel === level) return
+    if (currentLevel === level) {
+      return new Promise((resolve) => resolve(null))
+    }
 
     const pseudoZeroLevel = linearVolumeTo32(1)
     // If the target level is 0, transition to the smallest non-zero level
     if (level === 0) {
-      transitionValue(
-        currentLevel || pseudoZeroLevel,
-        pseudoZeroLevel,
-        duration,
-        (v) => set(v),
-        () => set(0) // After transition, finally set the level to 0
-      )
+      return new Promise((resolve) => {
+        transitionValue(
+          currentLevel || pseudoZeroLevel,
+          pseudoZeroLevel,
+          duration,
+          (v) => set(v),
+          () => {
+            // After transition, finally set the level to 0
+            set(0)
+            resolve(null)
+          }
+        )
+      })
     } else {
-      // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
-      transitionValue(currentLevel || pseudoZeroLevel, level, duration, (v) => set(v))
+      return new Promise((resolve) => {
+        // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
+        transitionValue(
+          currentLevel || pseudoZeroLevel,
+          level, duration,
+          (v) => set(v),
+          () => resolve(null)
+        )
+      })
     }
   }
 
@@ -306,8 +323,8 @@ export class Client extends EventEmitter {
    * @param channel 
    * @param level range: -84 dB to 10 dB
    */
-  setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
-    this.setLevel(selector, logVolumeTo32(decibel), duration)
+  async setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
+    return this.setLevel(selector, logVolumeTo32(decibel), duration)
   }
 
   /**
@@ -319,7 +336,7 @@ export class Client extends EventEmitter {
    *              `0` Sets the fader to the bottom (aka -84 dB)
    * @see http://www.sengpielaudio.com/calculator-levelchange.htm
    */
-  setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
+  async setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
     /**
      * 🚒 🧯 🧨 🚒 🧯 🧨 
      * 🔥 this is fine 🔥 
@@ -330,7 +347,7 @@ export class Client extends EventEmitter {
      * 20dB means 100x
      * 30dB means 1000x
      */
-    this.setLevel(selector, linearVolumeTo32(linearLevel), duration)
+    return this.setLevel(selector, linearVolumeTo32(linearLevel), duration)
   }
 
   /**
