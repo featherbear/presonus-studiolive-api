@@ -81,3 +81,65 @@ export const onOff = {
     return bytes
   }
 }
+
+type CancelTransitionFn = () => void
+
+/**
+ * Transition a value along an easing sine curve.  
+ * _Should_ work from a -> b when a </> b
+ * 
+ * @param from Initial value
+ * @param to Final value
+ * @param duration Transition period (ms)
+ * @param fn Function to execute(intermediateValue)
+ * @param callback Completion callback
+ * @returns Cancel function
+ */
+export function transitionValue(from: number, to: number, duration: number, fn: (value: number) => any, callback?: Function) {
+  if (duration <= 0 || from === to) {
+    fn(to)
+    callback?.()
+    return (() => {}) as CancelTransitionFn
+  }
+
+  // Interval should be at least 10 ms
+  const minInterval = 10
+
+  const curveFunction = (position: number) => {
+    // Linear
+    // return position
+
+    // https://easings.net/#easeInOutSine
+    return -(Math.cos(Math.PI * position) - 1) / 2
+  }
+
+  // Interval delay
+  const interval = Math.max(duration / 100, minInterval)
+
+  const bounds: Bounds = [0, 1]
+  // [0 - 1.0] Progress value to increase by
+  const step = clamp(interval / duration, bounds)
+
+  // [0 - 1.0] Current progress
+  let progress = 0
+
+  const tick = () => {
+    fn(from + (to - from) * curveFunction(progress))
+
+    if (progress === bounds[1]) {
+      cancelTransition()
+      callback?.()
+    } else {
+      progress = clamp(progress + step, bounds)
+    }
+  }
+
+  const timer = setInterval(() => tick(), interval)
+  tick()
+
+  const cancelTransition: CancelTransitionFn = () => {
+    clearInterval(timer)
+  } 
+
+  return cancelTransition
+}

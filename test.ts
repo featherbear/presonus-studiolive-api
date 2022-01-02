@@ -1,6 +1,7 @@
 
 import { createWriteStream } from 'fs'
 import { CHANNELS, CHANNELTYPES, Client, MESSAGETYPES } from './src/api'
+import { transitionValue } from './src/lib/util/valueUtil'
 import { ZlibNode } from './src/lib/util/zlib/zlibNodeParser'
 import { getZlibValue } from './src/lib/util/zlib/zlibUtil'
 
@@ -127,14 +128,19 @@ function doIt() {
   // client.discoverySubscribe()
 
   client.connect().then(() => {
-    setTimeout(function() {
-      console.log('DO')
-      // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
-      client.setChannelVolumeLinear({
-        type: 'LINE',
-        channel: CHANNELS.LINE.CHANNEL_1
-      }, 100)
-    }, 2000)
+    transitionValue(100, 200, 2000, function(v) {
+      console.log(v)
+    }, function() {
+      console.log('Done')
+    })
+    // setTimeout(function() {
+    //   console.log('DO')
+    //   // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
+    //   client.setChannelVolumeLinear({
+    //     type: 'LINE',
+    //     channel: CHANNELS.LINE.CHANNEL_1
+    //   }, 100)
+    // }, 2000)
     // let i = 1
     // let direction = true
     // setInterval(function() {
