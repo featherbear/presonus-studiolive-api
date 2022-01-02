@@ -250,12 +250,12 @@ export class Client extends EventEmitter {
 
     const assertReturn = () => {
       // Additional time to wait for response
-      const stabilisationPeriod = 100
       return new Promise<null>((resolve) => {
+        // 0ms timeout - queue event loop
         setTimeout(() => {
           this.state.set(target, level)
           resolve(null)
-        }, stabilisationPeriod)
+        }, 0)
       })
     }
 
