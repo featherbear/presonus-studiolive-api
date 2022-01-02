@@ -25,7 +25,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import { linearVolumeTo32, logVolumeTo32, onOff } from './util/valueUtil'
+import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 
 // Forward discovery events
@@ -236,13 +236,46 @@ export class Client extends EventEmitter {
    * **INTERNAL** Send a level command to the target
    */
   private setLevel(selector: ChannelSelector, level, duration: number = 0) {
-    this.sendPacket(
-      MESSAGETYPES.Setting,
-      Buffer.concat([
-        Buffer.from(`${parseChannelString(selector)}/${ACTIONS.VOLUME}\x00\x00\x00`),
-        intToLE(level)
-      ])
-    )
+    const channelString = parseChannelString(selector)
+    const target = `${channelString}/${ACTIONS.VOLUME}`
+
+    const set = (level) => {
+      this.sendPacket(
+        MESSAGETYPES.Setting,
+        Buffer.concat([
+          Buffer.from(`${target}\x00\x00\x00`),
+          intToLE(level)
+        ])
+      )
+    }
+
+    if (!duration) {
+      set(level)
+      return
+    }
+
+    // Transitioning to zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
+    // So if we see transition to/from 0, we transition to/from 0x3a...... first
+    const currentLevel = this.state.get(target, 0)
+    
+    // Don't do anything if we already are on the same level
+    // Unlikely because of the approximation values
+    if (currentLevel === level) return
+
+    const pseudoZeroLevel = linearVolumeTo32(1)
+    // If the target level is 0, transition to the smallest non-zero level
+    if (level === 0) {
+      transitionValue(
+        currentLevel || pseudoZeroLevel,
+        pseudoZeroLevel,
+        duration,
+        (v) => set(v),
+        () => set(0) // After transition, finally set the level to 0
+      )
+    } else {
+      // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
+      transitionValue(currentLevel || pseudoZeroLevel, level, duration, (v) => set(v))
+    }
   }
 
   /**

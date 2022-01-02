@@ -128,19 +128,15 @@ function doIt() {
   // client.discoverySubscribe()
 
   client.connect().then(() => {
-    transitionValue(100, 200, 2000, function(v) {
-      console.log(v)
-    }, function() {
-      console.log('Done')
-    })
-    // setTimeout(function() {
-    //   console.log('DO')
-    //   // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
-    //   client.setChannelVolumeLinear({
-    //     type: 'LINE',
-    //     channel: CHANNELS.LINE.CHANNEL_1
-    //   }, 100)
-    // }, 2000)
+    setTimeout(function() {
+      console.log('DO')
+      // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
+      client.setChannelVolumeLinear({
+        type: 'LINE',
+        channel: CHANNELS.LINE.CHANNEL_1
+      }, 0,
+      5000)
+    }, 2000)
     // let i = 1
     // let direction = true
     // setInterval(function() {
