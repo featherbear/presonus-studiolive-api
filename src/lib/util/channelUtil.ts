@@ -19,7 +19,7 @@ export function parseChannelString(
   if (
     // `channel` must be a whole number larger than zero
     !(Math.trunc(channel) > 0) ||
-    (channel !== (channel = Math.trunc(channel))) ||
+    (channel != (channel = Math.trunc(channel))) || // eslint-disable-line eqeqeq
 
     // `channel` must also exist for a given `type`
     !Object.values(CHANNELS[type]).includes(channel)
