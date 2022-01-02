@@ -1,4 +1,4 @@
-import { tokenisePath, valueTransform, ValueTransformerLookup } from '../treeUtil'
+import { valueTransform, ValueTransformerLookup } from '../treeUtil'
 
 export const ZlibValueSymbol = Symbol('value')
 export const ZlibRangeSymbol = Symbol('range')

@@ -25,7 +25,7 @@ export default function handleMSPacket(data) {
   }
   data = data.slice(config.channels * 2)
 
-  const tape = data.readUInt16LE(0) // tape
+  const tape = data.readUInt16LE() // tape
 
   data = data.slice(2)
 
@@ -35,7 +35,7 @@ export default function handleMSPacket(data) {
   }
   data = data.slice(config.fx * 2)
 
-  const talkback = data.readUInt16LE(0)
+  const talkback = data.readUInt16LE()
   data = data.slice(2)
 
   const aux = []
@@ -50,7 +50,7 @@ export default function handleMSPacket(data) {
   }
   data = data.slice(config.fx * 2)
 
-  const main = data.readUInt16LE(0)
+  const main = data.readUInt16LE()
   data = data.slice(2 * 2)
 
   return {
