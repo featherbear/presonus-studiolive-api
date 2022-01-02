@@ -2,7 +2,7 @@
  * Parse Zlib packets
  */
 
-import { tokenisePath } from '../treeUtil'
+import { simplifyPathTokens, tokenisePath } from '../treeUtil'
 import { onOff } from '../valueUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibValueSymbol } from './zlibNodeParser'
@@ -41,20 +41,7 @@ export function zlibParse(zlib: Buffer) {
 export default zlibParse
 
 export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: string | string[]): RType {
-  let tokens = [...tokenisePath(key)]
-
-  /**
-   * Key replacements
-   */
-  {
-    // TODO: This occurs during control packets sent TO the mixer as well
-    const slice = tokens.slice(-2)
-    if (slice[0] === 'dca') {
-      const old = [...tokens]
-      tokens = [...tokens.slice(0, -2), ...slice.slice(1)]
-      console.log(`Converted ${old.join('/')} to ${tokens.join('/')}`)
-    }
-  }
+  const tokens = [...simplifyPathTokens(tokenisePath(key))]
 
   let cur: ZlibNode<RType> | RType = node
   while (cur && tokens.length > 0) {

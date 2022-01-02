@@ -72,3 +72,18 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
 
   return value
 }
+
+export function simplifyPathTokens(path: string | string[]) {
+  let tokens = tokenisePath(path)
+  /**
+   * Key replacements
+   */
+  const slice = tokens.slice(-2)
+  if (slice[0] === 'dca') {
+    // const old = [...tokens]
+    tokens = [...tokens.slice(0, -2), ...slice.slice(1)]
+    // console.log(`Converted ${old.join('/')} to ${tokens.join('/')}`)
+  }
+
+  return tokens
+}

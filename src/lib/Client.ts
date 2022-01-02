@@ -27,6 +27,7 @@ import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
+import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -89,6 +90,14 @@ export class Client extends EventEmitter {
     })
 
     this.on(MESSAGETYPES.Setting, ({ name, value }) => {
+      name = simplifyPathTokens(tokenisePath(name))
+      
+      value = valueTransform(name, value, {
+        'line.*.volume'(value: Buffer) {
+          return value.readInt32LE()
+        }
+      })
+
       this.state.set(name, value)
     })
   }
