@@ -130,7 +130,10 @@ function doIt() {
     setTimeout(function() {
       console.log('DO')
       // client.setChannelVolumeDb('LINE', CHANNELS.LINE.CHANNEL_1, -88)
-      client.setChannelVolumeLinear('LINE', CHANNELS.LINE.CHANNEL_1, 100)
+      client.setChannelVolumeLinear({
+        type: 'LINE',
+        channel: CHANNELS.LINE.CHANNEL_1
+      }, 100)
     }, 2000)
     // let i = 1
     // let direction = true

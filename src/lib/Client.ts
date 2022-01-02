@@ -58,10 +58,8 @@ export class Client extends EventEmitter {
   serverPort: number
   serverPortUDP: number
 
-  discovery: Discovery
-
-  meterListener: any
-  metering: any
+  meteringClient: any
+  meteringData: any
 
   state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -72,12 +70,13 @@ export class Client extends EventEmitter {
   constructor(host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
+
     this.serverHost = host
     this.serverPort = port
-
     this.serverPortUDP = 52704
-    this.meterListener = null
-    this.metering = {}
+
+    this.meteringClient = null
+    this.meteringData = {}
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
@@ -109,14 +108,14 @@ export class Client extends EventEmitter {
 
   meterSubscribe(port) {
     port = port || this.serverPortUDP
-    this.meterListener = MeterServer.call(this, port)
+    this.meteringClient = MeterServer.call(this, port)
     this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   meterUnsubscribe() {
-    if (!this.meterListener) return
-    this.meterListener.close()
-    this.meterListener = null
+    if (!this.meteringClient) return
+    this.meteringClient.close()
+    this.meteringClient = null
   }
 
   async connect(subscribeData?: SubscriptionOptions) {
@@ -161,6 +160,13 @@ export class Client extends EventEmitter {
     }))
   }
 
+  async close() {
+    this.meterUnsubscribe()
+    await this.sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
+      this.conn.destroy()
+    })
+  }
+  
   /**
    * Analyse, decode and emit packets
    */
