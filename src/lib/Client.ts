@@ -85,6 +85,7 @@ export class Client extends EventEmitter {
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
     })
 
+
     this.on(MESSAGETYPES.ZLIB, (ZB) => {
       this.zlibData = ZB
     })

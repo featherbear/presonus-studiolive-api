@@ -126,28 +126,29 @@ function doIt() {
   // client.discoverySubscribe()
 
   client.connect().then(() => {
-    let X: Node<ZlibPayload['children']> = client.state as any
-    X.fxreturn['a'].avb_src
-
-
     setInterval(() => {
       console.log(
-        client.state.get('line.ch1.mute'),
-        client.state.get('line.ch2.mute'),
-        client.state.get('line.ch3.mute'),
-        client.state.get('line.ch4.mute')
+        {
+          consoleName: client.state.get('global.mixer_name'),
+          consoleType: client.state.get('global.devicename'),
+          version: client.state.get('global.mixer_version'),
+          versionDate: client.state.get('global.mixer_version_date'),
+          serial: client.state.get('global.mixer_serial'),
+          registeredUser: client.state.get('global.registered_user'),
+          channels: {
+            line: Object.keys(client.state.get('line')).length,
+            aux: Object.keys(client.state.get('aux')).length,
+            fx /* fxbus == fxreturn */: Object.keys(client.state.get('fx')).length,
+            return /* aka tape? */: Object.keys(client.state.get('return')).length,
+            talkback: Object.keys(client.state.get('talkback')).length,
+            main: Object.keys(client.state.get('main')).length,
+          }
+        }
       )
     }, 500)
   })
-
 }
 
 
-type Node<root> = {
-  [key in keyof root]:
-  (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
-  & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : {})
-  & (root[key] extends { ranges, values} ? { [k in keyof root[key]['values']]: root[key]['values'][k] & root[key]['ranges'][k] } : {})
-}
 console.log('go')
 doIt()
