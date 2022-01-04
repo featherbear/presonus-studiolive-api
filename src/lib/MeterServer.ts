@@ -8,10 +8,11 @@ import chalk from 'chalk'
 
 import * as dgram from 'dgram'
 import { PacketHeader } from './constants'
+import ChannelCount from './types/ChannelCount'
 
 let instanceCount = 0
 
-export default function createServer(port) {
+export default function createServer(port, channelCounts: ChannelCount) {
   if (typeof port !== 'number' || port <= 0 || port > 65535) {
     throw Error('Invalid port number')
   }

@@ -28,6 +28,7 @@ import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
+import ChannelCount from './types/ChannelCount'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -62,14 +63,7 @@ export class Client extends EventEmitter {
   meteringClient: any
   meteringData: any
 
-  channelCounts: {
-    line: number
-    aux: number
-    fx: number
-    return: number
-    talkback: number
-    main: number
-  }
+  channelCounts: ChannelCount
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -129,7 +123,7 @@ export class Client extends EventEmitter {
    */
   meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meteringClient = MeterServer.call(this, port)
+    this.meteringClient = MeterServer.call(this, port, this.channelCounts)
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
