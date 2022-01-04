@@ -135,14 +135,7 @@ function doIt() {
           versionDate: client.state.get('global.mixer_version_date'),
           serial: client.state.get('global.mixer_serial'),
           registeredUser: client.state.get('global.registered_user'),
-          channels: {
-            line: Object.keys(client.state.get('line')).length,
-            aux: Object.keys(client.state.get('aux')).length,
-            fx /* fxbus == fxreturn */: Object.keys(client.state.get('fx')).length,
-            return /* aka tape? */: Object.keys(client.state.get('return')).length,
-            talkback: Object.keys(client.state.get('talkback')).length,
-            main: Object.keys(client.state.get('main')).length,
-          }
+         
         }
       )
     }, 500)

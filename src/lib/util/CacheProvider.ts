@@ -6,6 +6,10 @@ interface FallbackInterface {
 }
 
 
+/**
+ * Internal KV State Tree  
+ * Types do not match transformed
+ */
 type Node<root> = {
   [key in keyof root]:
   (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
@@ -21,7 +25,6 @@ type Node<root> = {
  */
 export default function CacheProvider(fallback?: FallbackInterface) {
   const data: KVTree & Node<ZlibPayload['children']> = new KVTree() as any
-
 
   return {
     set(path: string | string[], value: any) {

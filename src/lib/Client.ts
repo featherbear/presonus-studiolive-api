@@ -62,6 +62,15 @@ export class Client extends EventEmitter {
   meteringClient: any
   meteringData: any
 
+  channelCounts: {
+    line: number
+    aux: number
+    fx: number
+    return: number
+    talkback: number
+    main: number
+  }
+
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
 
@@ -84,7 +93,6 @@ export class Client extends EventEmitter {
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
     })
-
 
     this.on(MESSAGETYPES.ZLIB, (ZB) => {
       this.zlibData = ZB
@@ -146,20 +154,53 @@ export class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
-        {
-          // Send subscription request
-          this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
-
-          const subscribeCallback = data => {
-            if (data.id === 'SubscriptionReply') {
-              this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
-              this.conn.removeListener('error', rejectHandler)
-              this.emit('connected')
+        Promise.all([
+          /**
+           * Await for the first zlib response to resolve channel counts
+           */
+          new Promise((resolve) => {
+            const zlibInitCallback = () => {
+              this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+              // TODO: Do something with these values
+              console.log("Console channels are",
+                (this.channelCounts = {
+                  line: Object.keys(this.state.get('line')).length,
+                  aux: Object.keys(this.state.get('aux')).length,
+                  fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
+                  return /* aka tape? */: Object.keys(this.state.get('return')).length,
+                  talkback: Object.keys(this.state.get('talkback')).length,
+                  main: Object.keys(this.state.get('main')).length,
+                })
+              )
+              
               resolve(this)
             }
-          }
-          this.on(MESSAGETYPES.JSON, subscribeCallback)
-        }
+            this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+          }),
+
+          /**
+           * Await for the subscription success
+           */
+          new Promise((resolve) => {
+            const subscribeCallback = data => {
+              if (data.id === 'SubscriptionReply') {
+                // Do we even need to wait for this reply?
+                // - probably a good idea.
+                this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
+                resolve(this)
+              }
+            }
+            this.addListener(MESSAGETYPES.JSON, subscribeCallback)
+          })
+        ]).then(() => {
+          this.conn.removeListener('error', rejectHandler)
+
+          this.emit('connected')
+          resolve(this)
+        })
+
+        // Send subscription request
+        this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
         // #endregion
 
         // #region Keep alive
