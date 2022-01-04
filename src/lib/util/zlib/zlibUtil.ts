@@ -58,7 +58,6 @@ export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: str
   return cur as RType
 }
 
-
 /**
  *  @deprecated testing
  */
@@ -77,7 +76,7 @@ export function getZlibKeyData(node: ZlibNode, key: string | string[], {
 
   if (cur === undefined) return null
 
-  let result: {
+  const result: {
     value?, range?, strings?
   } = {}
   if (value && node[ZlibValueSymbol]) result.value = node[ZlibValueSymbol]
