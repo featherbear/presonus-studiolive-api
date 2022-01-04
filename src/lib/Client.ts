@@ -60,7 +60,7 @@ export class Client extends EventEmitter {
   readonly serverPort: number
   readonly serverPortUDP: number
 
-  meteringClient: any
+  meteringClient: Awaited<ReturnType<typeof MeterServer>>
   meteringData: any
 
   channelCounts: ChannelCount
@@ -121,9 +121,9 @@ export class Client extends EventEmitter {
   /**
    * @deprecated Not implemented
    */
-  meterSubscribe(port?: number) {
+  async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meteringClient = MeterServer.call(this, port, this.channelCounts)
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts)
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
