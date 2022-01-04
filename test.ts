@@ -125,20 +125,24 @@ function doIt() {
   // client.on('discover', console.table)
   // client.discoverySubscribe()
 
+  client.on(MESSAGETYPES.FaderPosition, function (MS) {
+    console.log(MS);
+  })
+
   client.connect().then(() => {
-    setInterval(() => {
-      console.log(
-        {
-          consoleName: client.state.get('global.mixer_name'),
-          consoleType: client.state.get('global.devicename'),
-          version: client.state.get('global.mixer_version'),
-          versionDate: client.state.get('global.mixer_version_date'),
-          serial: client.state.get('global.mixer_serial'),
-          registeredUser: client.state.get('global.registered_user'),
-         
-        }
-      )
-    }, 500)
+    // setInterval(() => {
+    //   console.log(
+    //     {
+    //       consoleName: client.state.get('global.mixer_name'),
+    //       consoleType: client.state.get('global.devicename'),
+    //       version: client.state.get('global.mixer_version'),
+    //       versionDate: client.state.get('global.mixer_version_date'),
+    //       serial: client.state.get('global.mixer_serial'),
+    //       registeredUser: client.state.get('global.registered_user'),
+
+    //     }
+    //   )
+    // }, 500)
   })
 }
 

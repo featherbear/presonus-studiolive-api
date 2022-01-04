@@ -161,7 +161,6 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const zlibInitCallback = () => {
               this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
-              // TODO: Do something with these values
               console.log("Console channels are",
                 (this.channelCounts = {
                   line: Object.keys(this.state.get('line')).length,
@@ -172,7 +171,7 @@ export class Client extends EventEmitter {
                   main: Object.keys(this.state.get('main')).length,
                 })
               )
-              
+
               resolve(this)
             }
             this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
@@ -244,7 +243,7 @@ export class Client extends EventEmitter {
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
-      data = handlers[messageCode]?.(data) ?? data
+      data = handlers[messageCode]?.call?.(this, data) ?? data
     } else {
       console.warn('Unhandled message code', messageCode)
     }
