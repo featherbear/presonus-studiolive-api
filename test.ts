@@ -127,26 +127,27 @@ function doIt() {
 
   client.connect().then(() => {
     let X: Node<ZlibPayload['children']> = client.state as any
-    X.main.ch1['10db_boost']
+    X.main.ch1
 
 
 
-      setInterval(() => {
-        console.log(
-          client.state.get('line.ch1.mute'),
-          client.state.get('line.ch2.mute'),
-          client.state.get('line.ch3.mute'),
-          client.state.get('line.ch4.mute')
-        )
-      }, 500)
+    setInterval(() => {
+      console.log(
+        client.state.get('line.ch1.mute'),
+        client.state.get('line.ch2.mute'),
+        client.state.get('line.ch3.mute'),
+        client.state.get('line.ch4.mute')
+      )
+    }, 500)
   })
 
 }
 
 
 type Node<root> = {
-  [key in keyof root]: (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
-  & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : Node<root[key]>)
+  [key in keyof root]:
+  (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
+  & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : {})
 }
 console.log('go')
 doIt()
