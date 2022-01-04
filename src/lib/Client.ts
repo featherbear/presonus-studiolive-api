@@ -1,24 +1,33 @@
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
-import type { DiscoveryType } from './Discovery'
+import type DiscoveryType from './types/DiscoveryType'
 
-import DataClient from './DataClient'
+import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
-import { ACTIONS, CHANNELS, MESSAGETYPES, PacketHeader, CByte, CHANNELTYPES } from './constants'
-import zlib from 'zlib'
+import { ACTIONS, MESSAGETYPES } from './constants'
 
 import {
   analysePacket,
-  craftSubscribe,
-  onOffCode,
-  onOffEval,
-  SubscriptionOptions
-} from './MessageProtocol'
+  createPacket
+} from './util/MessageProtocol'
 
-import { parseChannelString, shortToLE } from './util'
-import KVTree from './KVTree'
-import zlibParser from './zlib'
+import { parseChannelString } from './util/channelUtil'
+import { intToLE, shortToLE } from './util/bufferUtil'
+
+import handleZBPacket from './packetParser/ZB'
+import handleJMPacket from './packetParser/JM'
+import handlePVPacket from './packetParser/PV'
+
+import SubscriptionOptions from './types/SubscriptionOptions'
+import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
+import handleMSPacket from './packetParser/MS'
+import CacheProvider from './util/CacheProvider'
+import { ZlibNode } from './util/zlib/zlibNodeParser'
+import { getZlibValue } from './util/zlib/zlibUtil'
+import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
+import ChannelSelector from './types/ChannelSelector'
+import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -29,7 +38,7 @@ type dataFnCallback<T = any> = (obj: {
   data: T
 }) => void;
 
-declare interface CustomEventTypes {
+export declare interface Client {
   on(event: MESSAGETYPES, listener: fnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MESSAGETYPES, listener: fnCallback): this;
@@ -44,32 +53,53 @@ declare interface CustomEventTypes {
   removeAllListeners(event: 'data'): this;
 }
 
-class Client extends EventEmitter implements CustomEventTypes {
-  serverHost: string
-  serverPort: number
-  serverPortUDP: number
-  discovery: Discovery
-  state: KVTree
+// eslint-disable-next-line no-redeclare
+export class Client extends EventEmitter {
+  readonly serverHost: string
+  readonly serverPort: number
+  readonly serverPortUDP: number
 
-  conn: any
-  meterListener: any
-  metering: any
+  meteringClient: any
+  meteringData: any
 
+  readonly state: ReturnType<typeof CacheProvider>
+  private zlibData?: ZlibNode
+
+  private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
   constructor(host: string, port: number = 53000) {
     super()
     if (!host) throw new Error('Host address not supplied')
+
     this.serverHost = host
     this.serverPort = port
-
     this.serverPortUDP = 52704
-    this.meterListener = null
-    this.metering = {}
+
+    this.meteringClient = null
+    this.meteringData = {}
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
-    this.state = new KVTree()
+    this.state = CacheProvider({
+      get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
+    })
+
+    this.on(MESSAGETYPES.ZLIB, (ZB) => {
+      this.zlibData = ZB
+    })
+
+    this.on(MESSAGETYPES.Setting, ({ name, value }) => {
+      name = simplifyPathTokens(tokenisePath(name))
+
+      value = valueTransform(name, value, {
+        'line.*.volume'(value: Buffer) {
+          return value.readInt32LE()
+        }
+      })
+
+      this.state.set(name, value)
+    })
   }
 
   static async discover(timeout = 10 * 1000) {
@@ -85,93 +115,96 @@ class Client extends EventEmitter implements CustomEventTypes {
     return Object.values(devices)
   }
 
+  /**
+   * @deprecated Not implemented
+   */
   meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meterListener = MeterServer(port)
-    this.sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
+    this.meteringClient = MeterServer.call(this, port)
+    this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
+  /**
+   * @deprecated Not implemented
+   */
   meterUnsubscribe() {
-    if (!this.meterListener) return
-    this.meterListener.close()
-    this.meterListener = null
+    if (!this.meteringClient) return
+    this.meteringClient.close()
+    this.meteringClient = null
   }
 
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (...args) => {
+      const rejectHandler = (err: Error) => {
         this.connectPromise = null
-        return reject(new Error(...args))
+        return reject(err)
       }
+
       this.conn.once('error', rejectHandler)
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
-        // Send control subscribe request
-        this.sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
+        // #region Connection handshake
+        {
+          // Send subscription request
+          this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
 
-        const subscribeCallback = data => {
-          if (data.id === 'SubscriptionReply') {
-            this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
-            this.conn.removeListener('error', rejectHandler)
-            this.emit('connected')
-            resolve(this)
+          const subscribeCallback = data => {
+            if (data.id === 'SubscriptionReply') {
+              this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
+              this.conn.removeListener('error', rejectHandler)
+              this.emit('connected')
+              resolve(this)
+            }
           }
+          this.on(MESSAGETYPES.JSON, subscribeCallback)
         }
-        this.on(MESSAGETYPES.JSON, subscribeCallback)
+        // #endregion
 
-        this.on(MESSAGETYPES.Setting, ({ name, value }) => {
-          this.state.register(name, value)
-          // console.log(JSON.stringify(this.state, undefined, 2))
-        })
-
+        // #region Keep alive
         // Send a KeepAlive packet every second
-        const keepAliveFn = () => {
+        const keepAliveLoop = setInterval(() => {
           if (this.conn.destroyed) {
             clearInterval(keepAliveLoop)
             return
           }
-          this.sendPacket(MESSAGETYPES.KeepAlive)
-        }
-        const keepAliveLoop = setInterval(keepAliveFn, 1000)
+          this._sendPacket(MESSAGETYPES.KeepAlive)
+        }, 1000)
+        // #endregion
       })
     }))
   }
 
+  async close() {
+    this.meterUnsubscribe()
+    await this._sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
+      this.conn.destroy()
+    })
+  }
+
+  /**
+   * Analyse, decode and emit packets
+   */
   private handleRecvPacket(packet) {
     let [messageCode, data] = analysePacket(packet)
-    if (messageCode === null) {
-      return
+    if (messageCode === null) return
+
+    // Handle message types
+    // eslint-disable-next-line
+    const handlers: { [k in MESSAGETYPES]?: (data) => any } = {
+      [MESSAGETYPES.JSON]: handleJMPacket,
+      [MESSAGETYPES.Setting]: handlePVPacket,
+      [MESSAGETYPES.ZLIB]: handleZBPacket,
+      [MESSAGETYPES.FaderPosition]: handleMSPacket,
+      [MESSAGETYPES.DeviceList]: null,
+      [MESSAGETYPES.Unknown1]: null,
+      [MESSAGETYPES.Unknown3]: null
     }
 
-    if (!Object.values(MESSAGETYPES).includes(messageCode)) {
-      console.log('Unhandled message code', messageCode)
-    }
-
-    switch (messageCode) {
-      case MESSAGETYPES.JSON:
-        data = JSON.parse(data.slice(4))
-        break
-      case MESSAGETYPES.Setting: {
-        const idx = data.indexOf(0x00) // Find the NULL terminator of the key string
-        if (idx !== -1) {
-          const key = data.slice(0, idx).toString()
-
-          // Most setting packets are `key\x00\x00\x00...`
-          // but some (i.e. filter groups) have `key\x00\x00\x01`
-          const partA = data.slice(idx + 1, idx + 3 /* 1+2 */)
-          const partB = data.slice(idx + 3)
-          data = {
-            name: key,
-            value: partB.length ? onOffEval(partB) : partA
-          }
-        }
-        break
-      }
-      case MESSAGETYPES.ZLIB: {
-        data = zlibParser(zlib.inflateSync(data.slice(4)))
-        break
-      }
+    if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
+      data = handlers[messageCode]?.(data) ?? data
+    } else {
+      console.warn('Unhandled message code', messageCode)
     }
 
     this.emit(messageCode, data)
@@ -179,7 +212,7 @@ class Client extends EventEmitter implements CustomEventTypes {
   }
 
   sendList(key) {
-    this.sendPacket(
+    this._sendPacket(
       MESSAGETYPES.FileResource,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
@@ -189,103 +222,173 @@ class Client extends EventEmitter implements CustomEventTypes {
     )
   }
 
-  private sendPacket(messageCode: Buffer | string, data?: Buffer | string, customA?: any, customB?: any) {
-    if (!data) data = Buffer.allocUnsafe(0)
-    const connIdentity = Buffer.from([
-      customA || CByte.A,
-      0x00,
-      customB || CByte.B,
-      0x00
-    ])
-    if (connIdentity.length !== 4) throw Error('connIdentity')
-
-    const lengthLE = shortToLE(
-      messageCode.length + connIdentity.length + data.length
-    )
-    if (lengthLE.length !== 2) throw Error('lengthLE')
-
-    const b = Buffer.alloc(
-      PacketHeader.length +
-      lengthLE.length +
-      messageCode.length +
-      connIdentity.length +
-      data.length
-    )
-
-    let cursor = 0
-    b.fill(PacketHeader)
-    b.fill(lengthLE, (cursor += PacketHeader.length))
-    b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
-    b.fill(connIdentity, (cursor += messageCode.length))
-
-    if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
-    else b.fill(data, (cursor += connIdentity.length))
-
-    this.conn.write(b)
+  /**
+   * Send bytes to the console
+   */
+  private async _sendPacket(...params: Parameters<typeof createPacket>) {
+    return new Promise((resolve) => {
+      const bytes = createPacket(...params)
+      this.conn.write(bytes, null, (resp) => {
+        resolve(resp)
+      })
+    })
   }
 
-  private setMuteState(raw: string, state) {
-    this.sendPacket(
+  /**
+   * **INTERNAL** Send a mute/unmute command to the target
+   */
+  private _setMuteState(selector: ChannelSelector, state) {
+    this._sendPacket(
       MESSAGETYPES.Setting,
       Buffer.concat([
-        Buffer.from(`${raw}/${ACTIONS.MUTE}\x00\x00\x00`),
-        onOffCode(state)
+        Buffer.from(`${parseChannelString(selector)}/${ACTIONS.MUTE}\x00\x00\x00`),
+        onOff.encode(state)
       ])
     )
   }
 
-  mute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  mute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  mute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  mute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  mute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  mute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  mute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-
-  mute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
-    this.setMuteState(target, true)
+  /**
+   * Mute a given channel
+   */
+  mute(selector: ChannelSelector) {
+    this._setMuteState(selector, true)
   }
 
-  unmute(channel: CHANNELS.LINE, type: CHANNELTYPES.LINE);
-  unmute(channel: CHANNELS.AUX, type: CHANNELTYPES.AUX);
-  unmute(channel: CHANNELS.SUB, type: CHANNELTYPES.SUB);
-  unmute(channel: CHANNELS.FX, type: CHANNELTYPES.FX);
-  unmute(channel: CHANNELS.FXRETURN, type: CHANNELTYPES.FXRETURN);
-  unmute(channel: CHANNELS.MAIN, type: CHANNELTYPES.MAIN);
-  unmute(channel: CHANNELS.TALKBACK, type: CHANNELTYPES.TALKBACK);
-  unmute(channel: CHANNELS.CHANNELS, type: CHANNELTYPES) {
-    const target = parseChannelString(channel, type)
-    this.setMuteState(target, false)
+  /**
+   * Unmute a given channel
+   */
+  unmute(selector: ChannelSelector) {
+    this._setMuteState(selector, false)
   }
 
-  // toggleMuteState (channel: Channels) {
+  /**
+   * Toggle the mute status of a channel
+   */
+  toggleMute(selector: ChannelSelector) {
+    const currentState = this.state.get(`${parseChannelString(selector)}/${ACTIONS.MUTE}`)
+    this._setMuteState(selector, !currentState)
+  }
 
-  // }
+  /**
+   * **INTERNAL** Send a level command to the target
+   */
+  private _setLevel(this: Client, selector: ChannelSelector, level, duration: number = 0): Promise<null> {
+    const channelString = parseChannelString(selector)
+    const target = `${channelString}/${ACTIONS.VOLUME}`
 
-  /* IDEA: Force get channel state 
-    If we are unable to figure out how to get initial channel data
-    then we could do a hackish method to query the information.
+    const assertReturn = () => {
+      // Additional time to wait for response
+      return new Promise<null>((resolve) => {
+        // 0ms timeout - queue event loop
+        setTimeout(() => {
+          this.state.set(target, level)
+          resolve(null)
+        }, 0)
+      })
+    }
 
-    A. Send an unmute command and see if there is a response (Will be unmuted regardless now)
-    * If there is a unmute event, then we know that the channel was originally muted
-      * Then send a mute event
-    * If there was no unmute event, then we know the channel was already unmuted
-    
-    B. Send a mute command and see if there is a response (Will be muted regardless now)
-    * If there is a mute event, then we know that the channel was originally unmuted
-      * Then send an unmute event
-    * If there was no mute event, then we know that the channel was already muted
-    
-    C. Some commands cause a list of channel mute statuses to be send (Link Aux Mute - MB: mt64).
-    * Send that command 
+    const set = (level) => {
+      this._sendPacket(
+        MESSAGETYPES.Setting,
+        Buffer.concat([
+          Buffer.from(`${target}\x00\x00\x00`),
+          intToLE(level)
+        ])
+      )
+    }
 
-  */
+    if (!duration) {
+      set(level)
+      return assertReturn()
+    }
 
-  close() {
-    this.meterUnsubscribe()
-    this.conn.destroy()
-    // TODO: Send unsubscribe
+    // Transitioning to zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
+    // So if we see transition to/from 0, we transition to/from 0x3a...... first
+    const currentLevel = this.state.get(target, 0)
+
+    // console.log(`Change ${target} from ${currentLevel} to ${level}`)
+
+    // Don't do anything if we already are on the same level
+    // Unlikely because of the approximation values
+    if (currentLevel === level) {
+      return assertReturn()
+    }
+
+    const pseudoZeroLevel = linearVolumeTo32(1)
+    // If the target level is 0, transition to the smallest non-zero level
+    if (level === 0) {
+      return new Promise((resolve) => {
+        transitionValue(
+          currentLevel || pseudoZeroLevel,
+          pseudoZeroLevel,
+          duration,
+          (v) => set(v),
+          async () => {
+            // After transition, finally set the level to 0
+            set(0)
+            resolve(await assertReturn())
+          }
+        )
+      })
+    } else {
+      return new Promise((resolve) => {
+        // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
+        transitionValue(
+          currentLevel || pseudoZeroLevel,
+          level, duration,
+          (v) => set(v),
+          async () => {
+            resolve(await assertReturn())
+          }
+
+        )
+      })
+    }
+  }
+
+  /**
+   * Set volume (decibels)
+   * 
+   * @param channel 
+   * @param level range: -84 dB to 10 dB
+   */
+  async setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
+    return this._setLevel(selector, logVolumeTo32(decibel), duration)
+  }
+
+  /**
+   * Set volume (pseudo intensity)
+   * 
+   * @description Sound is difficult, so this function attempts to provide a "what-you-see-is-what-you-get" interface to control the volume levels.  
+   *              `100` Sets the fader to the top (aka +10 dB)  
+   *              `72` Sets the fader to unity (aka 0 dB) or a value close enough  
+   *              `0` Sets the fader to the bottom (aka -84 dB)
+   * @see http://www.sengpielaudio.com/calculator-levelchange.htm
+   */
+  async setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
+    /**
+     * 🚒 🧯 🧨 🚒 🧯 🧨 
+     * 🔥 this is fine 🔥 
+     * 🚒 🧯 🧨 🚒 🧯 🧨
+     * https://preview.redd.it/j4886fi37yh71.gif?format=mp4&s=df2258d4a78e0933515e0c445a96c8ee7b3f89c4
+     * 
+     * Every 10dB is a 10x change
+     * 20dB means 100x
+     * 30dB means 1000x
+     */
+    return this._setLevel(selector, linearVolumeTo32(linearLevel), duration)
+  }
+
+  /**
+   * Look at metering data and adjust channel fader so that the level is of a certain loudness
+   * NOTE: This is not perceived loudness. Not very practical, but useful in a pinch?
+   * 
+   * @param channel 
+   * @param level 
+   * @param duration 
+   */
+  async normaliseChannelTo(channel, level, duration?: number) {
+    // TODO:
   }
 }
 

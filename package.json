@@ -1,6 +1,6 @@
 {
   "name": "presonus-studiolive-api",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
   "main": "dist/api.js",
   "scripts": {
@@ -25,18 +25,18 @@
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
     "chalk": "4",
-    "queue": "^6.0.1"
+    "queue": "^6.0.1",
+    "@types/node": "^14.14.6",
+    "typescript": "^4.5.4"
   },
   "devDependencies": {
-    "@types/node": "^14.14.6",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "snazzy": "^9.0.0",
     "standardx": "^7.0.0",
-    "sucrase": "^3.20.3",
-    "typescript": "^4.0.5"
+    "sucrase": "^3.20.3"
   },
   "eslintConfig": {
     "rules": {

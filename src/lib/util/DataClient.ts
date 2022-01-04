@@ -1,5 +1,9 @@
+/**
+ * TCP data client to receive messages from UCNET devices
+ */
+
 import { Socket } from 'net'
-import { PacketHeader } from './constants'
+import { PacketHeader } from '../constants'
 import Queue from 'queue'
 
 export default function (callback) {
@@ -14,8 +18,9 @@ export default function (callback) {
 
   TCPclient.on('data', bytes => {
     let frame = Buffer.from(bytes)
-    Q.push(cb => {
-      ;(function () {
+    Q.push(finish => {
+      // 27/12/2021 @featherbear: I have no idea why we need to wrap this execution in its own inline function but we need it heh.
+      ; (function () {
         // Desc   Header  Length   Payload
         // Size     4       2       ...
         while (frame.length !== 0) {
@@ -63,13 +68,13 @@ export default function (callback) {
           }
         }
       })()
-      cb()
+      finish()
     })
   })
 
-  TCPclient.on('close', function () {
-    console.log('Connection closed')
-  })
+  // TCPclient.on('close', function () {
+  //   console.log('Connection closed')
+  // })
 
   return TCPclient
 }

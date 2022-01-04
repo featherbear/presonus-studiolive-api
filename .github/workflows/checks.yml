@@ -1,0 +1,19 @@
+name: Checks
+
+on: push
+
+jobs:
+  checks:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+
+    - name: Install packages
+      run: yarn install --no-scripts
+    
+    - name: Lint and Build
+      run: yarn build

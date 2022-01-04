@@ -1,19 +1,23 @@
-import { analysePacket } from './MessageProtocol'
+/**
+ * Device discovery client
+ * Listen to the `discover` event with <Discover>.on('discover', callback)
+ */
+
+import { analysePacket } from './util/MessageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
-
-export interface DiscoveryType {
-    name: string,
-    serial: string
-    ip: string
-    port: number
-    timestamp: Date
-}
+import DiscoveryType from './types/DiscoveryType'
 
 export default class extends EventEmitter {
   socket: dgram.Socket
 
-  async start (timeout = null) {
+  /**
+   * Scan for devices
+   * 
+   * @param timeout Duration (in milliseconds) to discover for, or indefinitely if empty
+   * @returns 
+   */
+  async start(timeout = null) {
     return new Promise<void>((resolve, reject) => {
       this.stop()
       this.setup()
@@ -27,30 +31,35 @@ export default class extends EventEmitter {
     })
   }
 
-  stop () {
+  /**
+   * Shut down discovery client
+   */
+  stop() {
     if (this.socket !== undefined) {
       this.socket.close()
       this.socket = undefined
     }
   }
 
-  private setup () {
+  /**
+   * Setup routine
+   */
+  private setup() {
+    // Listen to broadcast on port 47809
     const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
     socket.bind(47809, '0.0.0.0')
-
     socket.on('listening', function () {
       this.setBroadcast(true)
     })
 
     socket.on('message', (packet, rinfo) => {
       const [code, data] = analysePacket(packet, true)
-      if (code === null) {
-        return
-      }
+      if (!code) return
 
+      // Split data by null byte
       const fragments = []
       for (
-        let payload = data.slice(20), cur = 0, f;
+        let payload = data.slice(20), cur = 0, f: Buffer;
         cur < payload.length;
         cur += f.length + 1
       ) {
