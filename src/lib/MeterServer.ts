@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* Metering server */
 
 // The console establishes a UDP connection to the computer, and sends over metering data
