@@ -119,16 +119,16 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * @deprecated Not implemented
+   * Subscribe to the metering data
    */
   async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meteringClient = await MeterServer.call(this, port, this.channelCounts)
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   /**
-   * @deprecated Not implemented
+   * Unsubscribe from the metering data
    */
   meterUnsubscribe() {
     if (!this.meteringClient) return
@@ -155,16 +155,14 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const zlibInitCallback = () => {
               this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
-              console.log("Console channels are",
-                (this.channelCounts = {
-                  line: Object.keys(this.state.get('line')).length,
-                  aux: Object.keys(this.state.get('aux')).length,
-                  fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
-                  return /* aka tape? */: Object.keys(this.state.get('return')).length,
-                  talkback: Object.keys(this.state.get('talkback')).length,
-                  main: Object.keys(this.state.get('main')).length,
-                })
-              )
+              this.channelCounts = {
+                line: Object.keys(this.state.get('line')).length,
+                aux: Object.keys(this.state.get('aux')).length,
+                fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
+                return /* aka tape? */: Object.keys(this.state.get('return')).length,
+                talkback: Object.keys(this.state.get('talkback')).length,
+                main: Object.keys(this.state.get('main')).length
+              }
 
               resolve(this)
             }
@@ -177,8 +175,6 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const subscribeCallback = data => {
               if (data.id === 'SubscriptionReply') {
-                // Do we even need to wait for this reply?
-                // - probably a good idea.
                 this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
                 resolve(this)
               }
