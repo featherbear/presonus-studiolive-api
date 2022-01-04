@@ -45,7 +45,6 @@ export default function createServer(port, channelCounts: ChannelCount) {
       return
     }
 
-
     var length = data.slice(4, 6); // length is given as cf08 = 53000, but the payload is only 1041 long
     const PORT = length // FIXME: 4:6 is the port
 
@@ -54,7 +53,7 @@ export default function createServer(port, channelCounts: ChannelCount) {
     const text = data.slice(12, 16)
     if (text.toString() !== 'levl') {
       ready = true
-      return // Only 'levl' (partially) implemented
+      return // Only 'levl'  implemented
     }
 
     // head, length, code, conn, levl, SPACER, data = x[:4], x[4:6], x[6:8], x[8:12], x[12:16], x[16:20], x[20:]
@@ -65,6 +64,7 @@ export default function createServer(port, channelCounts: ChannelCount) {
 
     // 192
 
+    // Reduce buffer size
     data = data.slice(20, 20 + 192 * 2 - 8)
 
     function colFmt(v: number) {
@@ -81,6 +81,7 @@ export default function createServer(port, channelCounts: ChannelCount) {
 
     {
 
+      // Calculate columns
       let valArray = []
       let offset = 0;
       for (let i = 0 + offset; i < data.length / 2 - 1 + offset; i++) valArray.push(colFmt(data.readUInt16LE(i * 2)))
@@ -212,6 +213,7 @@ export default function createServer(port, channelCounts: ChannelCount) {
 
     // emitter.emit('meter', this.metering)
 
+    // during dev, restrict output to every 50ms
     setTimeout(function () {
       ready = true
 
