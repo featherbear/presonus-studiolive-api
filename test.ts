@@ -127,8 +127,7 @@ function doIt() {
 
   client.connect().then(() => {
     let X: Node<ZlibPayload['children']> = client.state as any
-    X.main.ch1
-
+    X.fxreturn['a'].avb_src
 
 
     setInterval(() => {
@@ -148,6 +147,7 @@ type Node<root> = {
   [key in keyof root]:
   (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
   & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : {})
+  & (root[key] extends { ranges, values} ? { [k in keyof root[key]['values']]: root[key]['values'][k] & root[key]['ranges'][k] } : {})
 }
 console.log('go')
 doIt()
