@@ -3,7 +3,7 @@ name: build webpage
 on:
   push:
     branches:
-    - documentation
+    - documentation_new
 
 jobs:
   build-deploy:
@@ -11,43 +11,11 @@ jobs:
     steps:
     - uses: actions/checkout@master
       
-    - run: mkdir dist -p
+    - run: mkdir build
 
     - name: Generate index page
-      uses: docker://pandoc/core:2.9
-      with:
-        args: >
-          --standalone
-          --metadata pagetitle="PreSonus StudioLive III Development"
-          --output=dist/index.html
-          README.md
-
-    - name: Generate protocol page
-      uses: docker://pandoc/core:2.9
-      with:
-        args: >
-          --standalone
-          --metadata pagetitle="Protocol Research | PreSonus StudioLive III Development"
-          --output=dist/protocol.html
-          PROTOCOL.md
-
-    - name: Generate packet page
-      uses: docker://pandoc/core:2.9
-      with:
-        args: >
-          --standalone
-          --metadata pagetitle="Packet Research | PreSonus StudioLive III Development"
-          --output=dist/packet.html
-          PACKET.md
-
-    - name: Generate API docs
-      uses: docker://pandoc/core:2.9
-      with:
-        args: >
-          --standalone
-          --metadata pagetitle="API Documentation | PreSonus StudioLive III Development"
-          --output=dist/api-documentation.html
-          API.md
+      uses: docker://slatedocs/slate:v2.12.0
+ 
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2.3.1
