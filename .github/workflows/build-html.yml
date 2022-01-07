@@ -19,7 +19,6 @@ jobs:
         entrypoint: ls
         args: .
         working-directory: /tmp
-      working-directory: /
  
 
     - name: Deploy
