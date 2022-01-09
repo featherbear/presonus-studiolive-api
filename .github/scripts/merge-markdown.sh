@@ -30,7 +30,7 @@ scriptDir="$(dirname $0)"
 outFile=__BUILD_SOURCE.MD
 pushd $scriptDir/../.. > /dev/null
 
-rm $outFile
+rm -f $outFile
 npx concat-md --ignore README.md --decrease-title-levels --file-name-as-title docs > $outFile
 
 if [ $? -ne 0 ]; then

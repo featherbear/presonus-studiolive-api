@@ -11,10 +11,17 @@ jobs:
     steps:
     - uses: actions/checkout@master
       
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.9.0'
+    
+    - name: Combine source files
+      run: .github/scripts/merge-markdown.sh
+
     - name: Generate index page
       uses: docker://slatedocs/slate:v2.12.0
       with:
-        entrypoint: /github/workspace/.github/scripts/pipeline.sh
+        entrypoint: /github/workspace/.github/scripts/build-slate.sh
  
 
     - name: Deploy
