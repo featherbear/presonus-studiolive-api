@@ -225,8 +225,3 @@ or
 ```
 55 43 00 01 00 00 44 51 00 00 65 00  UC....DQ..e.
 ```
-
-
----
-
-Author: [Andrew Wong](https://featherbear.cc)

@@ -15,10 +15,3 @@ TCP for control
 
 -->
 
-## Packet Research
-
-Refer to the [PACKET.md](https://featherbear.cc/presonus-studiolive-api/packet.html) file
-
----
-
-Author: [Andrew Wong](https://featherbear.cc)
