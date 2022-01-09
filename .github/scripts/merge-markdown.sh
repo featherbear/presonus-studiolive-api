@@ -27,7 +27,7 @@
 #     $ npx concat-md --toc --decrease-title-levels --file-name-as-title --dir-name-as-title docs > README.md
 
 scriptDir="$(dirname $0)"
-outFile=__BUILD_SOURCE.MD
+outFile=__BUILD_SOURCE.md
 pushd $scriptDir/../.. > /dev/null
 
 rm -f $outFile
