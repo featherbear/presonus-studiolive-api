@@ -1,0 +1,36 @@
+name: build webpage
+
+on:
+  push:
+    branches:
+    - documentation_new
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@master
+      
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.9.0'
+    
+    - name: Combine source files
+      run: .build/merge-markdown.sh
+
+    - name: Generate index page
+      uses: docker://slatedocs/slate:v2.12.0
+      with:
+        entrypoint: /github/workspace/.github/scripts/build-slate.sh
+ 
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v2.3.1
+      env:
+        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: build
+
+
+
+
