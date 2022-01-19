@@ -16,7 +16,7 @@ jobs:
         node-version: '14.9.0'
     
     - name: Combine source files
-      run: .scripts/merge-markdown.sh
+      run: .build/merge-markdown.sh
 
     - name: Generate index page
       uses: docker://slatedocs/slate:v2.12.0
