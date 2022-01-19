@@ -3,7 +3,7 @@ name: build webpage
 on:
   push:
     branches:
-    - documentation_new
+    - documentation
 
 jobs:
   build-deploy:
