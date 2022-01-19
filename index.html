@@ -938,6 +938,11 @@ Request list resource</p>
 <h3 id='payload-packing'>Payload Packing</h3>
 <p>In most situations, the packet is sent as follows</p>
 
+<blockquote>
+<p><strong>Note</strong><br>
+<code>Payload Size = length(Payload Type) + length(Payload Data)</code></p>
+</blockquote>
+
 <table><thead>
 <tr>
 <th style="text-align: center">Header</th>
@@ -953,11 +958,6 @@ Request list resource</p>
 <td style="text-align: center">data</td>
 </tr>
 </tbody></table>
-
-<blockquote>
-<p><strong>Note</strong><br>
-<code>Payload Size = length(Payload Type) + length(Payload Data)</code></p>
-</blockquote>
 <h3 id='c-bytes'>C-Bytes</h3>
 <p>There are four bytes that appear after the payload type in the payload data.
 The first and third positions have some byte value (either <code>0x6a</code>, <code>0x68</code>, or <code>0x65</code>), with the other positions being NULL.</p>
