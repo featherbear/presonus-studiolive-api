@@ -1,47 +1,1353 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>PreSonus StudioLive III Development</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<h1 id="presonus-studiolive-iii-development">PreSonus StudioLive III Development</h1>
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>API Documentation</title>
+
+    <style media="screen">
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cpf {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s, .highlight .sa, .highlight .dl {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf, .highlight .fm {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv, .highlight .vm {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #f92672;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <style media="print">
+      * {
+        -webkit-transition:none!important;
+        transition:none!important;
+      }
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #586e75;
+}
+.highlight .err {
+  color: #002b36;
+  background-color: #dc322f;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #657b83;
+}
+.highlight .cp {
+  color: #b58900;
+}
+.highlight .nt {
+  color: #b58900;
+}
+.highlight .o, .highlight .ow {
+  color: #93a1a1;
+}
+.highlight .p, .highlight .pi {
+  color: #93a1a1;
+}
+.highlight .gi {
+  color: #859900;
+}
+.highlight .gd {
+  color: #dc322f;
+}
+.highlight .gh {
+  color: #268bd2;
+  background-color: #002b36;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #6c71c4;
+}
+.highlight .kc {
+  color: #cb4b16;
+}
+.highlight .kt {
+  color: #cb4b16;
+}
+.highlight .kd {
+  color: #cb4b16;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #859900;
+}
+.highlight .sa {
+  color: #6c71c4;
+}
+.highlight .sr {
+  color: #2aa198;
+}
+.highlight .si {
+  color: #d33682;
+}
+.highlight .se {
+  color: #d33682;
+}
+.highlight .nn {
+  color: #b58900;
+}
+.highlight .nc {
+  color: #b58900;
+}
+.highlight .no {
+  color: #b58900;
+}
+.highlight .na {
+  color: #268bd2;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #859900;
+}
+.highlight .ss {
+  color: #859900;
+}
+    </style>
+    <link href="stylesheets/screen-c9d8fa83.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print-953e3353.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all_nosearch-18c3ed8e.js"></script>
+
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar-cad8cdcb.png" alt="" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="images/logo-0a7a1420.png" class="logo" alt="" />
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#presonus-studiolive-api" class="toc-h1 toc-link" data-title="PreSonus StudioLive API">PreSonus StudioLive API</a>
+          </li>
+          <li>
+            <a href="#installation" class="toc-h1 toc-link" data-title="Installation">Installation</a>
+          </li>
+          <li>
+            <a href="#documentation" class="toc-h1 toc-link" data-title="Documentation">Documentation</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#data-types" class="toc-h2 toc-link" data-title="Data Types">Data Types</a>
+                  </li>
+                  <li>
+                    <a href="#events" class="toc-h2 toc-link" data-title="Events">Events</a>
+                  </li>
+                  <li>
+                    <a href="#client-api" class="toc-h2 toc-link" data-title="Client API">Client API</a>
+                  </li>
+                  <li>
+                    <a href="#metering" class="toc-h2 toc-link" data-title="Metering">Metering</a>
+                  </li>
+                  <li>
+                    <a href="#device-state" class="toc-h2 toc-link" data-title="Device State">Device State</a>
+                  </li>
+                  <li>
+                    <a href="#discovery" class="toc-h2 toc-link" data-title="Discovery">Discovery</a>
+                  </li>
+                  <li>
+                    <a href="#standalone-discovery" class="toc-h2 toc-link" data-title="Standalone Discovery">Standalone Discovery</a>
+                  </li>
+                  <li>
+                    <a href="#internal-functions" class="toc-h2 toc-link" data-title="Internal Functions">Internal Functions</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#research" class="toc-h1 toc-link" data-title="Research">Research</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#high-level-overview" class="toc-h2 toc-link" data-title="High-Level Overview">High-Level Overview</a>
+                  </li>
+                  <li>
+                    <a href="#general" class="toc-h2 toc-link" data-title="General">General</a>
+                  </li>
+                  <li>
+                    <a href="#sent-payloads" class="toc-h2 toc-link" data-title="Sent Payloads">Sent Payloads</a>
+                  </li>
+                  <li>
+                    <a href="#received-packets" class="toc-h2 toc-link" data-title="Received Packets">Received Packets</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#demo-code" class="toc-h1 toc-link" data-title="Demo Code">Demo Code</a>
+          </li>
+          <li>
+            <a href="#other" class="toc-h1 toc-link" data-title="Other">Other</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#source-code" class="toc-h2 toc-link" data-title="Source Code">Source Code</a>
+                  </li>
+                  <li>
+                    <a href="#bitfocus-companion" class="toc-h2 toc-link" data-title="Bitfocus Companion">Bitfocus Companion</a>
+                  </li>
+                  <li>
+                    <a href="#console-advertisement-utility" class="toc-h2 toc-link" data-title="Console Advertisement Utility">Console Advertisement Utility</a>
+                  </li>
+                  <li>
+                    <a href="#blog" class="toc-h2 toc-link" data-title="Blog">Blog</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#license" class="toc-h1 toc-link" data-title="License">License</a>
+          </li>
+      </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <p><a name="00-introductionmd"></a></p>
+<h1 id='presonus-studiolive-api'>PreSonus StudioLive API</h1>
+<p>An unofficial Node.js API for the PreSonus StudioLive III consoles.</p>
+
+<p>Tested against the following models</p>
+
+<ul>
+<li>StudioLive 16 Mixer</li>
+<li>StudioLive 16R Rack Mixer</li>
+<li>StudioLive 24R Rack Mixer</li>
+</ul>
+
+<p>Read more <a href="https://featherbear.cc/blog/post/presonus-studiolive-api-iii-jan22/">here</a></p>
+
+<p><a name="10-installationmd"></a></p>
+<h1 id='installation'>Installation</h1>
+<p>This node.js package is only hosted on <a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a>, however you can install packages from <code>npm</code> and <code>yarn</code> in the same way as you would with any other package.</p>
+
+<ul>
+<li><code>npm install featherbear/presonus-studiolive#v1.0.5</code></li>
+<li><code>yarn add featherbear/presonus-studiolive#v1.0.5</code></li>
+</ul>
+
+<p><a name="20-documentationmd"></a></p>
+<h1 id='documentation'>Documentation</h1>
+<p><a name="21-data-typesmd"></a></p>
+<h2 id='data-types'>Data Types</h2><h3 id='payload-subscriptionoptions'>payload:<code>SubscriptionOptions</code></h3>
+<table><thead>
+<tr>
+<th style="text-align: center">Property</th>
+<th style="text-align: center">Type</th>
+<th style="text-align: center">Default</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center"><code>clientDescription</code></td>
+<td style="text-align: center"><code>string</code></td>
+<td style="text-align: center"><code>&quot;User&quot;</code></td>
+<td style="text-align: left">Display name</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>clientIdentifier</code></td>
+<td style="text-align: center"><code>string</code></td>
+<td style="text-align: center"><code>&quot;133d066a919ea0ea&quot;</code></td>
+<td style="text-align: left">Identifier</td>
+</tr>
+</tbody></table>
+
+<p>Used during API client connection to configure identity.<br>
+If using multiple instances of this API, it is recommended to modify the <code>clientIdentifier</code> property</p>
+<h3 id='enum-messagetypes'>enum:<code>MESSAGETYPES</code></h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+
+<span class="c1">// ...</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MESSAGETYPES</span><span class="p">.</span><span class="nx">JSON</span><span class="p">,</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">})</span>
+
+<span class="c1">// or</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">"</span><span class="s2">JM</span><span class="dl">"</span><span class="p">,</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">})</span>
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: center">Name</th>
+<th style="text-align: center">Code</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center"><code>JSON</code></td>
+<td style="text-align: center"><code>JM</code></td>
+<td style="text-align: left">JSON packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>Setting</code></td>
+<td style="text-align: center"><code>PV</code></td>
+<td style="text-align: left">Settings packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>DeviceList</code></td>
+<td style="text-align: center"><code>PL</code></td>
+<td style="text-align: left">Device listing packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>FileResource</code></td>
+<td style="text-align: center"><code>FR</code></td>
+<td style="text-align: left">File data packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>FileResource2</code></td>
+<td style="text-align: center"><code>FD</code></td>
+<td style="text-align: left">File data packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>ZLIB</code></td>
+<td style="text-align: center"><code>ZB</code></td>
+<td style="text-align: left">Zlib data packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>Unknown1</code></td>
+<td style="text-align: center"><code>BO</code></td>
+<td style="text-align: left">???</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>Unknown2</code></td>
+<td style="text-align: center"><code>CK</code></td>
+<td style="text-align: left">Compressed data packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>Unknown3</code></td>
+<td style="text-align: center"><code>MB</code></td>
+<td style="text-align: left">Mute status packet</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>FaderPosition</code></td>
+<td style="text-align: center"><code>MS</code></td>
+<td style="text-align: left">Fader position packet</td>
+</tr>
+</tbody></table>
+
+<p>Payloads emitted from these <a href="#events">events</a> are of various data types</p>
+<h3 id='type-discoverytype'>type:<code>DiscoveryType</code></h3>
 <blockquote>
-<p><em>Note: I am not affiliated with PreSonus in any way, shape or form. I just use their products</em></p>
+<p>Example</p>
 </blockquote>
-<p>Hey there! 🥳</p>
-<p>If you can read this, you’ve either found this page <a href="https://featherbear.cc/presonus-studiolive-api">online</a>, or via my <a href="https://github.com/featherbear/presonus-studiolive-api">GitHub repository</a></p>
-<p>This page/repo outlines my research and implementation of the undocumented PreSonus UCNET network control protocol.</p>
-<hr />
-<h2 id="api">API</h2>
-<p>The majority of you probably have stumbled upon this page because you’ve wanted some sort of integration with your StudioLive console.</p>
+<div class="highlight"><pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"StudioLive 16R"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"serial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RA1E21060260"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ip"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10.0.0.18"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">53000</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">Date</span><span class="w"> </span><span class="err">object</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: center">Property</th>
+<th style="text-align: center">Type</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center"><code>name</code></td>
+<td style="text-align: center"><code>string</code></td>
+<td style="text-align: left">Device model</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>serial</code></td>
+<td style="text-align: center"><code>string</code></td>
+<td style="text-align: left">Device serial</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>ip</code></td>
+<td style="text-align: center"><code>string</code></td>
+<td style="text-align: left">Device IP</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>port</code></td>
+<td style="text-align: center"><code>number</code></td>
+<td style="text-align: left">Device port</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>timestamp</code></td>
+<td style="text-align: center"><code>Date</code></td>
+<td style="text-align: left">Time the device was (last) discovered</td>
+</tr>
+</tbody></table>
+
+<p><strong>See <a href="#discovery">Discovery</a></strong></p>
+<h3 id='enum-channeltypes'>enum:<code>CHANNELTYPES</code></h3>
 <ul>
-<li><a href="https://featherbear.cc/presonus-studiolive-api/api-documentation.html">Unofficial Node.js API - <code>presonus-studiolive-api</code></a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-api-demo">Demos and Examples</a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a></li>
+<li><code>LINE</code></li>
+<li><code>MAIN</code></li>
+<li><code>TALKBACK</code></li>
+<li><code>AUX</code></li>
+<li><code>SUB</code></li>
+<li><code>FX</code></li>
+<li><code>FXRETURN</code></li>
 </ul>
-<hr />
-<h2 id="research">Research</h2>
-<p>Protocol research was performed on a <em>StudioLive Series III 16R rack mixer</em>, <em>StudioLive Series III 24R rack mixer</em> and a <em>StudioLive Series III 16 console</em>, using the <a href="https://www.presonus.com/products/UC-Surface">UC Surface</a> application on Android and Windows. You can read more about my research at the link below</p>
+<h3 id='type-channelselector'>type:<code>ChannelSelector</code></h3><div class="highlight"><pre class="highlight javascript"><code><span class="nx">someFunctionThatTakesInAChannelSelector</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">channel</span><span class="p">:</span> <span class="mi">13</span>
+<span class="p">})</span>
+</code></pre></div>
+<blockquote>
+<p>or</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">CHANNELS</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+
+<span class="nx">someFunctionThatTakesInAChannelSelector</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_13</span>
+<span class="p">})</span>
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: center">Property</th>
+<th style="text-align: center">Type</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center"><code>type</code></td>
+<td style="text-align: center"><code>CHANNELTYPES</code></td>
+<td style="text-align: left">Channel type</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>channel</code></td>
+<td style="text-align: center"><code>number</code></td>
+<td style="text-align: left">Channel number</td>
+</tr>
+</tbody></table>
+
+<p>If <code>type</code> is <code>MAIN</code> or <code>TALKBACK</code>, then the value of <code>channel</code> will be implicitly set to <code>1</code></p>
+
+<p><code>channel</code> values can also be sourced from the <code>CHANNELS</code> enum</p>
+<h3 id='type-meterdata'>type:<code>MeterData</code></h3>
+<blockquote>
+<p>Example</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">meter</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">meterData</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">meterData</span><span class="p">.</span><span class="nx">input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">// Input signal meter for channel 1</span>
+    <span class="nx">meterData</span><span class="p">.</span><span class="nx">input</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="c1">// Input signal meter for channel 9</span>
+
+    <span class="nx">meterData</span><span class="p">.</span><span class="nx">main</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1">// Left channel signal meter for main output</span>
+    <span class="nx">meterData</span><span class="p">.</span><span class="nx">main</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1">// Right channel signal meter for main output</span>
+<span class="p">})</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">meterSubscribe</span><span class="p">()</span>
+</code></pre></div>
 <ul>
-<li><a href="https://featherbear.cc/presonus-studiolive-api/protocol.html">Protocol Research</a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-console-advertisement">Console Advertisment Spoofing</a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-api/tree/research_python">(Git) Python research code</a></li>
+<li><code>input</code> - <code>number[]</code> - Input channel meters</li>
+<li><code>mainMixFaders</code> - <code>number[]</code> - Main mix channel meters</li>
+<li><code>main</code> - Main mix meters</li>
+<li><code>aux_metering</code> - <code>number[]</code> - Auxiliary bus meters</li>
+<li><code>channelStrip</code> - Signal processor meters
+
+<ul>
+<li><code>stripA</code> - <code>number[]</code></li>
+<li><code>stripB</code> - <code>number[]</code></li>
+<li><code>stripC</code> - <code>number[]</code></li>
+<li><code>stripD</code> - <code>number[]</code></li>
+<li><code>stripE</code> - <code>number[]</code></li>
+</ul></li>
+<li><code>aux_chstrip</code> - Auxiliary bus signal processor meters
+
+<ul>
+<li><code>stripA</code> - <code>number[]</code></li>
+<li><code>stripB</code> - <code>number[]</code></li>
+<li><code>stripC</code> - <code>number[]</code></li>
+<li><code>stripD</code> - <code>number[]</code></li>
+</ul></li>
+<li><code>main_chstrip</code> - Main mix signal processor meters
+
+<ul>
+<li><code>stageA</code> - <code>number[]</code></li>
+<li><code>stageB</code> - <code>number[]</code></li>
+<li><code>stageC</code> - <code>number[]</code></li>
+<li><code>stageD</code> - <code>number[]</code></li>
+</ul></li>
+<li><code>fx_chstrip</code> - FX bus signal processor meters
+
+<ul>
+<li><code>inputs</code> - <code>number[]</code></li>
+<li><code>stripA</code> - <code>number[]</code></li>
+<li><code>stripB</code> - <code>number[]</code></li>
+<li><code>stripC</code> - <code>number[]</code></li>
+</ul></li>
+<li><code>fxreturn_strip</code> - FX bus return signal processor meters
+
+<ul>
+<li><code>input</code> - <code>number[]</code></li>
+<li><code>stripA</code> - <code>number[]</code></li>
+<li><code>stripB</code> - <code>number[]</code></li>
+<li><code>stripC</code> - <code>number[]</code></li>
+</ul></li>
 </ul>
-<hr />
-<p>Author: <a href="https://featherbear.cc">Andrew Wong</a></p>
-</body>
+
+<p><strong>See <a href="#metering">Metering</a></strong></p>
+
+<p><a name="22-eventsmd"></a></p>
+<h2 id='events'>Events</h2>
+<p>Events are split into data events and lifecycle events.  </p>
+<h3 id='data-events'>Data Events</h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+
+<span class="c1">// Listen for changes to settings</span>
+<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MESSAGETYPES</span><span class="p">.</span><span class="nx">Setting</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+<blockquote>
+<p>or</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="c1">// Listen for changes to settings</span>
+<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">"</span><span class="s2">PV</span><span class="dl">"</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>Specific events can be listened to by attaching an event handler with <code>&lt;Client&gt;.on(type, callback)</code>.<br>
+A list of possible event types are given in <a href="#enum-messagetypes">enum:<code>MESSAGETYPES</code></a>.</p>
+
+<p>To listen to <strong>all events</strong>, attach an event handler to the <code>data</code> event.<br>
+This event will be emitted after the specific event is emitted.</p>
+
+<p>To listen to <strong>meter events</strong>, attach an event handler to the <code>meter</code> event.<br>
+<strong>See <a href="#metering">Metering</a></strong></p>
+<h3 id='lifecycle-events'>Lifecycle Events</h3>
+<blockquote>
+<p>Lifecycle Events</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connected</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Connected to the device!</span><span class="dl">"</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>To trigger a function when client has successfully connected to the console, listen to the <code>connected</code> event.  </p>
+<div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Also connected to the device!)
+})
+</span></code></pre></div>
+<p>Note: The <code>&lt;Client&gt;.connect(...)</code> function returns a Promise and is therefore thenable, so you may simply just use <code>.then(cb)</code> to continue execution after connection</p>
+
+<p><a name="23-client-apimd"></a></p>
+<h2 id='client-api'>Client API</h2>
+<blockquote>
+<p>ES5</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">Client</span><span class="p">,</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span><span class="p">)</span>
+</code></pre></div>
+<blockquote>
+<p>ES6</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="nx">Client</span><span class="p">,</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+</code></pre></div>
+<blockquote>
+<p>Example</p>
+</blockquote>
+<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="nx">Client</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+
+<span class="c1">// Also import some enums</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span><span class="p">,</span> <span class="nx">CHANNELS</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+
+<span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">(</span><span class="dl">"</span><span class="s2">10.0.0.18</span><span class="dl">"</span><span class="p">,</span> <span class="mi">53000</span><span class="p">)</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span>
+    <span class="na">clientDescription</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Console Remote</span><span class="dl">'</span>
+<span class="p">}).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+    <span class="c1">// Set channel 1 fader to -6 dB over a duration of 3 seconds</span>
+    <span class="nx">client</span><span class="p">.</span><span class="nx">setChannelVolumeDb</span><span class="p">({</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_1</span>
+    <span class="p">},</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3000</span><span class="p">).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+        <span class="c1">// Unmute channel 2</span>
+        <span class="nx">client</span><span class="p">.</span><span class="nx">unmute</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_2</span>
+        <span class="p">})</span>
+    <span class="p">})</span>
+
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Ver </span><span class="p">${</span><span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">global.mixer_version</span><span class="dl">'</span><span class="p">)}</span><span class="s2">`</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+<p><code>new Client(host: string, port: number = 53000)</code><br>
+Creates a Client object that will later connect to the console</p>
+
+<p><code>&lt;Client&gt;.connect(subscribeData?: SubscriptionOptions)</code><br>
+Connect to the console. See <a href="#payload-subscriptionoptions">SubscriptionOptions</a></p>
+
+<p><code>&lt;Client&gt;.close()</code><br>
+Disconnect from the console</p>
+
+<p><code>&lt;Client&gt;.mute(selector: ChannelSelector)</code><br>
+Mute a channel</p>
+
+<p><code>&lt;Client&gt;.unmute(selector: ChannelSelector)</code><br>
+Unmute a channel</p>
+
+<p><code>&lt;Client&gt;.toggleMute(selector: ChannelSelector)</code><br>
+Toggle the mute status of a channel</p>
+
+<p><code>&lt;Client&gt;.setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number)</code><br>
+Set the level of a channel to a certain decibel (between <code>-84</code> and <code>10</code>).<br>
+Optionally provide a <code>duration</code> (in milliseconds) to set the transition time.</p>
+
+<p><code>&lt;Client&gt;.setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number)</code><br>
+Set the level of a channel to a certain percentage (between <code>0</code> and <code>100</code>).<br>
+Optionally provide a <code>duration</code> (in milliseconds) to set the transition time.</p>
+
+<p><code>&lt;Client&gt;.on(evtName: str, fn: function)</code><br>
+Attach a handler function <code>fn</code> to an event given by <code>evtName</code>.<br>
+See <a href="#events">Events</a></p>
+
+<p><a name="23-meteringmd"></a></p>
+<h2 id='metering'>Metering</h2><div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">meter</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">metering</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">metering</span><span class="p">.</span><span class="nx">input</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="p">})</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">meterSubscribe</span><span class="p">()</span>
+</code></pre></div>
+<p><code>&lt;Client&gt;.on(&#39;meter&#39;, Function&lt;MeterData&gt;)</code><br>
+Listen to meter events</p>
+
+<p><code>&lt;Client&gt;.meterSubscribe(port?: number)</code><br>
+Start the metering server</p>
+
+<p><code>&lt;Client&gt;.stop()</code><br>
+Stop the metering server</p>
+
+<p><strong>See <a href="#type-meterdata">type:<code>MeterData</code></a></strong></p>
+
+<p><a name="24-device-statemd"></a></p>
+<h2 id='device-state'>Device State</h2><div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">global.mixer_name</span><span class="dl">'</span><span class="p">)</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">line.ch1.mute</span><span class="dl">'</span><span class="p">)</span>
+</code></pre></div>
+<p><code>&lt;Client&gt;.state.get(key)</code><br>
+Get a device state given by its <code>key</code>.  </p>
+
+<p>This function is used internally by other methods, but can be accessed by the user to extract other data that might not yet be used.<br>
+Refer to the <a href="https://github.com/featherbear/presonus-studiolive-api/blob/2dedb706fa0cddeaf064422b1f79f4cdb00be1d8/zlib.parsed"><code>zlib.parsed</code></a> file for known keys.<br>
+Alternatively, refer to the IntelliSense information at <code>&lt;Client&gt;.state._data</code></p>
+
+<p><a name="25-discoverymd"></a></p>
+<h2 id='discovery'>Discovery</h2><div class="highlight"><pre class="highlight javascript"><code><span class="c1">// Discover for 30 seconds</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">discover</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">devices</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">device</span> <span class="k">of</span> <span class="nx">devices</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// device.name</span>
+        <span class="c1">// device.serial</span>
+        <span class="c1">// device.ip</span>
+        <span class="c1">// device.port</span>
+        <span class="c1">// device.timestamp</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">device</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div>
+<p><code>&lt;Client&gt;.discover(timeout: number = 10 * 1000)</code></p>
+
+<p>Perform a console discovery for <code>timeout</code> milliseconds.<br>
+Returns an array containing the devices found within the discovery period</p>
+<h2 id='standalone-discovery'>Standalone Discovery</h2><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Discovery</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api
+</span></code></pre></div>
+<p>If you only want to search for devices on the network without the intention of connecting to them, you can run the discovery client independently.</p>
+<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="nx">discoveryClient</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Discovery</span><span class="p">()</span>
+
+<span class="nx">discoveryClient</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">discover</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">(</span><span class="nx">device</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// device.name</span>
+    <span class="c1">// device.serial</span>
+    <span class="c1">// device.ip</span>
+    <span class="c1">// device.port</span>
+    <span class="c1">// device.timestamp</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+
+<span class="c1">// Discover indefinitely</span>
+<span class="nx">discoveryClient</span><span class="p">.</span><span class="nx">start</span><span class="p">()</span>
+
+ <span class="c1">// Discover for 10 seconds</span>
+<span class="nx">discoveryClient</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+</code></pre></div>
+<p><code>new Discovery()</code><br>
+Instantiate the client</p>
+
+<p><code>&lt;Client&gt;.on(&#39;discover&#39;, Function&lt;DiscoveryType&gt;)</code><br>
+Attach <code>discover</code> event handler</p>
+
+<p><code>&lt;Client&gt;.start(timeout?: ms)</code><br>
+Listen for discovery events (optional <code>timeout</code>)</p>
+
+<p><a name="26-internalmd"></a></p>
+<h2 id='internal-functions'>Internal Functions</h2>
+<p><code>&lt;Client&gt;.sendList(key)</code><br>
+Request list resource</p>
+
+<p><a name="30-researchmd"></a></p>
+<h1 id='research'>Research</h1>
+<p>Protocol research was performed on a StudioLive Series III 16R rack mixer, StudioLive Series III 24R rack mixer and a StudioLive Series III 16 console, using the <a href="https://www.presonus.com/products/uc-surface">UC Surface</a> application on Android and Windows. </p>
+
+<p>Old Python code: <a href="https://github.com/featherbear/presonus-studiolive-api/tree/research_python">github.com/featherbear/presonus-studiolive-api/tree/research_python</a></p>
+
+<p><a name="31-overviewmd"></a></p>
+<h2 id='high-level-overview'>High-Level Overview</h2>
+<ul>
+<li>TCP connections are used for control
+
+<ul>
+<li>The console listens on TCP port <code>53000</code></li>
+</ul></li>
+<li><p>UDP connections are used for metering data</p>
+
+<ul>
+<li>The client opens up a UDP server on a random port</li>
+<li>The client notifies the console of the port</li>
+</ul></li>
+<li><p>Every 3 seconds, the console emits a Discovery packet</p></li>
+<li><p>The client sends a KeepAlive packet every few seconds </p></li>
+<li><p>When the client connects it sends a Hello and Subscribe message to the console</p>
+
+<ul>
+<li>The console replies with a SubscriptionReply and Zlib data containing the console state</li>
+</ul></li>
+</ul>
+
+<p><a name="32-packetmd"></a></p>
+<h2 id='general'>General</h2><h3 id='packet-headers'>Packet Headers</h3>
+<p>All packets start with the four bytes <code>\x55\x43\x00\x01</code> (UC..)</p>
+<h3 id='payload-types'>Payload Types</h3>
+<p>There are different formats of payloads, identified by a two byte preamble preceding the payload data</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left">Code</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left"><code>KA</code></td>
+<td style="text-align: left">KeepAlive</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>UM</code></td>
+<td style="text-align: left">Hello</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>JM</code></td>
+<td style="text-align: left">JSON</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>PV</code></td>
+<td style="text-align: left">Setting</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>PL</code></td>
+<td style="text-align: left">Device List</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>FR</code></td>
+<td style="text-align: left">File Request</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>FD</code></td>
+<td style="text-align: left">FileResource 2</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>BO</code></td>
+<td style="text-align: left">?????????</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>CK</code></td>
+<td style="text-align: left">Compressed Data ??????</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>ZB</code></td>
+<td style="text-align: left">ZLIB Compressed Data</td>
+</tr>
+</tbody></table>
+<h3 id='payload-packing'>Payload Packing</h3>
+<p>In most situations, the packet is sent as follows</p>
+
+<table><thead>
+<tr>
+<th style="text-align: center">Header</th>
+<th style="text-align: center">Payload Size</th>
+<th style="text-align: center">Payload Type</th>
+<th style="text-align: center">Payload Data</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center"><code>\x55\x43\x00\x01</code></td>
+<td style="text-align: center">2-byte LE</td>
+<td style="text-align: center">2-byte code</td>
+<td style="text-align: center">data</td>
+</tr>
+</tbody></table>
+
+<blockquote>
+<p><strong>Note</strong><br>
+<code>Payload Size = length(Payload Type) + length(Payload Data)</code></p>
+</blockquote>
+<h3 id='c-bytes'>C-Bytes</h3>
+<p>There are four bytes that appear after the payload type in the payload data.
+The first and third positions have some byte value (either <code>0x6a</code>, <code>0x68</code>, or <code>0x65</code>), with the other positions being NULL.</p>
+
+<p>i.e. <code>68 00 65 00</code>, or <code>6a 00 65 00</code></p>
+
+<p>I will refer to this group of four bytes as <strong>C-Bytes</strong> (custom bytes).<br>
+The first byte will be <strong>C-Byte A</strong>, and the third as <strong>C-Byte B</strong></p>
+
+<blockquote>
+<p>i.e If a message is sent with <code>C-Byte A = j</code>, <code>C-Byte B = e</code> a response will be sent containing <code>C-Byte A = e</code>, <code>C-Byte B = j</code> so that the response can be matched with the request.</p>
+</blockquote>
+
+<p>They seem to be used for matching responses to requests.  </p>
+
+<p>For most cases it looks like they&#39;re not too important to keep synchronised - But as I keep researching and developing this API, I might find the need to actually implement proper request matching</p>
+<h2 id='sent-payloads'>Sent Payloads</h2><h3 id='hello'>Hello</h3>
+<blockquote>
+<p>The first packet that gets sent to the console</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 08 00 55 4d 00 00 65 00 15 fa   UC....UM..e...
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: left">Bytes</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">0-3</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">4-5</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6-7</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>UM</code></td>
+</tr>
+<tr>
+<td style="text-align: left">8-11</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">12-&gt;13</td>
+<td style="text-align: left">Payload Data</td>
+<td style="text-align: left"><code>TCP Window Size + 1</code> ???</td>
+</tr>
+</tbody></table>
+<h3 id='subscribe'>Subscribe</h3>
+<blockquote>
+<p>Register the client to the console</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 fe 00 4a 4d 6a 00 65 00 f4 00 00 00   UC....JMj.e.....
+7b 22 69 64 22 3a 20 22 53 75 62 73 63 72 69 62   {"id": "Subscrib
+65 22 2c 22 63 6c 69 65 6e 74 4e 61 6d 65 22 3a   e","clientName":
+20 22 55 6e 69 76 65 72 73 61 6c 20 43 6f 6e 74    "Universal Cont
+72 6f 6c 22 2c 22 63 6c 69 65 6e 74 49 6e 74 65   rol","clientInte
+72 6e 61 6c 4e 61 6d 65 22 3a 20 22 75 63 61 70   rnalName": "ucap
+70 22 2c 22 63 6c 69 65 6e 74 54 79 70 65 22 3a   p","clientType":
+20 22 50 43 22 2c 22 63 6c 69 65 6e 74 44 65 73    "PC","clientDes
+63 72 69 70 74 69 6f 6e 22 3a 20 22 46 45 41 54   cription": "FEAT
+48 45 52 4e 45 54 2d 50 43 22 2c 22 63 6c 69 65   HERNET-PC","clie
+6e 74 49 64 65 6e 74 69 66 69 65 72 22 3a 20 22   ntIdentifier": "
+46 45 41 54 48 45 52 4e 45 54 2d 50 43 22 2c 22   FEATHERNET-PC","
+63 6c 69 65 6e 74 4f 70 74 69 6f 6e 73 22 3a 20   clientOptions": 
+22 70 65 72 6d 20 75 73 65 72 73 20 6c 65 76 6c   "perm users levl
+20 72 65 64 75 20 72 74 61 6e 22 2c 22 63 6c 69    redu rtan","cli
+65 6e 74 45 6e 63 6f 64 69 6e 67 22 3a 20 32 33   entEncoding": 23
+31 30 36 7d                                       106}
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: left">Bytes</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">0-3</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">4-5</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6-7</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>JM</code></td>
+</tr>
+<tr>
+<td style="text-align: left">8-&gt;11</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"><code>6a 00 65 00</code></td>
+</tr>
+<tr>
+<td style="text-align: left">12-15</td>
+<td style="text-align: left">JSON Size</td>
+<td style="text-align: left">4-byte LE</td>
+</tr>
+<tr>
+<td style="text-align: left">16-&gt;?</td>
+<td style="text-align: left">JSON Data</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
+
+<p>The console will then reply with a response JSON payload<br>
+<code>{&quot;id&quot;: &quot;SubscriptionReply&quot;}</code><br>
+and additionally a ZLIB payload</p>
+<h4 id='json-fields'>JSON Fields</h4>
+<table><thead>
+<tr>
+<th style="text-align: left">Key</th>
+<th style="text-align: left">Type</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Known Values</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left"><code>id</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">Action</td>
+<td style="text-align: left"><code>&quot;Subscribe&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientName</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">Name</td>
+<td style="text-align: left"><code>&quot;Universal Control&quot;</code>/<code>&quot;UC-Surface&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientInternalName</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">Internal name</td>
+<td style="text-align: left"><code>&quot;ucapp&quot;</code>/<code>&quot;ucremoteapp&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientType</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">Client platform</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientDescription</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">Visible name</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientIdentifier</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">ID</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientOptions</code></td>
+<td style="text-align: left"><em>string</em></td>
+<td style="text-align: left">???</td>
+<td style="text-align: left"><code>&quot;perm users levl redu rtan&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left"><code>clientEncoding</code></td>
+<td style="text-align: left"><em>integer</em></td>
+<td style="text-align: left">???</td>
+<td style="text-align: left"><code>23106</code></td>
+</tr>
+</tbody></table>
+<h3 id='file-request'>File Request</h3>
+<!-- TODO: What is a file? -->
+
+<blockquote>
+<p>Request a file from the console.<br>
+File path is terminated with a NULL character.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 1d 00 46 52 6a 00 65 00 01 00 4c 69   UC....FRj.e...Li
+73 74 70 72 65 73 65 74 73 2f 63 68 61 6e 6e 65   stpresets/channe
+6c 00 00                                          l..
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: left">Bytes</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">0-3</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">4-5</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6-7</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>FR</code></td>
+</tr>
+<tr>
+<td style="text-align: left">8-&gt;11</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"><code>6a 00 65 00</code></td>
+</tr>
+<tr>
+<td style="text-align: left">12-13</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"><code>01 00</code></td>
+</tr>
+<tr>
+<td style="text-align: left">14-&gt;?</td>
+<td style="text-align: left">Request path</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">?-&gt;?</td>
+<td style="text-align: left">Null byte</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
+<h2 id='received-packets'>Received Packets</h2>
+<p>(Maybe they&#39;re the same?)</p>
+<h3 id='settings'>Settings</h3>
+<p>Setting packets have a payload type code of <code>0x50 0x56</code> (<code>PV</code>).</p>
+<h4 id='format'>Format</h4>
+<blockquote>
+<p><strong>key</strong> + <code>\x00</code> + <code>partA</code> (+ <code>partB</code>)</p>
+</blockquote>
+
+<ul>
+<li><code>key</code> - The name of the setting value</li>
+<li><code>partA</code> - <code>0x00 0x00</code> or <code>0x00 0x01</code></li>
+<li><code>partB</code> -  Optional 4-byte value</li>
+</ul>
+
+<p>For most responses, <code>partA</code> is <code>0x00 0x00</code>, and <code>partB</code> is appended.<br>
+However, for keys related to filter groups, <code>partA</code> is <code>0x00 0x01</code> and <code>partB</code> is omitted.</p>
+<h3 id='discovery-2'>Discovery</h3>
+<p><strong>Note</strong><br>
+<strong><em>Discovery packets do not follow the standard format</em></strong></p>
+
+<blockquote>
+<p>Every <strong>3 seconds</strong>, the console will broadcast a UDP packet (from port <code>53000</code>) to <code>255.255.255.255:47809</code>.</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 08 cf 44 41 65 00 00 00 00 04 00 80   UC....DAe.......
+48 1c 48 67 23 60 51 4f 92 4e 1e 46 91 50 51 d1   H.Hg#`QO.N.F.PQ.
+53 74 75 64 69 6f 4c 69 76 65 20 32 34 52 00 41   StudioLive 24R.A
+55 44 00 52 41 32 45 31 38 30 33 30 32 32 36 00   UD.RA2E18030226.
+53 74 75 64 69 6f 4c 69 76 65 20 32 34 52 00      StudioLive 24R.
+</code></pre></div>
+<table><thead>
+<tr>
+<th style="text-align: left">Bytes</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">0-3</td>
+<td style="text-align: left">Header</td>
+</tr>
+<tr>
+<td style="text-align: left">4-5</td>
+<td style="text-align: left">Source Port (2 byte little endian)</td>
+</tr>
+<tr>
+<td style="text-align: left">6-23</td>
+<td style="text-align: left">???</td>
+</tr>
+<tr>
+<td style="text-align: left">24-&gt;?</td>
+<td style="text-align: left">Console Model*</td>
+</tr>
+</tbody></table>
+
+<p>*The first &quot;StudioLLive 24R&quot; is used to identify the icon in <a href="https://www.presonus.com/products/UC-Surface">UC Surface</a>. The second instance appears to be some sort of friendly name</p>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 07 c2 44 51 00 00 65 00  UC....DQ..e.
+</code></pre></div>
+<blockquote>
+<p>or</p>
+</blockquote>
+<div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 00 00 44 51 00 00 65 00  UC....DQ..e.
+</code></pre></div>
+<p>When a client (Universal Control, etc) receives this broadcast, it will attempt to communicate with the console</p>
+<h3 id='zlib-compressed-data'>ZLIB Compressed Data</h3>
+<blockquote>
+<p>Example decompressed payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/2dedb706fa0cddeaf064422b1f79f4cdb00be1d8/zlib.dump">zlib.dump</a><br>
+Example decoded payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/2dedb706fa0cddeaf064422b1f79f4cdb00be1d8/zlib.parsed">zlib.parsed</a></p>
+</blockquote>
+
+<p><code>ZB</code> payloads contain a zlib-compressed copy of the mixer state.<br>
+These payloads have their own 4-byte little-endian size header.</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left">Bytes</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">0-3</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">4-5</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6-7</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>ZB</code></td>
+</tr>
+<tr>
+<td style="text-align: left">8-&gt;11</td>
+<td style="text-align: left">Compressed Payload Size (LE)</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">12-?</td>
+<td style="text-align: left">Compressed Payload</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
+
+<p>The decompressed payload is stored in a type-prefixed and length-prefixed dictionary, delimited by an <code>i</code> (<code>0x69</code>) character.  </p>
+<h4 id='keys'>Keys</h4>
+<blockquote>
+<p>e.g. <code>i\x05ABCDE</code> is the key <code>ABCDE</code> (length 5)</p>
+</blockquote>
+
+<p>Keys are prefixed with <code>i_</code> where <code>_</code> is the key string length.</p>
+<h4 id='values'>Values</h4>
+<ul>
+<li><code>Si_XXXXX</code> - String of length <code>_</code> (0-255), values contained in <code>XXXXX</code></li>
+<li><code>dXXXX</code> - 32-bit integer (signedness unknown), value in <code>XXXX</code></li>
+<li><code>iX</code> - Single byte (signedness unknown), value in <code>X</code></li>
+<li><code>{...}</code> - Dictionary</li>
+<li><code>[...]</code> - Array (TBC: only of strings???)</li>
+</ul>
+
+<p><a name="40-demomd"></a></p>
+<h1 id='demo-code'>Demo Code</h1>
+<p>For demo projects refer to the below repositories</p>
+
+<ul>
+<li><a href="https://github.com/featherbear/presonus-studiolive-api-demo">github.com/featherbear/presonus-studiolive-api-demo</a></li>
+<li><a href="https://github.com/featherbear/SL-Edit">github.com/featherbear/SL-Edit</a></li>
+</ul>
+
+<p><a name="50-othermd"></a></p>
+<h1 id='other'>Other</h1><h2 id='source-code'>Source Code</h2>
+<p>The TypeScript source code for this package is available on <a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a>.</p>
+
+<p>See <a href="https://github.com/featherbear/presonus-studiolive-api/">github.com/featherbear/presonus-studiolive-api</a></p>
+<h2 id='bitfocus-companion'>Bitfocus Companion</h2>
+<p>An experimental <a href="https://bitfocus.io/companion/">Bitfocus Companion</a> module has been developed to integrate the PreSonus StudioLive API.</p>
+
+<p>See <a href="https://github.com/featherbear/bitfocus-companion-module-presonus-studiolive-iii">github.com/featherbear/bitfocus-companion-module-presonus-studiolive-iii</a></p>
+
+<p><img src="https://featherbear.cc/blog/post/presonus-studiolive-api-ii/98021270-3d570300-1e58-11eb-89ce-71829c3da021.gif" alt="" /></p>
+<h2 id='console-advertisement-utility'>Console Advertisement Utility</h2>
+<p>Experimental tool to spoof a discovery packet, so that <a href="https://www.presonus.com/products/uc-surface">UC Surface</a> can &#39;find&#39; consoles that live on difficult network topologies</p>
+
+<p>See <a href="https://github.com/featherbear/presonus-studiolive-console-advertisement">github.com/featherbear/presonus-studiolive-console-advertisement</a></p>
+<h2 id='blog'>Blog</h2>
+<p>Updates about my development progress can be found on my <a href="https://featherbear.cc/blog/post/presonus-studiolive-api-iii-jan22/">blog</a></p>
+
+<p><a name="99-licensemd"></a></p>
+<h1 id='license'>License</h1>
+<p>Copyright © 2019 - 2022 <a href="https://featherbear.cc">Andrew Wong</a>  </p>
+
+<p>This software is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.<br>
+You are free to redistribute it and/or modify it under the <a href="https://opensource.org/licenses/MIT">terms</a> of the <a href="https://opensource.org/licenses/MIT">license</a>.</p>
+
+      </div>
+      <div class="dark-box">
+      </div>
+    </div>
+  </body>
 </html>
