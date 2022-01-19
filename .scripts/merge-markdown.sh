@@ -31,7 +31,7 @@ outFile=__BUILD_SOURCE.md
 pushd $scriptDir/.. > /dev/null
 
 rm -f $outFile
-npx concat-md --ignore README.md --decrease-title-levels --file-name-as-title docs > $outFile
+npx concat-md --decrease-title-levels docs > $outFile
 
 if [ $? -ne 0 ]; then
     echo $0 failed
