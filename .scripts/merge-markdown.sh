@@ -28,7 +28,7 @@
 
 scriptDir="$(dirname $0)"
 outFile=__BUILD_SOURCE.md
-pushd $scriptDir/../.. > /dev/null
+pushd $scriptDir/.. > /dev/null
 
 rm -f $outFile
 npx concat-md --ignore README.md --decrease-title-levels --file-name-as-title docs > $outFile
