@@ -1,4 +1,4 @@
-# PreSonus StudioLive III API Doocumentation
+# PreSonus StudioLive III API Documentation
 
 > _Note: I am not affiliated with PreSonus in any way, shape or form. I just use their products_
 
