@@ -122,6 +122,7 @@ export class Client extends EventEmitter {
     port = port || this.serverPortUDP
     this.meteringClient = MeterServer.call(this, port)
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
+
   }
 
   /**
@@ -251,14 +252,14 @@ export class Client extends EventEmitter {
    * Mute a given channel
    */
   mute(selector: ChannelSelector) {
-    this._setMuteState(selector, true)
+    this.setMute(selector, true)
   }
 
   /**
    * Unmute a given channel
    */
   unmute(selector: ChannelSelector) {
-    this._setMuteState(selector, false)
+    this.setMute(selector, false)
   }
 
   /**
@@ -266,7 +267,14 @@ export class Client extends EventEmitter {
    */
   toggleMute(selector: ChannelSelector) {
     const currentState = this.state.get(`${parseChannelString(selector)}/${ACTIONS.MUTE}`)
-    this._setMuteState(selector, !currentState)
+    this.setMute(selector, !currentState)
+  }
+
+  /**
+   * Set the mute status of a channel
+   */
+  setMute(selector: ChannelSelector, status: boolean) {
+    this._setMuteState(selector, status)
   }
 
   /**
