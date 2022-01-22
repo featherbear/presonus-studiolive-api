@@ -5,7 +5,6 @@ interface FallbackInterface {
   get(path: string | string[]): any
 }
 
-
 /**
  * Internal KV State Tree  
  * Types do not match transformed
@@ -16,7 +15,6 @@ type Node<root> = {
   & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : {})
   // & (root[key] extends { ranges, values} ? { [k in keyof root[key]['values']]: root[key]['values'][k] & root[key]['ranges'][k] } : {})
 }
-
 
 /**
  * Provides a function to set/get paths  

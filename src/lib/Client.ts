@@ -28,6 +28,7 @@ import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
+import ChannelCount from './types/ChannelCount'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -59,17 +60,10 @@ export class Client extends EventEmitter {
   readonly serverPort: number
   readonly serverPortUDP: number
 
-  meteringClient: any
+  meteringClient: Awaited<ReturnType<typeof MeterServer>>
   meteringData: any
 
-  channelCounts: {
-    line: number
-    aux: number
-    fx: number
-    return: number
-    talkback: number
-    main: number
-  }
+  channelCounts: ChannelCount
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -125,16 +119,16 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * @deprecated Not implemented
+   * Subscribe to the metering data
    */
-  meterSubscribe(port) {
+  async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meteringClient = MeterServer.call(this, port)
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   /**
-   * @deprecated Not implemented
+   * Unsubscribe from the metering data
    */
   meterUnsubscribe() {
     if (!this.meteringClient) return
@@ -161,16 +155,14 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const zlibInitCallback = () => {
               this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
-              console.log("Console channels are",
-                (this.channelCounts = {
-                  line: Object.keys(this.state.get('line')).length,
-                  aux: Object.keys(this.state.get('aux')).length,
-                  fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
-                  return /* aka tape? */: Object.keys(this.state.get('return')).length,
-                  talkback: Object.keys(this.state.get('talkback')).length,
-                  main: Object.keys(this.state.get('main')).length,
-                })
-              )
+              this.channelCounts = {
+                line: Object.keys(this.state.get('line')).length,
+                aux: Object.keys(this.state.get('aux')).length,
+                fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
+                return /* aka tape? */: Object.keys(this.state.get('return')).length,
+                talkback: Object.keys(this.state.get('talkback')).length,
+                main: Object.keys(this.state.get('main')).length
+              }
 
               resolve(this)
             }
@@ -183,8 +175,6 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const subscribeCallback = data => {
               if (data.id === 'SubscriptionReply') {
-                // Do we even need to wait for this reply?
-                // - probably a good idea.
                 this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
                 resolve(this)
               }
