@@ -45,9 +45,10 @@ export default function handleMSPacket(this: Client, data): {
     AUX: aux,
     FX: fx,
     FXRETURN: fx_return,
-    SUB: [],
     TALKBACK: talkback,
-    MAIN: main
+    MAIN: main,
+    SUB: [],
+    RETURN: []
     // ??? tape
   }
 }
