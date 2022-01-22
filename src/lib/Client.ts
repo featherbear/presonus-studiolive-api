@@ -122,7 +122,6 @@ export class Client extends EventEmitter {
     port = port || this.serverPortUDP
     this.meteringClient = MeterServer.call(this, port)
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
-
   }
 
   /**
