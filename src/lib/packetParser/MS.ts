@@ -2,6 +2,7 @@
 /* eslint-disable */
 
 import Client from "../Client"
+import { CHANNELTYPES } from "../constants"
 
 function readValues(buffer: Buffer, count: number) {
   const values = []
@@ -9,7 +10,9 @@ function readValues(buffer: Buffer, count: number) {
   return values
 }
 
-export default function handleMSPacket(this: Client, data) {
+export default function handleMSPacket(this: Client, data): {
+  [_ in keyof typeof CHANNELTYPES]: number[]
+} {
   data = data.slice(8)
 
   const channelCounts = this.channelCounts
@@ -37,15 +40,14 @@ export default function handleMSPacket(this: Client, data) {
 
   // TODO: Position of the faders for busses, groups, dcas, etc...
 
-  const result = {
-    line,
-    aux,
-    fx,
-    fx_return,
-    tape,
-    talkback,
-    main
+  return {
+    LINE: line,
+    AUX: aux,
+    FX: fx,
+    FXRETURN: fx_return,
+    SUB: [],
+    TALKBACK: talkback,
+    MAIN: main
+    // ??? tape
   }
-
-  return result
 }
