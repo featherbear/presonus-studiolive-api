@@ -1,18 +1,19 @@
 export default interface SubscriptionOptions {
     /**
-     * Application name
+     * @internal Application name
      */
     clientName?: string
 
     /**
-     * Application internal name
+     * @internal Application internal name
      */
     clientInternalName?: string
 
     /**
-     * Device name
+     * Device name  
+     * @description This value is visible in the client list
      */
-    clientDescription?: string // Name
+    clientDescription?: string
 
     /**
      * Device ID

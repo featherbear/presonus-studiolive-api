@@ -6,7 +6,7 @@ import { intToLE } from '../bufferUtil'
 import { simplifyPathTokens, tokenisePath } from '../treeUtil'
 import { onOff } from '../valueUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
-import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibValueSymbol } from './zlibNodeParser'
+import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibRangeSymbol, ZlibStringEnumSymbol, ZlibValueSymbol } from './zlibNodeParser'
 
 /**
  * Deserialise and parse a zlib buffer into an object tree
@@ -56,4 +56,32 @@ export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: str
   if (cur === undefined) return null
 
   return cur as RType
+}
+
+/**
+ *  @deprecated testing
+ */
+export function getZlibKeyData(node: ZlibNode, key: string | string[], {
+  value = false,
+  range = true,
+  strings = true
+} = {}) {
+  const tokens = [...simplifyPathTokens(tokenisePath(key))]
+
+  let cur = node
+  while (cur && tokens.length > 0) {
+    const next = tokens.shift()
+    cur = cur[next]
+  }
+
+  if (cur === undefined) return null
+
+  const result: {
+    value?, range?, strings?
+  } = {}
+  if (value && node[ZlibValueSymbol]) result.value = node[ZlibValueSymbol]
+  if (range && node[ZlibRangeSymbol]) result.range = node[ZlibRangeSymbol]
+  if (strings && node[ZlibStringEnumSymbol]) result.strings = node[ZlibStringEnumSymbol]
+
+  return result
 }

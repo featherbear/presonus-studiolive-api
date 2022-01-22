@@ -28,6 +28,7 @@ import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
+import ChannelCount from './types/ChannelCount'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -59,8 +60,10 @@ export class Client extends EventEmitter {
   readonly serverPort: number
   readonly serverPortUDP: number
 
-  meteringClient: any
+  meteringClient: Awaited<ReturnType<typeof MeterServer>>
   meteringData: any
+
+  channelCounts: ChannelCount
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -116,16 +119,16 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * @deprecated Not implemented
+   * Subscribe to the metering data
    */
-  meterSubscribe(port) {
+  async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
-    this.meteringClient = MeterServer.call(this, port)
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
     this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
   }
 
   /**
-   * @deprecated Not implemented
+   * Unsubscribe from the metering data
    */
   meterUnsubscribe() {
     if (!this.meteringClient) return
@@ -145,20 +148,48 @@ export class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
-        {
-          // Send subscription request
-          this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
+        Promise.all([
+          /**
+           * Await for the first zlib response to resolve channel counts
+           */
+          new Promise((resolve) => {
+            const zlibInitCallback = () => {
+              this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+              this.channelCounts = {
+                line: Object.keys(this.state.get('line')).length,
+                aux: Object.keys(this.state.get('aux')).length,
+                fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
+                return /* aka tape? */: Object.keys(this.state.get('return')).length,
+                talkback: Object.keys(this.state.get('talkback')).length,
+                main: Object.keys(this.state.get('main')).length
+              }
 
-          const subscribeCallback = data => {
-            if (data.id === 'SubscriptionReply') {
-              this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
-              this.conn.removeListener('error', rejectHandler)
-              this.emit('connected')
               resolve(this)
             }
-          }
-          this.on(MESSAGETYPES.JSON, subscribeCallback)
-        }
+            this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+          }),
+
+          /**
+           * Await for the subscription success
+           */
+          new Promise((resolve) => {
+            const subscribeCallback = data => {
+              if (data.id === 'SubscriptionReply') {
+                this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
+                resolve(this)
+              }
+            }
+            this.addListener(MESSAGETYPES.JSON, subscribeCallback)
+          })
+        ]).then(() => {
+          this.conn.removeListener('error', rejectHandler)
+
+          this.emit('connected')
+          resolve(this)
+        })
+
+        // Send subscription request
+        this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
         // #endregion
 
         // #region Keep alive
@@ -202,7 +233,7 @@ export class Client extends EventEmitter {
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
-      data = handlers[messageCode]?.(data) ?? data
+      data = handlers[messageCode]?.call?.(this, data) ?? data
     } else {
       console.warn('Unhandled message code', messageCode)
     }
