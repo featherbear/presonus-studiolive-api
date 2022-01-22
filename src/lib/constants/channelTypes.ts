@@ -8,5 +8,6 @@ export enum CHANNELTYPES {
     AUX = 'aux',
     SUB = 'sub',
     FX = 'fxbus',
-    FXRETURN = 'fxreturn'
+    FXRETURN = 'fxreturn',
+    RETURN = 'return' // e.g. Aux In 1
 }
