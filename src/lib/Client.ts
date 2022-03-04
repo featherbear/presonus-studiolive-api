@@ -136,7 +136,7 @@ export class Client extends EventEmitter {
     this.meteringClient = null
   }
 
-  async connect(subscribeData?: SubscriptionOptions) {
+  async connect(subscribeData?: SubscriptionOptions, skipWaitForZB: boolean = false) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
       const rejectHandler = (err: Error) => {
@@ -152,22 +152,24 @@ export class Client extends EventEmitter {
           /**
            * Await for the first zlib response to resolve channel counts
            */
-          new Promise((resolve) => {
-            const zlibInitCallback = () => {
-              this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
-              this.channelCounts = {
-                line: Object.keys(this.state.get('line')).length,
-                aux: Object.keys(this.state.get('aux')).length,
-                fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
-                return /* aka tape? */: Object.keys(this.state.get('return')).length,
-                talkback: Object.keys(this.state.get('talkback')).length,
-                main: Object.keys(this.state.get('main')).length
-              }
+          skipWaitForZB 
+            ? ((async () => {})())
+            : new Promise((resolve) => {
+              const zlibInitCallback = () => {
+                this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+                this.channelCounts = {
+                  line: Object.keys(this.state.get('line')).length,
+                  aux: Object.keys(this.state.get('aux')).length,
+                  fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
+                  return /* aka tape? */: Object.keys(this.state.get('return')).length,
+                  talkback: Object.keys(this.state.get('talkback')).length,
+                  main: Object.keys(this.state.get('main')).length
+                }
 
-              resolve(this)
-            }
-            this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
-          }),
+                resolve(this)
+              }
+              this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+            }),
 
           /**
            * Await for the subscription success
