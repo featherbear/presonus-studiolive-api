@@ -1,5 +1,8 @@
 /* eslint no-unused-vars: "off" */
 
+/**
+ * Mix channels
+ */
 export enum LINE {
   CHANNEL_1 = 1,
   CHANNEL_2 = 2,
@@ -35,6 +38,9 @@ export enum LINE {
   CHANNEL_32 = 32
 }
 
+/**
+ * Aux buses
+ */
 export enum AUX {
   AUX_1 = 1,
   AUX_2 = 2,
@@ -54,6 +60,9 @@ export enum AUX {
   AUX_16 = 16
 }
 
+/**
+ * Sub-groups
+ */
 export enum SUB {
   SUB_A = 1,
   SUB_B = 2,
@@ -61,6 +70,9 @@ export enum SUB {
   SUB_D = 4
 }
 
+/**
+ * FX buses
+ */
 export enum FX {
   FX_1 = 1,
   FX_2 = 2,
@@ -68,6 +80,9 @@ export enum FX {
   FX_4 = 4
 }
 
+/**
+ * FX return buses
+ */
 export enum FXRETURN {
   FXRETURN_1 = 1,
   FXRETURN_2 = 2,
@@ -75,10 +90,16 @@ export enum FXRETURN {
   FXRETURN_4 = 4
 }
 
+/**
+ * Main mix itself
+ */
 export enum MAIN {
   MAIN_CH = 1
 }
 
+/**
+ * Talkback
+ */
 export enum TALKBACK {
   TALKBACK_CH = 1
 }
