@@ -949,11 +949,39 @@ Request list resource</p>
 <code>Packet Size = length(Payload Type) + length(Payload Data)</code></p>
 </blockquote>
 
-<p>|Offset|Length|Type|Description|
-|0|4|<code>\x55\x43\x00\x01</code>|Header|
-|2|2|<code>uint16</code> (LE)|Payload Size|
-|4|2|<code>char[2]</code>|Payload Type|
-|6|...|...|Data|</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Type</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left"><code>\x55\x43\x00\x01</code></td>
+<td style="text-align: left">Header</td>
+</tr>
+<tr>
+<td style="text-align: center">2</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+<td style="text-align: left">Payload Size</td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left"><code>char[2]</code></td>
+<td style="text-align: left">Payload Type</td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">...</td>
+<td style="text-align: left">Data</td>
+</tr>
+</tbody></table>
 <h3 id='c-bytes'>C-Bytes</h3>
 <p>There are four bytes that appear after the payload type in the payload data.
 The first and third positions have some byte value (either <code>0x6a</code>, <code>0x68</code>, or <code>0x65</code>), with the other positions being NULL.</p>
@@ -976,13 +1004,45 @@ The first byte will be <strong>C-Byte A</strong>, and the third as <strong>C-Byt
 </blockquote>
 <div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 08 00 55 4d 00 00 65 00 15 fa   UC....UM..e...
 </code></pre></div>
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Payload Size||
-|6|2|Payload Type|<code>UM</code>|
-|8|4|C-Bytes||
-|12|2|UDP Metering Port|<code>uint16</code> (LE)|</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>UM</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">UDP Metering Port</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+</tbody></table>
 <h3 id='subscribe'>Subscribe</h3>
 <blockquote>
 <p>Register the client to the console</p>
@@ -1005,14 +1065,51 @@ The first byte will be <strong>C-Byte A</strong>, and the third as <strong>C-Byt
 65 6e 74 45 6e 63 6f 64 69 6e 67 22 3a 20 32 33   entEncoding": 23
 31 30 36 7d                                       106}
 </code></pre></div>
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Payload Size||
-|6|2|Payload Type|<code>JM</code>|
-|8|4|C-Bytes||
-|12|4|JSON Size|<code>uint32</code> (LE)|
-|16|...|JSON Data||</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>JM</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">JSON Size</td>
+<td style="text-align: left"><code>uint32</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">16</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">JSON Data</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
 
 <p>The console will then reply with a response JSON payload <code>{&quot;id&quot;: &quot;SubscriptionReply&quot;}</code>, and a ZLIB payload*</p>
 <h4 id='json-fields'>JSON Fields</h4>
@@ -1084,15 +1181,57 @@ File path is terminated with a NULL character.</p>
 73 74 70 72 65 73 65 74 73 2f 63 68 61 6e 6e 65   stpresets/channe
 6c 00 00                                          l..
 </code></pre></div>
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Payload Size||
-|6|2|Payload Type|<code>FR</code>|
-|8|4|C-Bytes||
-|12|2|??|<code>01 00</code>|
-|14|...|Request path||
-|x|Null byte|<code>00</code>|</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>FR</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"><code>01 00</code></td>
+</tr>
+<tr>
+<td style="text-align: center">14</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">Request path</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">x</td>
+<td style="text-align: center">Null byte</td>
+<td style="text-align: left"><code>00</code></td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
 <h2 id='received-packets'>Received Packets</h2>
 <p>(Maybe they&#39;re the same?)</p>
 <h3 id='settings'>Settings</h3>
@@ -1123,12 +1262,39 @@ However, for keys related to filter groups, <code>partA</code> is <code>0x00 0x0
 55 44 00 52 41 32 45 31 38 30 33 30 32 32 36 00   UD.RA2E18030226.
 53 74 75 64 69 6f 4c 69 76 65 20 32 34 52 00      StudioLive 24R.
 </code></pre></div>
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Source Port|<code>uint16</code> (LE)|
-|6|...|...||
-|24|...|Console Model*|</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Source Port</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">...</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">24</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">Console Model*</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
 
 <p>*The first &quot;StudioLive 24R&quot; is used to identify the icon in <a href="https://www.presonus.com/products/UC-Surface">UC Surface</a>. The second instance appears to be some sort of friendly name</p>
 <div class="highlight"><pre class="highlight plaintext"><code>55 43 00 01 07 c2 44 51 00 00 65 00  UC....DQ..e.
@@ -1148,31 +1314,53 @@ Example decoded payload: <a href="https://github.com/featherbear/presonus-studio
 <p><code>ZB</code> payloads contain a zlib-compressed copy of the mixer state.<br>
 These payloads have their own 4-byte little-endian size header.</p>
 
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Payload Size||
-|6|2|Payload Type|<code>ZB</code>|
-|8|4|C-Bytes||
-|12|4|Compressed Payload Size|<code>uint32</code> (LE)|
-|16|...|Compressed Payload Data||</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>ZB</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Compressed Payload Size</td>
+<td style="text-align: left"><code>uint32</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">16</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">Compressed Payload Data</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
 
-<p>The decompressed payload is a <a href="https://ubjson.org/">UBJSON</a> file</p>
-<h4 id='keys'>Keys</h4>
-<blockquote>
-<p>e.g. <code>i\x05ABCDE</code> is the key <code>ABCDE</code> (length 5)</p>
-</blockquote>
-
-<p>Keys are prefixed with <code>i_</code> where <code>_</code> is the key string length.</p>
-<h4 id='values'>Values</h4>
-<ul>
-<li><code>Si_XXXXX</code> - String of length <code>_</code> (0-255), values contained in <code>XXXXX</code></li>
-<li><code>dXXXX</code> - <code>uint32</code>, value in <code>XXXX</code></li>
-<li><code>LXXXXXXXX</code> - <code>uint64</code>, value in <code>XXXXXXXX</code></li>
-<li><code>iX</code> - Single byte (unsigned), value in <code>X</code></li>
-<li><code>{...}</code> - Dictionary</li>
-<li><code>[...]</code> - Array</li>
-</ul>
+<p>The decompressed payload is a <a href="https://ubjson.org/">UBJSON</a> payload</p>
 <h3 id='chunk-data'>Chunk Data</h3>
 <blockquote>
 <p>Example assembled payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/7e9239cd64de21fab03168fc57503144061bdf6c/dumps/CK_zlib.dump">CK_zlib.dump</a><br>
@@ -1181,19 +1369,81 @@ Example packet trace: <a href="https://github.com/featherbear/presonus-studioliv
 
 <p><code>CK</code> payloads are multi-part data of a single larger data payload. Whilst a single <code>CK</code> payload can span multiple packets (whose TCP contiguity is guaranteed), <code>CK</code> payloads belonging to the same larger data payload can be dispersed between other payloads</p>
 
-<p>|Offset|Length|Description|Note|
-|:----|:----------|:---|
-|0|4|Header||
-|4|2|Payload Size||
-|6|2|Payload Type|<code>CK</code>|
-|8|4|C-Bytes||
-|12|2|??||
-|14|2|Larger Data Type||
-|16|4|??|
-|20|4|Larger Data Offset|<code>uint32</code> (LE)|
-|24|4|Larger Data Size|<code>uint32</code> (LE)|
-|28|4|Current Chunk Size|<code>uint32</code> (LE)|
-|32|...|Current Chunk Data||</p>
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>CK</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">14</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Larger Data Type</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">16</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">20</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Larger Data Offset</td>
+<td style="text-align: left"><code>uint32</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">24</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Larger Data Size</td>
+<td style="text-align: left"><code>uint32</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">28</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Current Chunk Size</td>
+<td style="text-align: left"><code>uint32</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">32</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">Current Chunk Data</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
 
 <p><a name="40-demomd"></a></p>
 <h1 id='demo-code'>Demo Code</h1>
