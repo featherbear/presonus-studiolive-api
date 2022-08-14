@@ -404,7 +404,7 @@ export class Client extends EventEmitter {
    * @param channel 
    * @param level range: -84 dB to 10 dB
    */
-  async setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number) {
+  async setChannelVolumeLogarithmic(selector: ChannelSelector, decibel: number, duration?: number) {
     return this._setLevel(selector, logVolumeTo32(decibel), duration)
   }
 
