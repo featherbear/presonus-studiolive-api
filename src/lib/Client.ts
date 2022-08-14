@@ -353,22 +353,29 @@ export class Client extends EventEmitter {
       set(level)
       return assertReturn()
     }
-
-    // Transitioning to zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
+    
+    // Transitioning to absolute zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
     // So if we see transition to/from 0, we transition to/from 0x3a...... first
-    const currentLevel = this.state.get(target, 0)
+    
+    const pseudoZeroLevel = linearVolumeTo32(1)
 
-    // console.log(`Change ${target} from ${currentLevel} to ${level}`)
+    let currentLevel = this.state.get(target, 0)
+    if (!Number.isInteger(currentLevel)) {
+      currentLevel = linearVolumeTo32(currentLevel * 100)
+    } else if (currentLevel === 0) {
+      currentLevel = linearVolumeTo32(0)
+    } else if (currentLevel === 1) {
+      currentLevel = linearVolumeTo32(100)
+    }
 
     // Don't do anything if we already are on the same level
     // Unlikely because of the approximation values
     if (currentLevel === level) {
       return assertReturn()
     }
-
-    const pseudoZeroLevel = linearVolumeTo32(1)
-    // If the target level is 0, transition to the smallest non-zero level
+    
     if (level === 0) {
+      // If the target level is 0, transition to the smallest non-zero level
       return new Promise((resolve) => {
         transitionValue(
           currentLevel || pseudoZeroLevel,
@@ -383,8 +390,8 @@ export class Client extends EventEmitter {
         )
       })
     } else {
+      // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
       return new Promise((resolve) => {
-        // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
         transitionValue(
           currentLevel || pseudoZeroLevel,
           level, duration,
