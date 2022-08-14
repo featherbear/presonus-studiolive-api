@@ -30,7 +30,6 @@ export enum MESSAGETYPES {
     /**
      * Compressed content
      */
-    Unknown2 = 'CK',
     Chunk = 'CK',
 
     /**
