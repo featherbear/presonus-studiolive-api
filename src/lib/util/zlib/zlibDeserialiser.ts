@@ -6,10 +6,10 @@ import ZlibPayload from '../../types/ZlibPayload'
 export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
   let idx = 0
   if (buf[idx++] !== 0x7b) return null
-  
+
   const rootTree = {}
   const workingSet: Array<[] | {}> = [rootTree]
-  
+
   while (idx !== buf.length) {
     let keyData: Buffer | null
     if (Array.isArray(workingSet[0])) {
@@ -21,29 +21,29 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       }
     } else {
       const controlCharacter = buf[idx++]
-  
+
       if (controlCharacter === 0x7D /* } */) {
         // Exit leaf node
         workingSet.shift()
         continue
       }
-  
+
       if (controlCharacter !== 0x69 /* i */) {
         throw new Error('(A) failed to find delimiter')
       }
-  
+
       const length = buf[idx++]
       keyData = buf.slice(idx, idx + length)
       idx += length
     }
-  
+
     const type = buf[idx++]
     let length = 0
     switch (type) {
+      // New leaf dictionary
       case 0x7B /* { */: {
-        // Create new leaf dictionary
         const leaf = {}
-  
+
         if (Array.isArray(workingSet[0])) {
           (workingSet[0] as any[]).push(leaf)
         } else {
@@ -52,82 +52,99 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
         workingSet.unshift(leaf)
         continue
       }
-  
+
+      // New leaf array
       case 0x5B /* [ */: {
-        // Create new leaf array
         const leaf = []
-  
+
         if (Array.isArray(workingSet[0])) {
           (workingSet[0] as any[]).push(leaf)
         } else {
           workingSet[0][keyData.toString()] = leaf
         }
-  
+
         workingSet.unshift(leaf)
         continue
       }
-  
+
+      // string
       case 0x53 /* S */: {
         if (buf[idx++] !== 0x69) {
+          // TODO: This value is the number type
           throw new Error('(B) failed to find delimiter')
         }
-  
-        // Possibly a zero-length (aka null) string
+
         length = buf[idx++]
         break
       }
-  
+
+      // float32
       case 0x64 /* d */: {
         length = 4
         break
       }
-  
+
+      // int8
       case 0x69 /* i */: {
-        // Single byte?
         length = 1
         break
       }
-  
+      
+      // int64
+      case 0x4c /* L */: {
+        length = 8
+        break
+      }
+
       default: {
-        throw new Error('Unknown type ' + type)
+        throw new Error(`Unknown type ${type} at position ${idx}`)
       }
     }
-  
+
     const valueData = buf.slice(idx, idx + length)
-  
+
     let value
-  
+
     switch (type) {
+      // string
       case 0x53 /* S */: {
         value = valueData.toString()
         break
       }
+
+      // float32
       case 0x64 /* d */: {
-        // FIXME: ?
+        // FIXME: value = valueData.readFloatBE()
         value = valueData.readUInt32BE()
         break
       }
-  
+
+      // int8
       case 0x69 /* i */: {
-        // FIXME: Single byte?
+        // FIXME: valueData.readInt8()
         value = valueData.readUInt8()
         break
       }
-  
+
+      case 0x4c /* L */: {
+        value = valueData.readBigInt64BE()
+        break
+      }
+
       default: {
         value = valueData.toString()
       }
     }
-  
+
     idx += length
-  
+
     if (Array.isArray(workingSet[0])) {
       (workingSet[0] as any[]).push(value)
     } else {
       workingSet[0][keyData.toString()] = value
     }
   }
-  
+
   return rootTree as ZlibPayload
 }
 
