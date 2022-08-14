@@ -2,6 +2,8 @@ import ZlibPayload from '../../types/ZlibPayload'
 
 /**
  * Deserialise a zlib buffer into a raw object payload
+ * Partially implements the UBJSON specification
+ * https://ubjson.org
  */
 export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
   let idx = 0
