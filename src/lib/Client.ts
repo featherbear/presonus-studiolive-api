@@ -18,6 +18,7 @@ import { intToLE, shortToLE } from './util/bufferUtil'
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
 import handlePVPacket from './packetParser/PV'
+import handleCKPacket from './packetParser/CK'
 
 import SubscriptionOptions from './types/SubscriptionOptions'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
@@ -148,6 +149,14 @@ export class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
+  
+        const compressedZlibInitCallback = (data) => {
+          this.removeListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
+          this.emit(MESSAGETYPES.ZLIB, data)
+        }
+
+        this.addListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
+
         Promise.all([
           /**
            * Await for the first zlib response to resolve channel counts
@@ -155,6 +164,9 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const zlibInitCallback = () => {
               this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+
+              // ZB is not always encapsulated in the CK packet, so deregister the listener here too
+              this.removeListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
               this.channelCounts = {
                 line: Object.keys(this.state.get('line')).length,
                 aux: Object.keys(this.state.get('aux')).length,
@@ -227,17 +239,19 @@ export class Client extends EventEmitter {
       [MESSAGETYPES.Setting]: handlePVPacket,
       [MESSAGETYPES.ZLIB]: handleZBPacket,
       [MESSAGETYPES.FaderPosition]: handleMSPacket,
+      [MESSAGETYPES.Chunk]: handleCKPacket,
       [MESSAGETYPES.DeviceList]: null,
       [MESSAGETYPES.Unknown1]: null,
       [MESSAGETYPES.Unknown3]: null
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
-      data = handlers[messageCode]?.call?.(this, data) ?? data
+      data = handlers[messageCode]?.call?.(this, data)
     } else {
       console.warn('Unhandled message code', messageCode)
     }
 
+    if (!data) return
     this.emit(messageCode, data)
     this.emit('data', { code: messageCode, data })
   }
