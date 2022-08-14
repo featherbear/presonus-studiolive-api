@@ -1,8 +1,7 @@
-import Client from '../Client'
-import * as zlib from 'zlib'
-// import * as bjd from 'bjd'
+import type Client from '../Client'
+import { parseCompressed } from './ZB'
 
-const chunkBuffer: Buffer[] = []
+let chunkBuffer: Buffer[] = []
 
 export default function handleCKPacket(this: Client, data: Buffer) {
   data = data.slice(4)
@@ -15,9 +14,10 @@ export default function handleCKPacket(this: Client, data: Buffer) {
   chunkBuffer.push(chunkData)
 
   if (chunkOffset + chunkSize === totalSize) {
-    const fullData = Buffer.concat(chunkBuffer)
-    const unzip = zlib.inflateSync(fullData)
-    // const data = bjd.decode(unzip)
-    console.log(data)
+    // Delink the chunkBuffer and work on the chunks locally
+    const fullBuffer = chunkBuffer
+    chunkBuffer = []
+
+    return parseCompressed(Buffer.concat(fullBuffer))
   }
 }
