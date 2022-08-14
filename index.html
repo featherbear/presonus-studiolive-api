@@ -1173,6 +1173,27 @@ These payloads have their own 4-byte little-endian size header.</p>
 <li><code>{...}</code> - Dictionary</li>
 <li><code>[...]</code> - Array</li>
 </ul>
+<h3 id='chunk-data'>Chunk Data</h3>
+<blockquote>
+<p>Example assembled payload: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/7e9239cd64de21fab03168fc57503144061bdf6c/dumps/CK_zlib.dump">CK_zlib.dump</a><br>
+Example packet trace: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/7e9239cd64de21fab03168fc57503144061bdf6c/dumps/connect_and_idle_UC_SL16R.pcapng">connect_and_idle_UC_SL16R.pcapng</a></p>
+</blockquote>
+
+<p><code>CK</code> payloads are multi-part data of a single larger data payload. Whilst a single <code>CK</code> payload can span multiple packets (whose TCP contiguity is guaranteed), <code>CK</code> payloads belonging to the same larger data payload can be dispersed between other payloads</p>
+
+<p>|Offset|Length|Description|Note|
+|:----|:----------|:---|
+|0|4|Header||
+|4|2|Payload Size||
+|6|2|Payload Type|<code>CK</code>|
+|8|4|C-Bytes||
+|12|2|??||
+|14|2|Larger Data Type||
+|16|4|??|
+|20|4|Larger Data Offset|<code>uint32</code> (LE)|
+|24|4|Larger Data Size|<code>uint32</code> (LE)|
+|28|4|Current Chunk Size|<code>uint32</code> (LE)|
+|32|...|Current Chunk Data||</p>
 
 <p><a name="40-demomd"></a></p>
 <h1 id='demo-code'>Demo Code</h1>
