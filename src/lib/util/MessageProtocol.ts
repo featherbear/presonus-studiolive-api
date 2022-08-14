@@ -26,7 +26,7 @@ export function analysePacket(
 
   return [
     packet.slice(6, 8).toString(),
-    // Skip bytes 8-11 (identifier pair)
+    // Skip bytes 8-11 (C-Byte identifier pair)
     packet.slice(12)
   ]
 }
