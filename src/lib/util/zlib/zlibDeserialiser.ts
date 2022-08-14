@@ -13,7 +13,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
   while (idx !== buf.length) {
     let keyData: Buffer | null
     if (Array.isArray(workingSet[0])) {
-      // nested !important
+      // Close leaf array
       if (buf[idx] === 0x5D /* ] */) {
         idx++
         workingSet.shift()
@@ -22,14 +22,14 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
     } else {
       const controlCharacter = buf[idx++]
 
+      // Close leaf dictionary
       if (controlCharacter === 0x7D /* } */) {
-        // Exit leaf node
         workingSet.shift()
         continue
       }
 
       if (controlCharacter !== 0x69 /* i */) {
-        throw new Error('(A) failed to find delimiter')
+        throw new Error('(ZB) Failed to find delimiter 1')
       }
 
       const length = buf[idx++]
@@ -70,8 +70,9 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       // string
       case 0x53 /* S */: {
         if (buf[idx++] !== 0x69) {
-          // TODO: This value is the number type
-          throw new Error('(B) failed to find delimiter')
+          // UBJSON specifications say to read this value as the length type,
+          // but I've yet to see a non-0x69 (i) value in the received payloads
+          throw new Error('(ZB) Failed to find delimiter 2')
         }
 
         length = buf[idx++]
@@ -114,18 +115,17 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
 
       // float32
       case 0x64 /* d */: {
-        // FIXME: value = valueData.readFloatBE()
-        value = valueData.readUInt32BE()
+        value = valueData.readFloatBE()
         break
       }
 
       // int8
       case 0x69 /* i */: {
-        // FIXME: valueData.readInt8()
-        value = valueData.readUInt8()
+        valueData.readInt8()
         break
       }
 
+      // int64
       case 0x4c /* L */: {
         value = valueData.readBigInt64BE()
         break
