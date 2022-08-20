@@ -39,7 +39,13 @@
   },
   "eslintConfig": {
     "rules": {
-      "no-trailing-spaces": "off",
+      "no-trailing-spaces": [
+        "warn",
+        {
+          "ignoreComments": true,
+          "skipBlankLines": true
+        }
+      ],
       "no-dupe-class-members": "off",
       "space-before-function-paren": "off"
     }

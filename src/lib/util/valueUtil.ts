@@ -139,7 +139,7 @@ export function transitionValue(from: number, to: number, duration: number, fn: 
 
   const cancelTransition: CancelTransitionFn = () => {
     clearInterval(timer)
-  } 
+  }
 
   return cancelTransition
 }
