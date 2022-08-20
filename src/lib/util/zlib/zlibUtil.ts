@@ -18,25 +18,7 @@ export function zlibParse(zlib: Buffer) {
     return
   }
 
-  return zlibParseNode(payload as unknown as ZlibInputNode, {
-    valueTransformers: {
-      'permissions.access_code'() { return '*REDACTED*' },
-
-      ...[
-        // Add values which should be transformed with onOff byte decoding
-        'permissions.*',
-        'advancedscenefilters.*',
-        'projectfilters.*',
-        'channelfilters.*',
-        'line.*.select',
-        'line.*.mute',
-        'line.*.48v'
-      ].reduce((obj, val) => ({
-        ...obj,
-        [val]: (v) => onOff.decode(toInt(v))
-      }), {})
-    }
-  })
+  return zlibParseNode(payload as unknown as ZlibInputNode)
 }
 
 export default zlibParse

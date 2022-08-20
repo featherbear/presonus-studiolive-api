@@ -1,3 +1,4 @@
+import { transformersUB } from '../transformers'
 import { valueTransform, ValueTransformerLookup } from '../treeUtil'
 
 export const ZlibValueSymbol = Symbol('value')
@@ -30,7 +31,7 @@ export type ZlibNode<T = any> = {
 
 type zlibNodeParserOptArgs = Partial<{
   /**
-   * Currently unused
+   * Parent node
    */
   parent?: ZlibNode,
 
@@ -38,17 +39,12 @@ type zlibNodeParserOptArgs = Partial<{
    * Node root value
    */
   base?: Partial<ZlibNode>,
-
-  /**
-   * Value transformer
-   */
-  valueTransformers?: ValueTransformerLookup
 }>
 
 /**
  * Parse deserialised zlib data into an object tree
  */
-export function zlibParseNode(node: ZlibInputNode, { base = {}, valueTransformers }: zlibNodeParserOptArgs = {}): ZlibNode {
+export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParserOptArgs = {}): ZlibNode {
   const root = { ...base } as ZlibNode
 
   function setMetadata(key, value, type: symbol) {
@@ -71,7 +67,6 @@ export function zlibParseNode(node: ZlibInputNode, { base = {}, valueTransformer
             [ZlibKeySymbol]: [...(root?.[ZlibKeySymbol] ?? []), key]
           },
           parent: root,
-          valueTransformers
         })
       }
     },
@@ -86,7 +81,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {}, valueTransformer
         /**
          * Value transformers
          */
-        if (valueTransformers) value = valueTransform(symbolPath, value, valueTransformers)
+        value = valueTransform(symbolPath, value, transformersUB)
 
         root[key] = {
           ...root[key],
