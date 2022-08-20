@@ -1,39 +1,40 @@
 /* eslint no-unused-vars: "off" */
 
 export enum MESSAGETYPES {
-    // KeepAlive
     KeepAlive = 'KA',
     
     Hello = 'UM',
     
-    // Message
+    // JSON Message
     JSON = 'JM',
     
-    // ParamValue
+    /**
+     * @deprecated Use ParamValue
+     */
     Setting = 'PV',
+
+    ParamValue = 'PV',
     
-    // ParamStrList
+    /**
+     * @deprecated Use ParamStrList
+     */
     DeviceList = 'PL',
+    ParamStrList = 'PL',
     
-    // FileRequest
-    FileResource = 'FR',
+    FileRequest = 'FR',
     
-    // FileData
-    FileResource2 = 'FD',
+    FileData = 'FD',
 
     // BZ-Message
     ZLIB = 'ZB',
 
-    // Binary
+    // Binary Object
     Unknown1 = 'BO',
 
-    /**
-     * Compressed content
-     */
     Chunk = 'CK',
 
     /**
-     * Mute? mt64?
+     * Assume the B means byte (8)
      */
     // Meter8
     Unknown3 = 'MB',
@@ -41,6 +42,7 @@ export enum MESSAGETYPES {
     /**
      * Linear position of faders
      * Only message sent for main fader changes
+     * Assume the S means short (16)
      */
     // Meter16
     FaderPosition = 'MS'
