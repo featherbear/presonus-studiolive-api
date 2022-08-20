@@ -1,6 +1,6 @@
-import { tokenisePath } from './treeUtil'
+import { simplifyPathTokens, tokenisePath } from './treeUtil'
 
-export type ValueTransformer = (value: unknown) => any
+export type ValueTransformer = (value: unknown, key?: string[]) => any
 
 export type ValueTransformerLookup = {
     [prefix: string]: ValueTransformer
@@ -10,7 +10,7 @@ export type ValueTransformerLookup = {
  * Value transformers allow values to be processed different depending on their key
  */
 export function valueTransform(path: string | string[], value: any, valueTransformers: ValueTransformerLookup): typeof value {
-  const symbolPath = tokenisePath(path)
+  const symbolPath = simplifyPathTokens(path)
 
   const doesLookupMatch = (lookup: string) => {
     const lookupPath = tokenisePath(lookup)
@@ -49,7 +49,8 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
 
   for (const [lookup, transformer] of Object.entries(valueTransformers)) {
     if (doesLookupMatch(lookup)) {
-      value = transformer(value)
+      console.log('MATCHED', path, lookup);
+      value = transformer(value, symbolPath)
       break
     }
   }

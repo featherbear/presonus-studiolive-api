@@ -1,3 +1,5 @@
+import PV_steps from "../constants/temp__PVsteps"
+
 type Bounds = [number, number]
 /**
  * Convert a logarithmic volume to its respective number
@@ -37,6 +39,46 @@ export function linearVolumeTo32(level) {
   const result = clamp(curveFunction(level), outputBounds)
 
   return result
+}
+
+/**
+ * @deprecated / FIXME: Makeshift solution
+ */
+export function ParamValueToLinear(level) {
+  console.log('level', level);
+
+  let i = 0
+  for (i = 0; i < PV_steps.length; i++) {
+    if (level < PV_steps[i]) return i
+  }
+
+  // Binary search?
+
+  return i - 1
+
+
+  // // Used for PV volumes, but probably will be better to just use the MS packet
+  // const curveFunction = (x) => {
+  //   return -4e-14*Math.pow(x,3) - 8e-10 * Math.pow(x,2) + 8e-5 * x - 1.6467
+
+  //   // 8262053000 - (15.53416 * x) + (7.301761e-9 * Math.pow(x, 2))
+  // }
+  // level -= 1063699898
+
+  // const inputBounds: Bounds = [1063699898-1063699898, 1063843267-1063699898]
+  // const outputBounds: Bounds = [0, 100]
+
+
+  // console.log('input', level);
+
+  // level = clamp(level, inputBounds)
+  // console.log('clamped', level);
+  // // if (level === inputBounds[0]) return outputBounds[0]
+  // // if (level === inputBounds[1]) return outputBounds[1]
+  // console.log('return',  curveFunction(level));
+  // const result = clamp(curveFunction(level), outputBounds)
+
+  // return result
 }
 
 /**

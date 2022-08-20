@@ -28,7 +28,15 @@ const transformers: {
   'line.*.select': DEFAULTS.boolean,
   'line.*.mute': DEFAULTS.boolean,
   'line.*.48v': DEFAULTS.boolean,
-  'line.*.link': DEFAULTS.boolean
+  'line.*.link': DEFAULTS.boolean,
+  'line.*.volume': {
+    fromPV(value: Buffer) {
+      return ParamValueToLinear(value.readUInt32LE())
+    },
+    fromUB(value: number) {
+      return value * 100
+    }
+  }
   // 'permissions.*': DEFAULTS.boolean,
   // 'advancedscenefilters.*'
   // 'projectfilters.*'

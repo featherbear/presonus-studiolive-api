@@ -28,7 +28,7 @@ import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
-import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
+import { simplifyPathTokens } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
 
 // Forward discovery events
@@ -94,7 +94,7 @@ export class Client extends EventEmitter {
     })
 
     this.on(MessageCode.ParamValue, ({ name, value }) => {
-      name = simplifyPathTokens(tokenisePath(name))
+      name = simplifyPathTokens(name)
       this.state.set(name, value)
     })
   }
@@ -401,9 +401,7 @@ export class Client extends EventEmitter {
     const pseudoZeroLevel = linearVolumeTo32(1)
 
     let currentLevel = this.state.get(target, 0)
-    if (!Number.isInteger(currentLevel)) {
-      currentLevel = linearVolumeTo32(currentLevel * 100)
-    } else if (currentLevel === 0) {
+    if (currentLevel === 0) {
       currentLevel = linearVolumeTo32(0)
     } else if (currentLevel === 1) {
       currentLevel = linearVolumeTo32(100)

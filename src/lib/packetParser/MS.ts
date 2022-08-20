@@ -3,7 +3,7 @@ import { ChannelTypes } from "../constants"
 
 function readValues(buffer: Buffer, count: number) {
   const values = []
-  for (let i = 0; i < count; i++) values.push(buffer.readUInt16LE(i * 2))
+  for (let i = 0; i < count; i++) values.push(buffer.readUInt16LE(i * 2) / 655.35)
   return values
 }
 
