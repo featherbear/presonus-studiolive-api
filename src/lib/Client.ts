@@ -93,7 +93,7 @@ export class Client extends EventEmitter {
       this.zlibData = ZB
     })
 
-    this.on(MESSAGETYPES.Setting, ({ name, value }) => {
+    this.on(MESSAGETYPES.ParamValue, ({ name, value }) => {
       name = simplifyPathTokens(tokenisePath(name))
 
       value = valueTransform(name, value, {
@@ -125,7 +125,7 @@ export class Client extends EventEmitter {
   async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
     this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
-    this._sendPacket(MESSAGETYPES.Hello, shortToLE(port), 0x00)
+    this._sendPacket(MESSAGETYPES.Hello, toShort(port), 0x00)
   }
 
   /**
@@ -309,7 +309,7 @@ export class Client extends EventEmitter {
       MESSAGETYPES.ParamValue,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/mute\x00\x00\x00`),
-        onOff.encode(toFloat(status ? 1 : 0) 
+        onOff.encode(toFloat(status ? 1 : 0))
       ])
     )
   }
@@ -334,10 +334,10 @@ export class Client extends EventEmitter {
 
     const set = (level) => {
       this._sendPacket(
-        MESSAGETYPES.Setting,
+        MESSAGETYPES.ParamValue,
         Buffer.concat([
           Buffer.from(`${target}\x00\x00\x00`),
-          intToLE(level)
+          toInt(level)
         ])
       )
     }

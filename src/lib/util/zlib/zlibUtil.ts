@@ -2,7 +2,7 @@
  * Parse Zlib packets
  */
 
-import { intToLE } from '../bufferUtil'
+import { toInt } from '../bufferUtil'
 import { simplifyPathTokens, tokenisePath } from '../treeUtil'
 import { onOff } from '../valueUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
@@ -33,7 +33,7 @@ export function zlibParse(zlib: Buffer) {
         'line.*.48v'
       ].reduce((obj, val) => ({
         ...obj,
-        [val]: (v) => onOff.decode(intToLE(v))
+        [val]: (v) => onOff.decode(toInt(v))
       }), {})
     }
   })

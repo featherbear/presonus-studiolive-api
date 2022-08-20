@@ -1,5 +1,5 @@
 import SubscriptionOptions, { _InternalSubscriptionOptions } from '../types/SubscriptionOptions'
-import { shortToLE } from './bufferUtil'
+import { toShort } from './bufferUtil'
 
 /**
  * Create subscription packet
@@ -32,7 +32,7 @@ export const unsubscribePacket = prependLengthData(Buffer.from(JSON.stringify({ 
  */
 function prependLengthData(buffer: Buffer) {
   return Buffer.concat([
-    shortToLE(buffer.length), Buffer.from([0, 0]), // TODO: Perhaps the length can be 32LE 
+    toShort(buffer.length), Buffer.from([0, 0]), // TODO: Perhaps the length can be 32LE 
     buffer
   ])
 }

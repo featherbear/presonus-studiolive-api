@@ -1,5 +1,5 @@
 import { CByte, PacketHeader } from '../constants'
-import { shortToLE } from './bufferUtil'
+import { toShort } from './bufferUtil'
 
 type MessageCode = string
 /**
@@ -50,7 +50,7 @@ export function createPacket(messageCode: Buffer | string, data?: Buffer | strin
   ])
   if (connIdentity.length !== 4) throw Error('connIdentity')
 
-  const lengthLE = shortToLE(
+  const lengthLE = toShort(
     messageCode.length + connIdentity.length + data.length
   )
   if (lengthLE.length !== 2) throw Error('lengthLE')
