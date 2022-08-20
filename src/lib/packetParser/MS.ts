@@ -10,7 +10,7 @@ function readValues(buffer: Buffer, count: number) {
 export default function handleMSPacket(this: Client, data): {
 
 } {
-  // First 4 bytes SHOULD be fdrs, but for now we won't check
+  // First 4 bytes SHOULD be 'fdrs', but for now we won't check
   data = data.slice(8)
 
   const channelCounts = this.channelCounts

@@ -6,7 +6,7 @@ type Bounds = [number, number]
  * https://github.com/featherbear/presonus-studiolive-api/blob/a864a2fb4d2838f8edc811c4d2f395e894df4408/PV%2CZB_analysis.xlsx
  */
 export function logVolumeTo32(db) {
-  // Gaussian / Bell Curve fit - https://mycurvefit.com/
+  // Gaussian / Bell Curve fit
   const curveFunction = (x) => Math.trunc(
     1064974000 * Math.exp((-Math.pow(x - 17.99124, 2) / (2 * Math.pow(238.1057, 2))))
   )
@@ -42,46 +42,6 @@ export function linearVolumeTo32(level) {
 }
 
 /**
- * @deprecated / FIXME: Makeshift solution
- */
-export function ParamValueToLinear(level) {
-  console.log('level', level);
-
-  let i = 0
-  for (i = 0; i < PV_steps.length; i++) {
-    if (level < PV_steps[i]) return i
-  }
-
-  // Binary search?
-
-  return i - 1
-
-
-  // // Used for PV volumes, but probably will be better to just use the MS packet
-  // const curveFunction = (x) => {
-  //   return -4e-14*Math.pow(x,3) - 8e-10 * Math.pow(x,2) + 8e-5 * x - 1.6467
-
-  //   // 8262053000 - (15.53416 * x) + (7.301761e-9 * Math.pow(x, 2))
-  // }
-  // level -= 1063699898
-
-  // const inputBounds: Bounds = [1063699898-1063699898, 1063843267-1063699898]
-  // const outputBounds: Bounds = [0, 100]
-
-
-  // console.log('input', level);
-
-  // level = clamp(level, inputBounds)
-  // console.log('clamped', level);
-  // // if (level === inputBounds[0]) return outputBounds[0]
-  // // if (level === inputBounds[1]) return outputBounds[1]
-  // console.log('return',  curveFunction(level));
-  // const result = clamp(curveFunction(level), outputBounds)
-
-  // return result
-}
-
-/**
  * Restrict `val` between a `min` and `max`
  */
 export function clamp(val: number, [min, max]: Bounds) {
@@ -105,7 +65,7 @@ export function transitionValue(from: number, to: number, duration: number, fn: 
   if (duration <= 0 || from === to) {
     fn(to)
     callback?.()
-    return (() => {}) as CancelTransitionFn
+    return (() => { }) as CancelTransitionFn
   }
 
   // Interval should be at least 10 ms

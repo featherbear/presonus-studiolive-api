@@ -5,7 +5,7 @@ import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
-import { MessageCode } from './constants'
+import { Channel, ChannelTypes, MessageCode } from './constants'
 
 import {
   analysePacket,
@@ -30,6 +30,8 @@ import { linearVolumeTo32, logVolumeTo32, transitionValue } from './util/valueUt
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
+import { doesLookupMatch, IGNORE_TRANSFORM } from './util/ValueTransformer'
+import { ignorePV } from './util/transformers'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -95,7 +97,20 @@ export class Client extends EventEmitter {
 
     this.on(MessageCode.ParamValue, ({ name, value }) => {
       name = simplifyPathTokens(name)
+
+      for (let ignoreKey of ignorePV) {
+        if (doesLookupMatch(ignoreKey, name)) return
+      }
+      
       this.state.set(name, value)
+    })
+
+    this.on(MessageCode.FaderPosition, function (MS: { [type in ChannelTypes]: number[] }) {
+      for (let [type, values] of Object.entries(MS)) {
+        for (let i = 0; i < values.length; i++) {
+          this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
+        }
+      }
     })
   }
 
