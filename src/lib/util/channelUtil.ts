@@ -1,5 +1,12 @@
-import { CHANNELS, CHANNELTYPES } from '../constants'
+import { Channel } from '../constants'
+import ChannelCount from '../types/ChannelCount'
 import ChannelSelector from '../types/ChannelSelector'
+
+let counts : ChannelCount;
+
+export function setCounts(channelCount: ChannelCount) {
+  counts = channelCount
+}
 
 export function parseChannelString(
   selector: ChannelSelector
@@ -7,7 +14,7 @@ export function parseChannelString(
   let { type, channel } = selector
 
   // `type` must be a valid enum key
-  if (!Object.keys(CHANNELTYPES).includes(type)) {
+  if (!Object.keys(Channel).includes(type)) {
     throw new Error('Invalid channel type provided')
   }
 
@@ -21,11 +28,11 @@ export function parseChannelString(
     !(Math.trunc(channel) > 0) ||
     (channel != (channel = Math.trunc(channel))) || // eslint-disable-line eqeqeq
 
-    // `channel` must also exist for a given `type`
-    !Object.values(CHANNELS[type]).includes(channel)
+    // `channel` must also be less than the known maximum (if a max is provided)
+    (counts && !(counts[type] && counts[type] > channel))
   ) {
     throw new Error('Invalid channel provided')
   }
 
-  return `${CHANNELTYPES[type]}/ch${channel}`
+  return `${Channel[type]}/ch${channel}`
 }

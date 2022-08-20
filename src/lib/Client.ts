@@ -5,14 +5,14 @@ import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
 import MeterServer from './MeterServer'
-import { MESSAGETYPES } from './constants'
+import { MessageCode } from './constants'
 
 import {
   analysePacket,
   createPacket
 } from './util/MessageProtocol'
 
-import { parseChannelString } from './util/channelUtil'
+import { parseChannelString, setCounts } from './util/channelUtil'
 import { toInt, toShort, toFloat, toBoolean } from './util/bufferUtil'
 
 import handleZBPacket from './packetParser/ZB'
@@ -41,17 +41,17 @@ type dataFnCallback<T = any> = (obj: {
 }) => void;
 
 export declare interface Client {
-  on(event: MESSAGETYPES, listener: fnCallback): this;
+  on(event: MessageCode, listener: fnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
-  once(event: MESSAGETYPES, listener: fnCallback): this;
+  once(event: MessageCode, listener: fnCallback): this;
   once(event: 'data', listener: dataFnCallback): this;
-  off(event: MESSAGETYPES, listener: fnCallback): this;
+  off(event: MessageCode, listener: fnCallback): this;
   off(event: 'data', listener: dataFnCallback): this;
-  addListener(event: MESSAGETYPES, listener: fnCallback): this;
+  addListener(event: MessageCode, listener: fnCallback): this;
   addListener(event: 'data', listener: dataFnCallback): this;
-  removeListener(event: MESSAGETYPES, listener: fnCallback): this;
+  removeListener(event: MessageCode, listener: fnCallback): this;
   removeListener(event: 'data', listener: dataFnCallback): this;
-  removeAllListeners(event: MESSAGETYPES): this;
+  removeAllListeners(event: MessageCode): this;
   removeAllListeners(event: 'data'): this;
 }
 
@@ -89,11 +89,11 @@ export class Client extends EventEmitter {
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
     })
 
-    this.on(MESSAGETYPES.ZLIB, (ZB) => {
+    this.on(MessageCode.ZLIB, (ZB) => {
       this.zlibData = ZB
     })
 
-    this.on(MESSAGETYPES.ParamValue, ({ name, value }) => {
+    this.on(MessageCode.ParamValue, ({ name, value }) => {
       name = simplifyPathTokens(tokenisePath(name))
       this.state.set(name, value)
     })
@@ -118,7 +118,7 @@ export class Client extends EventEmitter {
   async meterSubscribe(port?: number) {
     port = port || this.serverPortUDP
     this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
-    this._sendPacket(MESSAGETYPES.Hello, toShort(port), 0x00)
+    this._sendPacket(MessageCode.Hello, toShort(port), 0x00)
   }
 
   /**
@@ -144,11 +144,11 @@ export class Client extends EventEmitter {
         // #region Connection handshake
 
         const compressedZlibInitCallback = (data) => {
-          this.removeListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
-          this.emit(MESSAGETYPES.ZLIB, data)
+          this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
+          this.emit(MessageCode.ZLIB, data)
         }
 
-        this.addListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
+        this.addListener(MessageCode.Chunk, compressedZlibInitCallback)
 
         Promise.all([
           /**
@@ -156,22 +156,26 @@ export class Client extends EventEmitter {
            */
           new Promise((resolve) => {
             const zlibInitCallback = () => {
-              this.removeListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+              this.removeListener(MessageCode.ZLIB, zlibInitCallback)
 
               // ZB is not always encapsulated in the CK packet, so deregister the listener here too
-              this.removeListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
-              this.channelCounts = {
-                line: Object.keys(this.state.get('line')).length,
-                aux: Object.keys(this.state.get('aux')).length,
-                fx /* fxbus == fxreturn */: Object.keys(this.state.get('fx')).length,
-                return /* aka tape? */: Object.keys(this.state.get('return')).length,
-                talkback: Object.keys(this.state.get('talkback')).length,
-                main: Object.keys(this.state.get('main')).length
-              }
+              this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
+              setCounts((this.channelCounts = {
+                LINE: Object.keys(this.state.get('line')).length,
+                AUX: Object.keys(this.state.get('aux')).length,
+                FX /* fxbus == fxreturn */: Object.keys(this.state.get('fxbus')).length,
+                FXRETURN: Object.keys(this.state.get('fxreturn')).length,
+                RETURN /* aka tape? */: Object.keys(this.state.get('return')).length,
+                TALKBACK: Object.keys(this.state.get('talkback')).length,
+                MAIN: Object.keys(this.state.get('main')).length,
+
+                // TODO: The 16R doesn't have SUB groups. Check against the 24R / 16
+                SUB: Object.keys(this.state.get('sub') ?? {}).length
+              }))
 
               resolve(this)
             }
-            this.addListener(MESSAGETYPES.ZLIB, zlibInitCallback)
+            this.addListener(MessageCode.ZLIB, zlibInitCallback)
           }),
 
           /**
@@ -180,11 +184,11 @@ export class Client extends EventEmitter {
           new Promise((resolve) => {
             const subscribeCallback = data => {
               if (data.id === 'SubscriptionReply') {
-                this.removeListener(MESSAGETYPES.JSON, subscribeCallback)
+                this.removeListener(MessageCode.JSON, subscribeCallback)
                 resolve(this)
               }
             }
-            this.addListener(MESSAGETYPES.JSON, subscribeCallback)
+            this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
           this.conn.removeListener('error', rejectHandler)
@@ -194,7 +198,7 @@ export class Client extends EventEmitter {
         })
 
         // Send subscription request
-        this._sendPacket(MESSAGETYPES.JSON, craftSubscribe(subscribeData))
+        this._sendPacket(MessageCode.JSON, craftSubscribe(subscribeData))
         // #endregion
 
         // #region Keep alive
@@ -204,7 +208,7 @@ export class Client extends EventEmitter {
             clearInterval(keepAliveLoop)
             return
           }
-          this._sendPacket(MESSAGETYPES.KeepAlive)
+          this._sendPacket(MessageCode.KeepAlive)
         }, 1000)
         // #endregion
       })
@@ -213,7 +217,7 @@ export class Client extends EventEmitter {
 
   async close() {
     this.meterUnsubscribe()
-    await this._sendPacket(MESSAGETYPES.JSON, unsubscribePacket).then(() => {
+    await this._sendPacket(MessageCode.JSON, unsubscribePacket).then(() => {
       this.conn.destroy()
     })
   }
@@ -227,15 +231,15 @@ export class Client extends EventEmitter {
 
     // Handle message types
     // eslint-disable-next-line
-    const handlers: { [k in MESSAGETYPES]?: (data) => any } = {
-      [MESSAGETYPES.JSON]: handleJMPacket,
-      [MESSAGETYPES.Setting]: handlePVPacket,
-      [MESSAGETYPES.ZLIB]: handleZBPacket,
-      [MESSAGETYPES.FaderPosition]: handleMSPacket,
-      [MESSAGETYPES.Chunk]: handleCKPacket,
-      [MESSAGETYPES.DeviceList]: null,
-      [MESSAGETYPES.Unknown1]: null,
-      [MESSAGETYPES.Unknown3]: null
+    const handlers: { [k in MessageCode]?: (data) => any } = {
+      [MessageCode.JSON]: handleJMPacket,
+      [MessageCode.Setting]: handlePVPacket,
+      [MessageCode.ZLIB]: handleZBPacket,
+      [MessageCode.FaderPosition]: handleMSPacket,
+      [MessageCode.Chunk]: handleCKPacket,
+      [MessageCode.DeviceList]: null,
+      [MessageCode.Unknown1]: null,
+      [MessageCode.Unknown3]: null
     }
 
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
@@ -251,7 +255,7 @@ export class Client extends EventEmitter {
 
   sendList(key) {
     this._sendPacket(
-      MESSAGETYPES.FileRequest,
+      MessageCode.FileRequest,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
         Buffer.from('List' + key.toString()),
@@ -299,7 +303,7 @@ export class Client extends EventEmitter {
    */
   setMute(selector: ChannelSelector, status: boolean) {
     this._sendPacket(
-      MESSAGETYPES.ParamValue,
+      MessageCode.ParamValue,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/mute\x00\x00\x00`),
         toBoolean(status)
@@ -309,7 +313,7 @@ export class Client extends EventEmitter {
 
   setColor(selector: ChannelSelector, hex: string, alpha: number = 0xFF) {
     this._sendPacket(
-      MESSAGETYPES.ParamColor,
+      MessageCode.ParamColor,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/color\x00\x00\x00`),
         Buffer.from(hex, 'hex'),
@@ -333,7 +337,7 @@ export class Client extends EventEmitter {
     */
     const isStereo = this.state.get(parseChannelString(selector) + '/link')
     this._sendPacket(
-      MESSAGETYPES.ParamValue,
+      MessageCode.ParamValue,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/${isStereo ? 'stereopan' : 'pan'}\x00\x00\x00`),
         toFloat(pan / 100)
@@ -346,7 +350,7 @@ export class Client extends EventEmitter {
    */
   setLink(selector: ChannelSelector, link: boolean) {
     this._sendPacket(
-      MESSAGETYPES.ParamValue,
+      MessageCode.ParamValue,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/link\x00\x00\x00`),
         toBoolean(link)
@@ -378,7 +382,7 @@ export class Client extends EventEmitter {
 
     const set = (level) => {
       this._sendPacket(
-        MESSAGETYPES.ParamValue,
+        MessageCode.ParamValue,
         Buffer.concat([
           Buffer.from(`${target}\x00\x00\x00`),
           toInt(level)

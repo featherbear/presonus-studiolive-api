@@ -1,10 +1,7 @@
+import { ChannelTypes } from "../constants"
+
 type ChannelCount = {
-    line: number
-    aux: number
-    fx: number
-    return: number
-    talkback: number
-    main: number
+    [_ in ChannelTypes]: number
 }
 
 export default ChannelCount

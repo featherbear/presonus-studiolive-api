@@ -1,4 +1,3 @@
-export * as CHANNELS from './channels'
-export * from './channelTypes'
-export * from './messageTypes'
+export * from './channel'
+export * from './message'
 export * from './presonus'

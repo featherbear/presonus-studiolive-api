@@ -2,7 +2,7 @@
 
 // https://github.com/featherbear/presonus-studiolive-api/issues/13
 
-export enum MESSAGETYPES {
+export enum MessageCode {
     KeepAlive = 'KA',
     
     Hello = 'UM',

@@ -1,8 +1,8 @@
-import { CHANNELS, CHANNELTYPES } from '../constants'
+import { ChannelTypes } from '../constants'
 
 type ChannelSelector = {
-    type: keyof typeof CHANNELTYPES
-    channel: CHANNELS.CHANNELS
+    type: ChannelTypes
+    channel: number
 } | {
     type: 'MAIN' | 'TALKBACK'
     channel?: 1
