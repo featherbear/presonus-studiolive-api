@@ -13,7 +13,7 @@ import {
 } from './util/MessageProtocol'
 
 import { parseChannelString } from './util/channelUtil'
-import { intToLE, shortToLE } from './util/bufferUtil'
+import { toInt, toShort, toFloat } from './util/bufferUtil'
 
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
@@ -26,7 +26,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import { linearVolumeTo32, logVolumeTo32, onOff, toFloat, transitionValue } from './util/valueUtil'
+import { linearVolumeTo32, logVolumeTo32, onOff, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath, valueTransform } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
@@ -258,7 +258,7 @@ export class Client extends EventEmitter {
 
   sendList(key) {
     this._sendPacket(
-      MESSAGETYPES.FileResource,
+      MESSAGETYPES.FileRequest,
       Buffer.concat([
         Buffer.from([0x01, 0x00]),
         Buffer.from('List' + key.toString()),

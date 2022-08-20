@@ -1,7 +1,7 @@
 /**
  * Convert an unsigned short (16-bit) to a 2-byte buffer
  */
-export function shortToLE(i) {
+export function toShort(i) {
   const res = Buffer.allocUnsafe(2)
   res.writeUInt16LE(i)
   return res
@@ -10,9 +10,18 @@ export function shortToLE(i) {
 /**
  * Convert an unsigned integer (32-bit) to a 4-byte buffer
  */
-export function intToLE(i) {
+export function toInt(i) {
   const res = Buffer.allocUnsafe(4)
   res.writeUInt32LE(i)
+  return res
+}
+
+/**
+ * Convert a decimal to a 4-byte buffer
+ */
+export function toFloat(i: number) {
+  const res = Buffer.allocUnsafe(4)
+  res.writeFloatLE(i)
   return res
 }
 
