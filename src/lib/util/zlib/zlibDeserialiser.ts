@@ -96,7 +96,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       // int32
       case 0x6c /* l */: {
         length = 4
-        break;
+        break
       }
       
       // int64

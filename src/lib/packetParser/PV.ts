@@ -12,7 +12,7 @@ export default function handlePVPacket(data) {
     const partA = data.slice(idx + 1, idx + 3 /* 1+2 */)
     const partB = data.slice(idx + 3)
 
-    let value = valueTransform(key, partB, transformersPV)
+    const value = valueTransform(key, partB, transformersPV)
 
     data = {
       name: key,
@@ -21,7 +21,7 @@ export default function handlePVPacket(data) {
       partB
     } as SettingType
   } else {
-    console.warn("Could parse PV packet", data)
+    console.warn('Could parse PV packet', data)
   }
 
   return data

@@ -30,7 +30,6 @@ import { linearVolumeTo32, logVolumeTo32, transitionValue } from './util/valueUt
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
-import { valueTransform } from './util/ValueTransformer'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -143,7 +142,7 @@ export class Client extends EventEmitter {
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
-  
+
         const compressedZlibInitCallback = (data) => {
           this.removeListener(MESSAGETYPES.Chunk, compressedZlibInitCallback)
           this.emit(MESSAGETYPES.ZLIB, data)
@@ -303,7 +302,7 @@ export class Client extends EventEmitter {
       MESSAGETYPES.ParamValue,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/mute\x00\x00\x00`),
-        onOff.encode(toFloat(status ? 1 : 0))
+        toBoolean(status)
       ])
     )
   }
@@ -332,11 +331,11 @@ export class Client extends EventEmitter {
     initiator
     linkmaster = 1
     */
-    let isStereo = this.state.get(parseChannelString(selector) + "/link")
+    const isStereo = this.state.get(parseChannelString(selector) + '/link')
     this._sendPacket(
       MESSAGETYPES.ParamValue,
       Buffer.concat([
-        Buffer.from(`${parseChannelString(selector)}/${isStereo ? "stereopan" : "pan"}\x00\x00\x00`),
+        Buffer.from(`${parseChannelString(selector)}/${isStereo ? 'stereopan' : 'pan'}\x00\x00\x00`),
         toFloat(pan / 100)
       ])
     )
@@ -360,7 +359,7 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * **INTERNAL** Send a level command to the target
+   * @internal Send a level command to the target
    */
   private _setLevel(this: Client, selector: ChannelSelector, level, duration: number = 0): Promise<null> {
     const channelString = parseChannelString(selector)
@@ -391,10 +390,10 @@ export class Client extends EventEmitter {
       set(level)
       return assertReturn()
     }
-    
+
     // Transitioning to absolute zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
     // So if we see transition to/from 0, we transition to/from 0x3a...... first
-    
+
     const pseudoZeroLevel = linearVolumeTo32(1)
 
     let currentLevel = this.state.get(target, 0)
@@ -411,7 +410,7 @@ export class Client extends EventEmitter {
     if (currentLevel === level) {
       return assertReturn()
     }
-    
+
     if (level === 0) {
       // If the target level is 0, transition to the smallest non-zero level
       return new Promise((resolve) => {

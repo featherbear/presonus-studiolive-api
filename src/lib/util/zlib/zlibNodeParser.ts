@@ -66,7 +66,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
           base: {
             [ZlibKeySymbol]: [...(root?.[ZlibKeySymbol] ?? []), key]
           },
-          parent: root,
+          parent: root
         })
       }
     },

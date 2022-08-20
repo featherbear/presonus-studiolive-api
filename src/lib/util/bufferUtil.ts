@@ -28,7 +28,7 @@ export function toFloat(i: number) {
 /**
  * Convert a decimal to a 4-byte boolean
  */
- export function toBoolean(val: boolean) {
+export function toBoolean(val: boolean) {
   return toFloat(val ? 1 : 0)
 }
 
