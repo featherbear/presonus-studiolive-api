@@ -82,6 +82,12 @@ export const onOff = {
   }
 }
 
+export const toFloat = (value: number) => {
+  let buffer = Buffer.allocUnsafe(4)
+  buffer.writeFloatLE(value)
+  return buffer
+}
+
 type CancelTransitionFn = () => void
 
 /**
