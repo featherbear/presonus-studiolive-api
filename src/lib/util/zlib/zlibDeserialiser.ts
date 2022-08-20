@@ -31,7 +31,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       }
 
       if (controlCharacter !== 0x69 /* i */) {
-        throw new Error('(ZB) Failed to find delimiter 1')
+        throw new Error(`(ZB) Failed to find delimiter 1, found ${controlCharacter} instead at position ${idx}`)
       }
 
       const length = buf[idx++]
