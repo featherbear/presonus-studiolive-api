@@ -129,7 +129,10 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
 
       // int8
       case 0x69 /* i */: {
-        valueData.readInt8()
+        value = valueData.readInt8()
+        break
+      }
+
       // int32
       case 0x6c /* l */: {
         value = valueData.readInt32BE()
