@@ -1,31 +1,24 @@
-import { ValueTransformerLookup } from "./treeUtil"
+import { DEFAULT_TRANSFORMS, ValueTransformer, ValueTransformerLookup } from "./ValueTransformer"
 
 type TransformerType = {
     /**
      * Transform values from the PV payload
      */
-    fromPV?: (value: Buffer) => any
+    fromPV?: ValueTransformer
 
     /**
      * Transform values from the UBJSON payload
      * Generally from the ZB or CK<ZB> payload
      */
-    fromUB?: (value: Buffer) => any
+    fromUB?: ValueTransformer
 }
 
 const DEFAULTS: {
     [key: string]: TransformerType
 } = {
     boolean: {
-        fromPV(bytes) {
-            if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
-                return true
-            } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
-                return false
-            }
-
-            throw new Error("Unexpected value")
-        }
+        fromPV: DEFAULT_TRANSFORMS.buffer.boolean,
+        fromUB: DEFAULT_TRANSFORMS.integer.boolean
     }
 }
 
@@ -35,7 +28,7 @@ const transformers: {
     'line.*.select': DEFAULTS.boolean,
     'line.*.mute': DEFAULTS.boolean,
     'line.*.48v': DEFAULTS.boolean,
-    'permissions.*':  DEFAULTS.boolean,
+    // 'permissions.*': DEFAULTS.boolean,
     // 'advancedscenefilters.*'
     // 'projectfilters.*'
     // 'channelfilters.*'

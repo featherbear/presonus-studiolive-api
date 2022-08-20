@@ -1,5 +1,5 @@
 import { transformersUB } from '../transformers'
-import { valueTransform, ValueTransformerLookup } from '../treeUtil'
+import { valueTransform } from '../ValueTransformer'
 
 export const ZlibValueSymbol = Symbol('value')
 export const ZlibRangeSymbol = Symbol('range')

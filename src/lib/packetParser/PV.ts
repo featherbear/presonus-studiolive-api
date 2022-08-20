@@ -1,6 +1,6 @@
 import type SettingType from '../types/SettingType'
 import { transformersPV } from '../util/transformers'
-import { valueTransform } from '../util/treeUtil'
+import { valueTransform } from '../util/ValueTransformer'
 
 export default function handlePVPacket(data) {
   const idx = data.indexOf(0x00) // Find the NULL terminator of the key string

@@ -74,16 +74,3 @@ export function craftSubscribe(overrides: SubscriptionOptions = {}) {
     Buffer.from(JSON.stringify(data, null, ' '))
   ])
 }
-
-export function onOffCode(bool) {
-  return Buffer.from(bool ? [0x00, 0x00, 0x80, 0x3f] : [0x00, 0x00, 0x00, 0x00])
-}
-
-export function onOffEval(bytes) {
-  if (bytes.equals(new Uint8Array([0x00, 0x00, 0x80, 0x3f]))) {
-    return true
-  } else if (bytes.equals(new Uint8Array([0x00, 0x00, 0x00, 0x00]))) {
-    return false
-  }
-  return bytes
-}
