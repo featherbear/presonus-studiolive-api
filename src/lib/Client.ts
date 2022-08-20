@@ -314,6 +314,21 @@ export class Client extends EventEmitter {
     )
   }
 
+  setColor(selector: ChannelSelector, hex: string, alpha: number = 0xFF) {
+    this._sendPacket(
+      MESSAGETYPES.ParamColor,
+      Buffer.concat([
+        Buffer.from(`${parseChannelString(selector)}/color\x00\x00\x00`),
+        Buffer.from(hex, 'hex'),
+        Buffer.from([alpha])
+      ])
+    )
+  }
+  
+  setColour(...args: Parameters<this['setColor']>) {
+    return this.setColor.apply(this, args)
+  }
+
   /**
    * **INTERNAL** Send a level command to the target
    */

@@ -1,5 +1,7 @@
 /* eslint no-unused-vars: "off" */
 
+// https://github.com/featherbear/presonus-studiolive-api/issues/13
+
 export enum MESSAGETYPES {
     KeepAlive = 'KA',
     
@@ -12,9 +14,10 @@ export enum MESSAGETYPES {
      * @deprecated Use ParamValue
      */
     Setting = 'PV',
-
     ParamValue = 'PV',
     
+    ParamColor = 'PC',
+
     /**
      * @deprecated Use ParamStrList
      */
