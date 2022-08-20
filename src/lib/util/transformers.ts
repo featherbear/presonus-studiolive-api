@@ -28,6 +28,7 @@ const transformers: {
     'line.*.select': DEFAULTS.boolean,
     'line.*.mute': DEFAULTS.boolean,
     'line.*.48v': DEFAULTS.boolean,
+    'line.*.link': DEFAULTS.boolean
     // 'permissions.*': DEFAULTS.boolean,
     // 'advancedscenefilters.*'
     // 'projectfilters.*'

@@ -25,6 +25,13 @@ export function toFloat(i: number) {
   return res
 }
 
+/**
+ * Convert a decimal to a 4-byte boolean
+ */
+ export function toBoolean(val: boolean) {
+  return toFloat(val ? 1 : 0)
+}
+
 // Hacky mc hack hack
 declare global {
     interface Buffer {

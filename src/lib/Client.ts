@@ -13,7 +13,7 @@ import {
 } from './util/MessageProtocol'
 
 import { parseChannelString } from './util/channelUtil'
-import { toInt, toShort, toFloat } from './util/bufferUtil'
+import { toInt, toShort, toFloat, toBoolean } from './util/bufferUtil'
 
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
@@ -318,7 +318,43 @@ export class Client extends EventEmitter {
       ])
     )
   }
-  
+
+  /**
+   * For a mono channel, the pan value is the pan value from 0 (hard left) to 100 (hard right)  
+   * TODO: For a stereo channel, the pan value is the width from 0 to 100 (stereo)
+   */
+  setPan(selector: ChannelSelector, pan: number) {
+    /*
+    When channels are grouped
+    link = 1
+    panlinkstate = 1
+    
+    initiator
+    linkmaster = 1
+    */
+    let isStereo = this.state.get(parseChannelString(selector) + "/link")
+    this._sendPacket(
+      MESSAGETYPES.ParamValue,
+      Buffer.concat([
+        Buffer.from(`${parseChannelString(selector)}/${isStereo ? "stereopan" : "pan"}\x00\x00\x00`),
+        toFloat(pan / 100)
+      ])
+    )
+  }
+
+  /**
+   * @internal By original nature, only an odd numbered channel is targeted (& ~1) 
+   */
+  setLink(selector: ChannelSelector, link: boolean) {
+    this._sendPacket(
+      MESSAGETYPES.ParamValue,
+      Buffer.concat([
+        Buffer.from(`${parseChannelString(selector)}/link\x00\x00\x00`),
+        toBoolean(link)
+      ])
+    )
+  }
+
   setColour(...args: Parameters<this['setColor']>) {
     return this.setColor.apply(this, args)
   }
