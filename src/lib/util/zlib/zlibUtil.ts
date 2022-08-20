@@ -2,9 +2,7 @@
  * Parse Zlib packets
  */
 
-import { toInt } from '../bufferUtil'
 import { simplifyPathTokens, tokenisePath } from '../treeUtil'
-import { onOff } from '../valueUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibRangeSymbol, ZlibStringEnumSymbol, ZlibValueSymbol } from './zlibNodeParser'
 
