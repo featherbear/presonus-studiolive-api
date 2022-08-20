@@ -1,4 +1,3 @@
-export * from './actions'
 export * as CHANNELS from './channels'
 export * from './channelTypes'
 export * from './messageTypes'
