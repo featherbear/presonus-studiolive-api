@@ -28,9 +28,9 @@ import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { linearVolumeTo32, logVolumeTo32, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
-import { simplifyPathTokens } from './util/treeUtil'
+import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
-import { doesLookupMatch, IGNORE_TRANSFORM } from './util/ValueTransformer'
+import { doesLookupMatch, IGNORE } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
 
 // Forward discovery events
@@ -96,7 +96,7 @@ export class Client extends EventEmitter {
     })
 
     this.on(MessageCode.ParamValue, ({ name, value }) => {
-      name = simplifyPathTokens(name)
+      name = tokenisePath(name)
 
       for (let ignoreKey of ignorePV) {
         if (doesLookupMatch(ignoreKey, name)) return
