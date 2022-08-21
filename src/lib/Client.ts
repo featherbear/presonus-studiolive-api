@@ -26,7 +26,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import { linearVolumeTo32, logVolumeTo32, transitionValue } from './util/valueUtil'
+import { logVolumeTo32, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
@@ -379,17 +379,23 @@ export class Client extends EventEmitter {
 
   /**
    * @internal Send a level command to the target
+   * targetLevel - [0, 100]
    */
-  private _setLevel(this: Client, selector: ChannelSelector, level, duration: number = 0): Promise<null> {
-    const channelString = parseChannelString(selector)
-    const target = `${channelString}/volume`
+  private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
+    let targetString = parseChannelString(selector)
+
+    if (selector.mixType) {
+      targetString += `/${Channel[selector.mixType]}${selector.mixNumber}`
+    } else {
+      targetString += '/volume'
+    }
 
     const assertReturn = () => {
       // Additional time to wait for response
       return new Promise<null>((resolve) => {
         // 0ms timeout - queue event loop
         setTimeout(() => {
-          this.state.set(target, level)
+          this.state.set(targetString, targetLevel)
           resolve(null)
         }, 0)
       })
@@ -399,64 +405,35 @@ export class Client extends EventEmitter {
       this._sendPacket(
         MessageCode.ParamValue,
         Buffer.concat([
-          Buffer.from(`${target}\x00\x00\x00`),
-          toInt(level)
+          Buffer.from(`${targetString}\x00\x00\x00`),
+          toFloat(level / 100)
         ])
       )
     }
 
     if (!duration) {
-      set(level)
+      set(targetLevel)
       return assertReturn()
     }
 
-    // Transitioning to absolute zero is hard because the numbers go from 0x3f800000 to 0x3a...... then suddenly 0
-    // So if we see transition to/from 0, we transition to/from 0x3a...... first
-
-    const pseudoZeroLevel = linearVolumeTo32(1)
-
-    let currentLevel = this.state.get(target, 0)
-    if (currentLevel === 0) {
-      currentLevel = linearVolumeTo32(0)
-    } else if (currentLevel === 1) {
-      currentLevel = linearVolumeTo32(100)
-    }
+    let currentLevel = this.state.get(targetString, 0)
 
     // Don't do anything if we already are on the same level
-    // Unlikely because of the approximation values
-    if (currentLevel === level) {
+    if (currentLevel === targetLevel) {
       return assertReturn()
     }
 
-    if (level === 0) {
-      // If the target level is 0, transition to the smallest non-zero level
-      return new Promise((resolve) => {
-        transitionValue(
-          currentLevel || pseudoZeroLevel,
-          pseudoZeroLevel,
-          duration,
-          (v) => set(v),
-          async () => {
-            // After transition, finally set the level to 0
-            set(0)
-            resolve(await assertReturn())
-          }
-        )
-      })
-    } else {
-      // If currentLevel == 0, then short circuit to use the smallest non-zero value (linear 1)
-      return new Promise((resolve) => {
-        transitionValue(
-          currentLevel || pseudoZeroLevel,
-          level, duration,
-          (v) => set(v),
-          async () => {
-            resolve(await assertReturn())
-          }
+    return new Promise((resolve) => {
+      transitionValue(
+        currentLevel,
+        targetLevel, duration,
+        (v) => set(v),
+        async () => {
+          resolve(await assertReturn())
+        }
 
-        )
-      })
-    }
+      )
+    })
   }
 
   /**
@@ -479,17 +456,7 @@ export class Client extends EventEmitter {
    * @see http://www.sengpielaudio.com/calculator-levelchange.htm
    */
   async setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
-    /**
-     * 🚒 🧯 🧨 🚒 🧯 🧨 
-     * 🔥 this is fine 🔥 
-     * 🚒 🧯 🧨 🚒 🧯 🧨
-     * https://preview.redd.it/j4886fi37yh71.gif?format=mp4&s=df2258d4a78e0933515e0c445a96c8ee7b3f89c4
-     * 
-     * Every 10dB is a 10x change
-     * 20dB means 100x
-     * 30dB means 1000x
-     */
-    return this._setLevel(selector, linearVolumeTo32(linearLevel), duration)
+    return this._setLevel(selector, linearLevel, duration)
   }
 
   /**

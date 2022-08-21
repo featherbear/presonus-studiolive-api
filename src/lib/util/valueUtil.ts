@@ -23,24 +23,6 @@ export function logVolumeTo32(db) {
   return result
 }
 
-export function linearVolumeTo32(level) {
-  // Logarithmic fit
-  const curveFunction = (x) => Math.trunc(
-    1008981585.018076882 + 12158286.478774655 * Math.log(x) // eslint-disable-line no-loss-of-precision
-  )
-
-  const inputBounds: Bounds = [0, 100]
-  const outputBounds: Bounds = [0, 0x3f800000]
-
-  level = clamp(level, inputBounds)
-
-  if (level === inputBounds[0]) return outputBounds[0]
-  if (level === inputBounds[1]) return outputBounds[1]
-  const result = clamp(curveFunction(level), outputBounds)
-
-  return result
-}
-
 /**
  * Restrict `val` between a `min` and `max`
  */
