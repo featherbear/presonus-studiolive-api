@@ -45,7 +45,7 @@ export function parseChannelString(
     (channel != (channel = Math.trunc(channel))) || // eslint-disable-line eqeqeq
 
     // `channel` must also be less than the known maximum (if a max is provided)
-    (counts && !(counts[type] && counts[type] > channel))
+    (counts && !(counts[type] && counts[type] >= channel))
   ) {
     throw new Error('Invalid channel provided')
   }
