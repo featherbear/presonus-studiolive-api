@@ -58,7 +58,7 @@ const transformers: {
     },
     'fxreturn.*.dca.aux*': {
       fromPV: IGNORE
-    },
+    }
   },
   ...{
     'line.*.aux*': {
@@ -72,7 +72,7 @@ const transformers: {
     },
     'talkback.*.aux*': {
       fromPV: DEFAULT_TRANSFORMS.buffer.float
-    },
+    }
   },
   'line.*.pan': {
     fromPV: DEFAULT_TRANSFORMS.buffer.float
