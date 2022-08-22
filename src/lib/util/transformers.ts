@@ -26,9 +26,10 @@ const transformers: {
   [key: string]: TransformerType
 } = {
   'line.*.select': DEFAULTS.boolean,
-  'line.*.mute': DEFAULTS.boolean,
+  '**.mute': DEFAULTS.boolean,
   'line.*.48v': DEFAULTS.boolean,
   'line.*.link': DEFAULTS.boolean,
+  '**.assign_*': DEFAULTS.boolean,
   'line.*.dca.volume': {
     fromPV: IGNORE,
   },

@@ -10,14 +10,16 @@ export type ValueTransformerLookup = {
  * Lookup - Transformer key
  * Symbol - Reference key
  */
-export const doesLookupMatch = (lookup: string, symbolPath: string[]) => {
-  const lookupPath = tokenisePath(lookup)
-  const lastIdx = Math.min(symbolPath.length, lookupPath.length)
+export const doesLookupMatch = (lookup: string | string[], symbolPath: string[]) => {
+  const lookupPath = Array.isArray(lookup) ? lookup : tokenisePath(lookup)
+  const lastIdx = lookupPath.length
 
   let lookupIdx = 0
   let symbolIdx = 0
 
   while (symbolIdx < lastIdx) {
+    if (symbolIdx >= symbolPath.length) return false;
+
     let currentSymbol = symbolPath[symbolIdx];
     let currentToken = lookupPath[lookupIdx];
 
@@ -26,22 +28,23 @@ export const doesLookupMatch = (lookup: string, symbolPath: string[]) => {
       symbolIdx++
       lookupIdx++
       continue
-    } else if (currentToken.endsWith("*") && currentSymbol.startsWith(currentToken.slice(0, currentToken.indexOf('*')))) {
-        symbolIdx++
-        lookupIdx++
-        continue
     } else if (currentToken === '**') {
-      lookupIdx++
-
       // Double wildcard on last token, accept all
       if (lookupIdx === lastIdx) break
 
-      // Find the position of the token after the wildcard
-      symbolIdx = symbolPath.indexOf(currentToken, lookupIdx)
+      lookupIdx++;
 
-      // const jumpIdx = symbolPath.indexOf(lookupPath[lookupIdx + 1], lookupIdx + 1)
-      // if (jumpIdx === -1) return false
-      // symbolIdx = jumpIdx
+      for (let j = 0; j < symbolPath.length - symbolIdx; j++) {
+        if (doesLookupMatch(lookupPath.slice(lookupIdx), symbolPath.slice(symbolIdx + j))) {
+          return true
+        }
+      }
+
+      return false
+    } else if (currentToken.endsWith("*") && currentSymbol.startsWith(currentToken.slice(0, currentToken.indexOf('*')))) {
+      symbolIdx++
+      lookupIdx++
+      continue
     } else {
       // Token doesn't match
       return false
@@ -60,7 +63,9 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
 
   for (const [lookup, transformer] of Object.entries(valueTransformers)) {
     if (doesLookupMatch(lookup, symbolPath)) {
+      let old = value
       value = transformer(value, symbolPath)
+      console.log(`Key '${symbolPath.join('.')}' matched transformer ${lookup}`, old, '->', value);
       break
     }
   }
