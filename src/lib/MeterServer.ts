@@ -61,53 +61,53 @@ export default function createServer(port, channelCounts: ChannelCount, onData: 
         return values
       }
 
-      const input = readValues(channelCounts.line)
+      const input = readValues(channelCounts.LINE)
 
       const channelStrip = {
-        stripA: readValues(channelCounts.line, 3),
-        stripB: readValues(channelCounts.line),
-        stripC: readValues(channelCounts.line),
-        stripD: readValues(channelCounts.line),
-        stripE: readValues(channelCounts.line)
+        stripA: readValues(channelCounts.LINE, 3),
+        stripB: readValues(channelCounts.LINE),
+        stripC: readValues(channelCounts.LINE),
+        stripD: readValues(channelCounts.LINE),
+        stripE: readValues(channelCounts.LINE)
       }
 
       // Metering values for the main mix
-      const mainMixFaders = readValues(channelCounts.line)
+      const mainMixFaders = readValues(channelCounts.LINE)
 
       // Stereo
       const fxreturn_strip = {
-        input: readValues(channelCounts.fx * 2, 8),
-        stripA: readValues(channelCounts.fx * 2),
-        stripB: readValues(channelCounts.fx * 2),
-        stripC: readValues(channelCounts.fx * 2)
+        input: readValues(channelCounts.FXRETURN * 2, 8),
+        stripA: readValues(channelCounts.FXRETURN * 2),
+        stripB: readValues(channelCounts.FXRETURN * 2),
+        stripC: readValues(channelCounts.FXRETURN * 2)
       }
 
       /**
        * Aux output meters
        */
-      const aux_metering = readValues(channelCounts.aux)
+      const aux_metering = readValues(channelCounts.AUX)
 
       const aux_chstrip = {
-        stripA: readValues(channelCounts.aux),
-        stripB: readValues(channelCounts.aux),
-        stripC: readValues(channelCounts.aux),
-        stripD: readValues(channelCounts.aux)
+        stripA: readValues(channelCounts.AUX),
+        stripB: readValues(channelCounts.AUX),
+        stripC: readValues(channelCounts.AUX),
+        stripD: readValues(channelCounts.AUX)
       }
 
       const fx_chstrip = {
-        inputs: readValues(channelCounts.fx),
-        stripA: readValues(channelCounts.fx), // eq out
-        stripB: readValues(channelCounts.fx), // comp out
-        stripC: readValues(channelCounts.fx) // outs
+        inputs: readValues(channelCounts.FX),
+        stripA: readValues(channelCounts.FX), // eq out
+        stripB: readValues(channelCounts.FX), // comp out
+        stripC: readValues(channelCounts.FX) // outs
       }
 
       // Stereo
-      const main = readValues(channelCounts.main * 2)
+      const main = readValues(channelCounts.MAIN * 2)
       const main_chstrip = {
-        stageA: readValues(channelCounts.main * 2),
-        stageB: readValues(channelCounts.main * 2),
-        stageC: readValues(channelCounts.main * 2),
-        stageD: readValues(channelCounts.main * 2)
+        stageA: readValues(channelCounts.MAIN * 2),
+        stageB: readValues(channelCounts.MAIN * 2),
+        stageC: readValues(channelCounts.MAIN * 2),
+        stageD: readValues(channelCounts.MAIN * 2)
       }
 
       onData({
