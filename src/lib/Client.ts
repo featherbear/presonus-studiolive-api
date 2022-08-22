@@ -24,7 +24,7 @@ import SubscriptionOptions from './types/SubscriptionOptions'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
 import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
-import { ZlibNode } from './util/zlib/zlibNodeParser'
+import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { logVolumeToLinear, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
@@ -112,6 +112,17 @@ export class Client extends EventEmitter {
         }
       }
     })
+  }
+
+  /**
+   * Extracts the data structure and cache layer
+   * @internal
+   */
+  dumpState(): any {
+    return {
+      internal: dumpNode(this.zlibData),
+      cache: this.state._data.toJSON()
+    }
   }
 
   static async discover(timeout = 10 * 1000) {

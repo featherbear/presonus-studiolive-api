@@ -53,4 +53,21 @@ export default class KVTree {
     if (!this[Parent]) return ''
     return [this[Parent].path, this[BaseSymbol]].join('/')
   }
+
+  toJSON() {
+    return Object.entries(this).reduce((cur, [key, obj]) => {
+      return ({
+        ...cur,
+        [key]: repr(obj)
+      })
+
+    }, {})
+  }
+}
+
+
+function repr(obj) {
+  if (obj instanceof KVTree) return obj.toJSON()
+  if (obj instanceof Buffer) return obj.toString('hex')
+  return obj
 }

@@ -76,8 +76,6 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
 
         const symbolPath = [...(root?.[ZlibKeySymbol] ?? []), key]
 
-        // TODO: Implement partial wildcard?
-        // e.g. aa.bb.cc* or aa.bb.*cc or aa.bb.c*c
         /**
          * Value transformers
          */
@@ -128,3 +126,27 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
 }
 
 export default zlibParseNode
+
+/**
+ * Extract the contents of a node
+ */
+export function dumpNode(node: ZlibNode, recurseDepth?: number) {
+  let data: any = {}
+  if (node[ZlibRangeSymbol]) data.range = node[ZlibRangeSymbol]
+  if (node[ZlibStringEnumSymbol]) data.strings = node[ZlibStringEnumSymbol]
+  if (node[ZlibKeySymbol]) data.key = node[ZlibKeySymbol]
+
+  if (
+    (typeof recurseDepth === 'undefined' || recurseDepth > 0)
+    && Object.keys(node).length > 0
+  ) {
+    data.children = Object.entries(node).reduce((obj, [key, node]) => ({ ...obj, [key]: dumpNode(<ZlibNode>node, recurseDepth ? recurseDepth - 1 : recurseDepth) }), {})
+  }
+
+  if (typeof node[ZlibValueSymbol] !== 'undefined') {
+    if (Object.keys(data).length > 0) data.value = node[ZlibValueSymbol]
+    else return node[ZlibValueSymbol]
+  }
+
+  return data
+} 
