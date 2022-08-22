@@ -32,6 +32,7 @@ import { tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
+import handlePSPacket from './packetParser/PS'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -96,12 +97,17 @@ export class Client extends EventEmitter {
     })
 
     this.on(MessageCode.ParamValue, ({ name, value }) => {
+      // Tokenise ahead of time
       name = tokenisePath(name)
 
       for (const ignoreKey of ignorePV) {
         if (doesLookupMatch(ignoreKey, name)) return
       }
 
+      this.state.set(name, value)
+    })
+
+    this.on(MessageCode.ParamString, ({ name, value }) => {
       this.state.set(name, value)
     })
 
@@ -259,7 +265,8 @@ export class Client extends EventEmitter {
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: handleJMPacket,
-      [MessageCode.Setting]: handlePVPacket,
+      [MessageCode.ParamValue]: handlePVPacket,
+      [MessageCode.ParamString]: handlePSPacket,
       [MessageCode.ZLIB]: handleZBPacket,
       [MessageCode.FaderPosition]: handleMSPacket,
       [MessageCode.Chunk]: handleCKPacket,

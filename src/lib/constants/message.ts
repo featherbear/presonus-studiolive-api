@@ -17,7 +17,8 @@ export enum MessageCode {
     ParamValue = 'PV',
     
     ParamColor = 'PC',
-
+    ParamString = 'PS',
+    
     /**
      * @deprecated Use ParamStrList
      */
