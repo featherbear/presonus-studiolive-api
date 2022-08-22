@@ -432,11 +432,11 @@
 
 <p>Used during API client connection to configure identity.<br>
 If using multiple instances of this API, it is recommended to modify the <code>clientIdentifier</code> property</p>
-<h3 id='enum-messagetypes'>enum:<code>MESSAGETYPES</code></h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+<h3 id='enum-messagecode'>enum:<code>MessageCode</code></h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 
 <span class="c1">// ...</span>
 
-<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MESSAGETYPES</span><span class="p">.</span><span class="nx">JSON</span><span class="p">,</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MessageCode</span><span class="p">.</span><span class="nx">JSON</span><span class="p">,</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="c1">// ...</span>
 <span class="p">})</span>
 
@@ -553,7 +553,7 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 </tbody></table>
 
 <p><strong>See <a href="#discovery">Discovery</a></strong></p>
-<h3 id='enum-channeltypes'>enum:<code>CHANNELTYPES</code></h3>
+<h3 id='key-channeltypes'>key:<code>ChannelTypes</code></h3>
 <ul>
 <li><code>LINE</code></li>
 <li><code>MAIN</code></li>
@@ -563,21 +563,7 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 <li><code>FX</code></li>
 <li><code>FXRETURN</code></li>
 </ul>
-<h3 id='type-channelselector'>type:<code>ChannelSelector</code></h3><div class="highlight"><pre class="highlight javascript"><code><span class="nx">someFunctionThatTakesInAChannelSelector</span><span class="p">({</span>
-    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
-    <span class="na">channel</span><span class="p">:</span> <span class="mi">13</span>
-<span class="p">})</span>
-</code></pre></div>
-<blockquote>
-<p>or</p>
-</blockquote>
-<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">CHANNELS</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
-
-<span class="nx">someFunctionThatTakesInAChannelSelector</span><span class="p">({</span>
-    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
-    <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_13</span>
-<span class="p">})</span>
-</code></pre></div>
+<h3 id='type-channelselector'>type:<code>ChannelSelector</code></h3>
 <table><thead>
 <tr>
 <th style="text-align: center">Property</th>
@@ -587,19 +573,40 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 </thead><tbody>
 <tr>
 <td style="text-align: center"><code>type</code></td>
-<td style="text-align: center"><code>CHANNELTYPES</code></td>
-<td style="text-align: left">Channel type</td>
+<td style="text-align: center"><code>ChannelTypes</code></td>
+<td style="text-align: left">Target channel type</td>
 </tr>
 <tr>
 <td style="text-align: center"><code>channel</code></td>
 <td style="text-align: center"><code>number</code></td>
-<td style="text-align: left">Channel number</td>
+<td style="text-align: left">Target channel</td>
+</tr>
+<tr>
+<td style="text-align: center"><code>mixType</code></td>
+<td style="text-align: center"><code>AUX</code> \</td>
+<td style="text-align: left"><code>FX</code></td>
+</tr>
+<tr>
+<td style="text-align: center"><code>mixNumber</code></td>
+<td style="text-align: center"><code>number</code></td>
+<td style="text-align: left">(optional) Target mix number</td>
 </tr>
 </tbody></table>
+<div class="highlight"><pre class="highlight javascript"><code><span class="c1">// Set channel 7 to 50%</span>
+<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">setChannelVolumeLinear</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">channel</span><span class="p">:</span> <span class="mi">7</span>
+<span class="p">},</span> <span class="mi">50</span><span class="p">)</span>
 
-<p>If <code>type</code> is <code>MAIN</code> or <code>TALKBACK</code>, then the value of <code>channel</code> will be implicitly set to <code>1</code></p>
-
-<p><code>channel</code> values can also be sourced from the <code>CHANNELS</code> enum</p>
+<span class="c1">// Mute channel 13 on Aux 2</span>
+<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">mute</span><span class="p">({</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">channel</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
+    <span class="na">mixType</span><span class="p">:</span> <span class="dl">'</span><span class="s1">AUX</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">mixNumber</span><span class="p">:</span> <span class="mi">2</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>If <code>type</code> is <code>MAIN</code> or <code>TALKBACK</code>, the value of <code>channel</code> will be implicitly set to <code>1</code></p>
 <h3 id='type-meterdata'>type:<code>MeterData</code></h3>
 <blockquote>
 <p>Example</p>
@@ -666,11 +673,13 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 
 <p><a name="22-eventsmd"></a></p>
 <h2 id='events'>Events</h2>
+<p>🔥 Also see <a href="https://github.com/featherbear/presonus-studiolive-api-simple-api"><code>presonus-studiolive-api-simple-api</code></a></p>
+
 <p>Events are split into data events and lifecycle events.  </p>
-<h3 id='data-events'>Data Events</h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+<h3 id='data-events'>Data Events</h3><div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 
 <span class="c1">// Listen for changes to settings</span>
-<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MESSAGETYPES</span><span class="p">.</span><span class="nx">Setting</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+<span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">MessageCode</span><span class="p">.</span><span class="nx">Setting</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
 <span class="p">})</span>
 </code></pre></div>
@@ -683,7 +692,7 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 <span class="p">})</span>
 </code></pre></div>
 <p>Specific events can be listened to by attaching an event handler with <code>&lt;Client&gt;.on(type, callback)</code>.<br>
-A list of possible event types are given in <a href="#enum-messagetypes">enum:<code>MESSAGETYPES</code></a>.</p>
+A list of possible event types are given in <a href="#enum-MessageCode">enum:<code>MessageCode</code></a>.</p>
 
 <p>To listen to <strong>all events</strong>, attach an event handler to the <code>data</code> event.<br>
 This event will be emitted after the specific event is emitted.</p>
@@ -700,9 +709,9 @@ This event will be emitted after the specific event is emitted.</p>
 </code></pre></div>
 <p>To trigger a function when client has successfully connected to the console, listen to the <code>connected</code> event.  </p>
 <div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Also connected to the device!)
-})
-</span></code></pre></div>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Also connected to the device!</span><span class="dl">"</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
 <p>Note: The <code>&lt;Client&gt;.connect(...)</code> function returns a Promise and is therefore thenable, so you may simply just use <code>.then(cb)</code> to continue execution after connection</p>
 
 <p><a name="23-client-apimd"></a></p>
@@ -710,12 +719,12 @@ This event will be emitted after the specific event is emitted.</p>
 <blockquote>
 <p>ES5</p>
 </blockquote>
-<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">Client</span><span class="p">,</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span><span class="p">)</span>
+<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">Client</span><span class="p">,</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span><span class="p">)</span>
 </code></pre></div>
 <blockquote>
 <p>ES6</p>
 </blockquote>
-<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="nx">Client</span><span class="p">,</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+<div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="nx">Client</span><span class="p">,</span> <span class="p">{</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 </code></pre></div>
 <blockquote>
 <p>Example</p>
@@ -723,7 +732,7 @@ This event will be emitted after the specific event is emitted.</p>
 <div class="highlight"><pre class="highlight javascript"><code><span class="k">import</span> <span class="nx">Client</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 
 <span class="c1">// Also import some enums</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">MESSAGETYPES</span><span class="p">,</span> <span class="nx">CHANNELS</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 
 <span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">(</span><span class="dl">"</span><span class="s2">10.0.0.18</span><span class="dl">"</span><span class="p">,</span> <span class="mi">53000</span><span class="p">)</span>
 <span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span>
@@ -731,19 +740,19 @@ This event will be emitted after the specific event is emitted.</p>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
 
     <span class="c1">// Set channel 1 fader to -6 dB over a duration of 3 seconds</span>
-    <span class="nx">client</span><span class="p">.</span><span class="nx">setChannelVolumeDb</span><span class="p">({</span>
+    <span class="nx">client</span><span class="p">.</span><span class="nx">setChannelVolumeLogarithmic</span><span class="p">({</span>
         <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_1</span>
+        <span class="na">channel</span><span class="p">:</span> <span class="mi">1</span>
     <span class="p">},</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3000</span><span class="p">).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
 
         <span class="c1">// Unmute channel 2</span>
         <span class="nx">client</span><span class="p">.</span><span class="nx">unmute</span><span class="p">({</span>
             <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">LINE</span><span class="dl">'</span><span class="p">,</span>
-            <span class="na">channel</span><span class="p">:</span> <span class="nx">CHANNELS</span><span class="p">.</span><span class="nx">LINE</span><span class="p">.</span><span class="nx">CHANNEL_2</span>
+            <span class="na">channel</span><span class="p">:</span> <span class="mi">2</span>
         <span class="p">})</span>
     <span class="p">})</span>
 
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Ver </span><span class="p">${</span><span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">global.mixer_version</span><span class="dl">'</span><span class="p">)}</span><span class="s2">`</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Version </span><span class="p">${</span><span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">global.mixer_version</span><span class="dl">'</span><span class="p">)}</span><span class="s2">`</span><span class="p">)</span>
 <span class="p">})</span>
 </code></pre></div>
 <p><code>new Client(host: string, port: number = 53000)</code><br>
@@ -754,6 +763,10 @@ Connect to the console. See <a href="#payload-subscriptionoptions">SubscriptionO
 
 <p><code>&lt;Client&gt;.close()</code><br>
 Disconnect from the console</p>
+
+<p><code>&lt;Client&gt;.on(evtName: str, fn: function)</code><br>
+Attach a handler function <code>fn</code> to an event given by <code>evtName</code>.<br>
+See <a href="#events">Events</a></p>
 
 <p><code>&lt;Client&gt;.mute(selector: ChannelSelector)</code><br>
 Mute a channel</p>
@@ -767,7 +780,7 @@ Toggle the mute status of a channel</p>
 <p><code>&lt;Client&gt;.setMute(selector: ChannelSelector, status: boolean)</code><br>
 Set the mute status of a channel</p>
 
-<p><code>&lt;Client&gt;.setChannelVolumeDb(selector: ChannelSelector, decibel: number, duration?: number)</code><br>
+<p><code>&lt;Client&gt;.setChannelVolumeLogarithmic(selector: ChannelSelector, decibel: number, duration?: number)</code><br>
 Set the level of a channel to a certain decibel (between <code>-84</code> and <code>10</code>).<br>
 Optionally provide a <code>duration</code> (in milliseconds) to set the transition time.</p>
 
@@ -775,9 +788,21 @@ Optionally provide a <code>duration</code> (in milliseconds) to set the transiti
 Set the level of a channel to a certain percentage (between <code>0</code> and <code>100</code>).<br>
 Optionally provide a <code>duration</code> (in milliseconds) to set the transition time.</p>
 
-<p><code>&lt;Client&gt;.on(evtName: str, fn: function)</code><br>
-Attach a handler function <code>fn</code> to an event given by <code>evtName</code>.<br>
-See <a href="#events">Events</a></p>
+<p><code>&lt;Client&gt;.setLink(selector: ChannelSelector, link: boolean)</code><br>
+Link/unlink a stereo channel pair</p>
+
+<p><code>&lt;Client&gt;.setLink(selector: ChannelSelector, link: boolean)</code><br>
+Link/unlink a stereo channel pair</p>
+
+<p><code>&lt;Client&gt;.setColor(selector: ChannelSelector, hex: string, alpha?: number)</code><br>
+<code>&lt;Client&gt;.setColour(selector: ChannelSelector, hex: string, alpha?: number)</code><br>
+Set the colour of a channel, provide a colour hex string (e.g. <code>ffa7a4</code>), and optionally an alpha (transparency) value (between <code>0</code> and <code>255</code>)</p>
+
+<p><code>&lt;Client&gt;.setPan(selector: ChannelSelector, pan: number)</code><br>
+Pan a channel (mono) (L = <code>0</code>, C = <code>50</code>, R = <code>100</code>), or set the stereo width of a stereo chanel pair (between <code>0</code> and <code>100</code>).</p>
+
+<p><code>&lt;Client&gt;.dumpState()</code><br>
+(DEBUG) Extract the data structure and cache layer values.</p>
 
 <p><a name="23-meteringmd"></a></p>
 <h2 id='metering'>Metering</h2><div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">meter</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">metering</span><span class="p">)</span> <span class="p">{</span>
@@ -879,12 +904,12 @@ Request list resource</p>
 <li>The client opens up a UDP server on a random port</li>
 <li>The client notifies the console of the port</li>
 </ul></li>
-<li><p>Every 3 seconds, the console emits a Discovery packet</p></li>
-<li><p>The client sends a KeepAlive packet every few seconds </p></li>
+<li><p>Every 3 seconds, the console emits a <code>Discovery</code> packet</p></li>
+<li><p>The client sends a <code>KA</code> (<code>KeepAlive</code>) packet every few seconds </p></li>
 <li><p>When the client connects it sends a Hello and Subscribe message to the console</p>
 
 <ul>
-<li>The console replies with a SubscriptionReply and Zlib data containing the console state</li>
+<li>The console replies with a <code>SubscriptionReply</code> and Zlib data containing the console state</li>
 </ul></li>
 </ul>
 
@@ -914,11 +939,15 @@ Request list resource</p>
 </tr>
 <tr>
 <td style="text-align: left"><code>PV</code></td>
-<td style="text-align: left">Setting</td>
+<td style="text-align: left">Parameter Value</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>PS</code></td>
+<td style="text-align: left">Parameter String</td>
 </tr>
 <tr>
 <td style="text-align: left"><code>PL</code></td>
-<td style="text-align: left">Device List</td>
+<td style="text-align: left">Parameter String List</td>
 </tr>
 <tr>
 <td style="text-align: left"><code>FR</code></td>
@@ -926,11 +955,11 @@ Request list resource</p>
 </tr>
 <tr>
 <td style="text-align: left"><code>FD</code></td>
-<td style="text-align: left">FileResource 2</td>
+<td style="text-align: left">File Data</td>
 </tr>
 <tr>
 <td style="text-align: left"><code>BO</code></td>
-<td style="text-align: left">?????????</td>
+<td style="text-align: left">Binary Object</td>
 </tr>
 <tr>
 <td style="text-align: left"><code>CK</code></td>
@@ -939,6 +968,10 @@ Request list resource</p>
 <tr>
 <td style="text-align: left"><code>ZB</code></td>
 <td style="text-align: left">ZLIB Compressed Data</td>
+</tr>
+<tr>
+<td style="text-align: left"><code>MS</code></td>
+<td style="text-align: left">Fader Position</td>
 </tr>
 </tbody></table>
 <h3 id='payload-packing'>Payload Packing</h3>
@@ -1451,7 +1484,9 @@ Example packet trace: <a href="https://github.com/featherbear/presonus-studioliv
 
 <ul>
 <li><a href="https://github.com/featherbear/presonus-studiolive-api-demo">github.com/featherbear/presonus-studiolive-api-demo</a></li>
-<li><a href="https://github.com/featherbear/SL-Edit">github.com/featherbear/SL-Edit</a></li>
+<li><a href="https://github.com/featherbear/presonus-studiolive-api-simple-api">API Wrapper</a></li>
+<li><a href="https://github.com/featherbear/SL-Edit">Offline Editor</a></li>
+<li><a href="https://github.com/featherbear/presonus-studiolive-api-midi-integration">MIDI Bridge</a></li>
 </ul>
 
 <p><a name="50-othermd"></a></p>
