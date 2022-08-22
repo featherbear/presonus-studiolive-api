@@ -385,10 +385,21 @@ export class Client extends EventEmitter {
     let targetString = parseChannelString(selector)
 
     if (selector.mixType) {
-      targetString += `/${Channel[selector.mixType]}${selector.mixNumber}`
+      switch (selector.mixType) {
+        case 'AUX':
+          targetString += `/${Channel[selector.mixType]}${selector.mixNumber}`
+          break
+        case 'FX':
+          targetString += `/FX${String.fromCharCode(0x40 + selector.mixNumber)}`
+          break
+        default:
+          throw new Error("Unexpected mix type")
+      }
     } else {
       targetString += '/volume'
     }
+
+
 
     const assertReturn = () => {
       // Additional time to wait for response

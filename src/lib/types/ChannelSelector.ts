@@ -1,11 +1,17 @@
 import { ChannelTypes } from '../constants'
 
-type ChannelSelector = {
+type MixSelector = {
+    mixType: ChannelTypes & ('AUX' | 'FX')
+    mixNumber: number
+}
+
+type ChannelSelector = ({
     type: ChannelTypes
     channel: number
 } | {
     type: 'MAIN' | 'TALKBACK'
     channel?: 1
-}
+}) & (MixSelector | {[key in keyof MixSelector]?: never})
+
 
 export default ChannelSelector

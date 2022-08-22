@@ -2,7 +2,7 @@ import { Channel } from '../constants'
 import ChannelCount from '../types/ChannelCount'
 import ChannelSelector from '../types/ChannelSelector'
 
-let counts : ChannelCount;
+let counts: ChannelCount;
 
 export function setCounts(channelCount: ChannelCount) {
   counts = channelCount
@@ -12,6 +12,25 @@ export function parseChannelString(
   selector: ChannelSelector
 ) {
   let { type, channel } = selector
+  let { mixType, mixNumber } = selector
+
+  if (counts && mixType) {
+    if (!mixNumber || mixNumber < 1) {
+      throw new Error('Invalid mix channel provided')
+    }
+
+    switch (mixType) {
+      case 'AUX':
+      case 'FX':
+        if (!(mixNumber <= counts[mixType])) throw new Error('Invalid mix channel provided')
+        break
+      default:
+        throw new Error('Invalid mix type provided')
+    }
+  }
+
+
+
 
   // `type` must be a valid enum key
   if (!Object.keys(Channel).includes(type)) {
