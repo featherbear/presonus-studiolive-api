@@ -13,13 +13,27 @@ type TransformerType = {
   fromUB?: ValueTransformer
 }
 
-const DEFAULTS: {
-  [key: string]: TransformerType
-} = {
+/**
+ * 
+ * Ignoring this type because IntelliSense stops offering suggestions
+ * 
+ * {
+ * [key: string]: TransformerType
+ * }
+ * 
+*/
+const DEFAULTS = {
   boolean: {
     fromPV: DEFAULT_TRANSFORMS.buffer.boolean,
     fromUB: DEFAULT_TRANSFORMS.integer.boolean
-  }
+  },
+  /**
+   * Define a key with passthrough methods to skip wildcard matching
+   */
+  passthrough: {
+    fromPV: x => x,
+    fromUB: x => x
+  },
 }
 
 const transformers: {
@@ -50,7 +64,8 @@ const transformers: {
   'line.*.dca.fx*': {
     fromPV: IGNORE
   },
-  // 'permissions.*': DEFAULTS.boolean,
+  'permissions.access_code': DEFAULTS.passthrough,
+  'permissions.*': DEFAULTS.boolean,
   // 'advancedscenefilters.*'
   // 'projectfilters.*'
   // 'channelfilters.*'
