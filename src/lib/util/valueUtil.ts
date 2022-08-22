@@ -2,17 +2,15 @@ import PV_steps from "../constants/temp__PVsteps"
 
 type Bounds = [number, number]
 /**
- * Convert a logarithmic volume to its respective number
- * https://github.com/featherbear/presonus-studiolive-api/blob/a864a2fb4d2838f8edc811c4d2f395e894df4408/PV%2CZB_analysis.xlsx
+ * Convert a logarithmic volume to its respective linear value [0-100]
  */
-export function logVolumeTo32(db) {
-  // Gaussian / Bell Curve fit
+export function logVolumeToLinear(db) {
   const curveFunction = (x) => Math.trunc(
-    1064974000 * Math.exp((-Math.pow(x - 17.99124, 2) / (2 * Math.pow(238.1057, 2))))
+    72.5204177782 + 2.4734739920 * x + 0.0265675570 * Math.pow(x, 2) + 0.0000880866 * Math.pow(x, 3)
   )
 
   const inputBounds: Bounds = [-84, 10]
-  const outputBounds: Bounds = [0, 0x3f800000]
+  const outputBounds: Bounds = [0, 100]
 
   db = clamp(db, inputBounds)
 

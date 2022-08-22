@@ -26,7 +26,7 @@ import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
 import { ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import { logVolumeTo32, transitionValue } from './util/valueUtil'
+import { logVolumeToLinear, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
 import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
@@ -443,7 +443,7 @@ export class Client extends EventEmitter {
    * @param level range: -84 dB to 10 dB
    */
   async setChannelVolumeLogarithmic(selector: ChannelSelector, decibel: number, duration?: number) {
-    return this._setLevel(selector, logVolumeTo32(decibel), duration)
+    return this._setLevel(selector, logVolumeToLinear(decibel), duration)
   }
 
   /**
