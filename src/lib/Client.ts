@@ -309,19 +309,28 @@ export class Client extends EventEmitter {
    * Toggle the mute status of a channel
    */
   toggleMute(selector: ChannelSelector) {
-    const currentState = this.state.get(`${parseChannelString(selector)}/mute`)
-    this.setMute(selector, !currentState)
+    this.setMute(selector, 'toggle')
   }
 
   /**
    * Set the mute status of a channel
    */
-  setMute(selector: ChannelSelector, status: boolean) {
+  setMute(selector: ChannelSelector, status: boolean | 'toggle') {
+    let targetString = parseChannelString(selector)
+
+    if (selector.mixType) {
+      targetString += `/assign_${selector.mixType.toLowerCase()}${selector.mixNumber}`
+    } else {
+      targetString += '/mute'
+    }
+
+    let state: boolean = status === 'toggle' ? !this.state.get(targetString, true) : status
+
     this._sendPacket(
       MessageCode.ParamValue,
       Buffer.concat([
-        Buffer.from(`${parseChannelString(selector)}/mute\x00\x00\x00`),
-        toBoolean(status)
+        Buffer.from(targetString + '\x00\x00\x00'),
+        toBoolean(state)
       ])
     )
   }
