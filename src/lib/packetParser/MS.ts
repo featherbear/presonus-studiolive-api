@@ -14,7 +14,7 @@ export default function handleMSPacket(this: Client, data): {
   data = data.slice(8)
 
   const channelCounts = this.channelCounts
-  const order: ChannelTypes[] = ['LINE', 'RETURN', 'FX', 'TALKBACK', 'AUX', 'FX', 'MAIN']
+  const order: ChannelTypes[] = ['LINE', 'RETURN', 'FXRETURN', 'TALKBACK', 'AUX', 'FX', 'MAIN']
 
   const values: { [_ in ChannelTypes]: number[] } = <any>{}
 
