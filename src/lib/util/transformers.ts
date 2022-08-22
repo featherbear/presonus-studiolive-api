@@ -42,7 +42,13 @@ const transformers: {
   },
   'line.*.aux*': {
     fromPV: DEFAULT_TRANSFORMS.buffer.float
-  }
+  },
+  'line.*.FX*': {
+    fromPV: DEFAULT_TRANSFORMS.buffer.float
+  },
+  'line.*.dca.fx*': {
+    fromPV: IGNORE
+  },
   // 'permissions.*': DEFAULTS.boolean,
   // 'advancedscenefilters.*'
   // 'projectfilters.*'
