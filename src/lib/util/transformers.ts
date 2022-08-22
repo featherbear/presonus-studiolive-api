@@ -71,6 +71,8 @@ const transformers: {
     fromPV: IGNORE
   },
   'permissions.access_code': DEFAULTS.passthrough,
+  'permissions.device_list': DEFAULTS.passthrough,
+  'permissions.mix_permissions': DEFAULTS.passthrough,
   'permissions.*': DEFAULTS.boolean
   // 'advancedscenefilters.*'
   // 'projectfilters.*'
