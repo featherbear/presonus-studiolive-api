@@ -52,11 +52,27 @@ const transformers: {
       return value * 100
     }
   },
-  'line.*.dca.aux*': {
-    fromPV: IGNORE
+  ...{
+    'line.*.dca.aux*': {
+      fromPV: IGNORE
+    },
+    'fxreturn.*.dca.aux*': {
+      fromPV: IGNORE
+    },
   },
-  'line.*.aux*': {
-    fromPV: DEFAULT_TRANSFORMS.buffer.float
+  ...{
+    'line.*.aux*': {
+      fromPV: DEFAULT_TRANSFORMS.buffer.float
+    },
+    'fxreturn.*.aux*': {
+      fromPV: DEFAULT_TRANSFORMS.buffer.float
+    },
+    'return.*.aux*': {
+      fromPV: DEFAULT_TRANSFORMS.buffer.float
+    },
+    'talkback.*.aux*': {
+      fromPV: DEFAULT_TRANSFORMS.buffer.float
+    },
   },
   'line.*.pan': {
     fromPV: DEFAULT_TRANSFORMS.buffer.float
