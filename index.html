@@ -351,13 +351,16 @@
               </ul>
           </li>
           <li>
-            <a href="#demo-code" class="toc-h1 toc-link" data-title="Demo Code">Demo Code</a>
-          </li>
-          <li>
-            <a href="#other" class="toc-h1 toc-link" data-title="Other">Other</a>
+            <a href="#related" class="toc-h1 toc-link" data-title="Related">Related</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#source-code" class="toc-h2 toc-link" data-title="Source Code">Source Code</a>
+                    <a href="#demo-projects" class="toc-h2 toc-link" data-title="Demo Projects">Demo Projects</a>
+                  </li>
+                  <li>
+                    <a href="#simple-api" class="toc-h2 toc-link" data-title="Simple API">Simple API</a>
+                  </li>
+                  <li>
+                    <a href="#sl-edit" class="toc-h2 toc-link" data-title="SL Edit">SL Edit</a>
                   </li>
                   <li>
                     <a href="#midi-integration" class="toc-h2 toc-link" data-title="MIDI Integration">MIDI Integration</a>
@@ -367,6 +370,23 @@
                   </li>
                   <li>
                     <a href="#console-advertisement-utility" class="toc-h2 toc-link" data-title="Console Advertisement Utility">Console Advertisement Utility</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#other" class="toc-h1 toc-link" data-title="Other">Other</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#source-code" class="toc-h2 toc-link" data-title="Source Code">Source Code</a>
+                  </li>
+                  <li>
+                    <a href="#midi-integration-2" class="toc-h2 toc-link" data-title="MIDI Integration">MIDI Integration</a>
+                  </li>
+                  <li>
+                    <a href="#bitfocus-companion-2" class="toc-h2 toc-link" data-title="Bitfocus Companion">Bitfocus Companion</a>
+                  </li>
+                  <li>
+                    <a href="#console-advertisement-utility-2" class="toc-h2 toc-link" data-title="Console Advertisement Utility">Console Advertisement Utility</a>
                   </li>
                   <li>
                     <a href="#blog" class="toc-h2 toc-link" data-title="Blog">Blog</a>
@@ -1478,22 +1498,17 @@ Example packet trace: <a href="https://github.com/featherbear/presonus-studioliv
 </tr>
 </tbody></table>
 
-<p><a name="40-demomd"></a></p>
-<h1 id='demo-code'>Demo Code</h1>
+<p><a name="40-relatedmd"></a></p>
+<h1 id='related'>Related</h1><h2 id='demo-projects'>Demo Projects</h2>
 <p>For demo projects refer to the below repositories</p>
 
 <ul>
 <li><a href="https://github.com/featherbear/presonus-studiolive-api-demo">github.com/featherbear/presonus-studiolive-api-demo</a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-api-simple-api">API Wrapper</a></li>
-<li><a href="https://github.com/featherbear/SL-Edit">Offline Editor</a></li>
-<li><a href="https://github.com/featherbear/presonus-studiolive-api-midi-integration">MIDI Bridge</a></li>
 </ul>
-
-<p><a name="50-othermd"></a></p>
-<h1 id='other'>Other</h1><h2 id='source-code'>Source Code</h2>
-<p>The TypeScript source code for this package is available on <a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a>.</p>
-
-<p>See <a href="https://github.com/featherbear/presonus-studiolive-api/">github.com/featherbear/presonus-studiolive-api</a></p>
+<h2 id='simple-api'>Simple API</h2>
+<p>Simplified wrapper to provide subscribable event like <code>mute</code>, and <code>level</code> - <a href="https://github.com/featherbear/presonus-studiolive-api-simple-api">presonus-studiolive-api-simple-api</a></p>
+<h2 id='sl-edit'>SL Edit</h2>
+<p>StudioLive Series III configuration editor with the ability to edit a configuration offline - <a href="https://github.com/featherbear/SL-Edit">SL Edit</a></p>
 <h2 id='midi-integration'>MIDI Integration</h2>
 <p>Experimental support to use MIDI input devices as control surfaces to control the console.<br>
 Read more on the <a href="https://featherbear.cc/blog/post/presonus-studiolive-api-iii-feb22/">February 2022 update blog post</a>.</p>
@@ -1504,6 +1519,25 @@ Read more on the <a href="https://featherbear.cc/blog/post/presonus-studiolive-a
 
 <p><img src="https://featherbear.cc/blog/post/presonus-studiolive-api-ii/98021270-3d570300-1e58-11eb-89ce-71829c3da021.gif" alt="" /></p>
 <h2 id='console-advertisement-utility'>Console Advertisement Utility</h2>
+<p>Experimental tool to spoof a discovery packet, so that <a href="https://www.presonus.com/products/uc-surface">UC Surface</a> can &#39;find&#39; consoles that live on difficult network topologies</p>
+
+<p>See <a href="https://github.com/featherbear/presonus-studiolive-console-advertisement">github.com/featherbear/presonus-studiolive-console-advertisement</a></p>
+
+<p><a name="50-othermd"></a></p>
+<h1 id='other'>Other</h1><h2 id='source-code'>Source Code</h2>
+<p>The TypeScript source code for this package is available on <a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a>.</p>
+
+<p>See <a href="https://github.com/featherbear/presonus-studiolive-api/">github.com/featherbear/presonus-studiolive-api</a></p>
+<h2 id='midi-integration-2'>MIDI Integration</h2>
+<p>Experimental support to use MIDI input devices as control surfaces to control the console.<br>
+Read more on the <a href="https://featherbear.cc/blog/post/presonus-studiolive-api-iii-feb22/">February 2022 update blog post</a>.</p>
+<h2 id='bitfocus-companion-2'>Bitfocus Companion</h2>
+<p>An experimental <a href="https://bitfocus.io/companion/">Bitfocus Companion</a> module has been developed to integrate the PreSonus StudioLive API.</p>
+
+<p>See <a href="https://github.com/featherbear/bitfocus-companion-module-presonus-studiolive-iii">github.com/featherbear/bitfocus-companion-module-presonus-studiolive-iii</a></p>
+
+<p><img src="https://featherbear.cc/blog/post/presonus-studiolive-api-ii/98021270-3d570300-1e58-11eb-89ce-71829c3da021.gif" alt="" /></p>
+<h2 id='console-advertisement-utility-2'>Console Advertisement Utility</h2>
 <p>Experimental tool to spoof a discovery packet, so that <a href="https://www.presonus.com/products/uc-surface">UC Surface</a> can &#39;find&#39; consoles that live on difficult network topologies</p>
 
 <p>See <a href="https://github.com/featherbear/presonus-studiolive-console-advertisement">github.com/featherbear/presonus-studiolive-console-advertisement</a></p>
