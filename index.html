@@ -801,9 +801,6 @@ Set the colour of a channel, provide a colour hex string (e.g. <code>ffa7a4</cod
 <p><code>&lt;Client&gt;.setPan(selector: ChannelSelector, pan: number)</code><br>
 Pan a channel (mono) (L = <code>0</code>, C = <code>50</code>, R = <code>100</code>), or set the stereo width of a stereo chanel pair (between <code>0</code> and <code>100</code>).</p>
 
-<p><code>&lt;Client&gt;.dumpState()</code><br>
-(DEBUG) Extract the data structure and cache layer values.</p>
-
 <p><a name="23-meteringmd"></a></p>
 <h2 id='metering'>Metering</h2><div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">meter</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">metering</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">metering</span><span class="p">.</span><span class="nx">input</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
