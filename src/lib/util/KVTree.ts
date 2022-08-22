@@ -60,11 +60,9 @@ export default class KVTree {
         ...cur,
         [key]: repr(obj)
       })
-
     }, {})
   }
 }
-
 
 function repr(obj) {
   if (obj instanceof KVTree) return obj.toJSON()

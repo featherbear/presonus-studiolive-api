@@ -13,7 +13,6 @@ export default function handlePVPacket(data) {
     const partB = data.slice(idx + 3)
 
     const value = valueTransform(key, partB, transformersPV)
-
     data = {
       name: key,
       value,

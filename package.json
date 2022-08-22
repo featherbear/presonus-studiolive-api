@@ -47,16 +47,14 @@
         }
       ],
       "no-dupe-class-members": "off",
-      "space-before-function-paren": "off"
+      "space-before-function-paren": "off",
+      "@typescript-eslint/no-unused-vars": ["error", {
+        "argsIgnorePattern": "."
+      }]
     }
   },
   "standardx": {
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin"
-    ],
-    "ignore": [
-      "src/lib/zlibType.ts"
-    ]
+    "plugins": ["@typescript-eslint/eslint-plugin"]
   }
 }

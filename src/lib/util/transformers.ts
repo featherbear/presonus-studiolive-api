@@ -33,7 +33,7 @@ const DEFAULTS = {
   passthrough: {
     fromPV: x => x,
     fromUB: x => x
-  },
+  }
 }
 
 const transformers: {
@@ -45,7 +45,7 @@ const transformers: {
   'line.*.link': DEFAULTS.boolean,
   '**.assign_*': DEFAULTS.boolean,
   'line.*.dca.volume': {
-    fromPV: IGNORE,
+    fromPV: IGNORE
   },
   'line.*.volume': {
     fromUB(value: number) {
@@ -71,7 +71,7 @@ const transformers: {
     fromPV: IGNORE
   },
   'permissions.access_code': DEFAULTS.passthrough,
-  'permissions.*': DEFAULTS.boolean,
+  'permissions.*': DEFAULTS.boolean
   // 'advancedscenefilters.*'
   // 'projectfilters.*'
   // 'channelfilters.*'

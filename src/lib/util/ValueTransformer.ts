@@ -1,4 +1,4 @@
-import { simplifyPathTokens, tokenisePath } from './treeUtil'
+import { tokenisePath } from './treeUtil'
 
 export type ValueTransformer = (value: unknown, key?: string[]) => any
 
@@ -18,10 +18,10 @@ export const doesLookupMatch = (lookup: string | string[], symbolPath: string[])
   let symbolIdx = 0
 
   while (symbolIdx < lastIdx) {
-    if (symbolIdx >= symbolPath.length) return false;
+    if (symbolIdx >= symbolPath.length) return false
 
-    let currentSymbol = symbolPath[symbolIdx];
-    let currentToken = lookupPath[lookupIdx];
+    const currentSymbol = symbolPath[symbolIdx]
+    const currentToken = lookupPath[lookupIdx]
 
     if ([currentSymbol, '*'].includes(currentToken)) {
       // Path matches, or wildcard match
@@ -32,11 +32,10 @@ export const doesLookupMatch = (lookup: string | string[], symbolPath: string[])
       // Double wildcard on last token, accept all
       if (lookupIdx === lastIdx) break
 
-      lookupIdx++;
+      lookupIdx++
 
       return doesLookupMatch(lookupPath.slice(lookupIdx).reverse(), symbolPath.slice(symbolIdx).reverse())
-      
-    } else if (currentToken.endsWith("*") && currentSymbol.startsWith(currentToken.slice(0, currentToken.indexOf('*')))) {
+    } else if (currentToken.endsWith('*') && currentSymbol.startsWith(currentToken.slice(0, currentToken.indexOf('*')))) {
       symbolIdx++
       lookupIdx++
       continue
@@ -58,9 +57,9 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
 
   for (const [lookup, transformer] of Object.entries(valueTransformers)) {
     if (doesLookupMatch(lookup, symbolPath)) {
-      let old = value
+      const old = value
       value = transformer(value, symbolPath)
-      console.log(`Key '${symbolPath.join('.')}' matched transformer ${lookup}`, old, '->', value);
+      // console.log(`Key '${symbolPath.join('.')}' matched transformer ${lookup}`, old, '->', value)
       break
     }
   }
@@ -77,7 +76,7 @@ export const DEFAULT_TRANSFORMS = {
         return false
       }
 
-      throw new Error('Unexpected value')
+      throw new Error('Unexpected value converting ' + value)
     }
   },
   buffer: {
@@ -88,7 +87,7 @@ export const DEFAULT_TRANSFORMS = {
         return false
       }
 
-      throw new Error('Unexpected value')
+      throw new Error('Unexpected value converting ' + bytes)
     },
     float(bytes: Buffer) {
       return bytes.readFloatLE()
@@ -96,4 +95,4 @@ export const DEFAULT_TRANSFORMS = {
   }
 } as const
 
-export const IGNORE = Symbol("Ignore")
+export const IGNORE = Symbol('Ignore')

@@ -13,7 +13,7 @@ import {
 } from './util/MessageProtocol'
 
 import { parseChannelString, setCounts } from './util/channelUtil'
-import { toInt, toShort, toFloat, toBoolean } from './util/bufferUtil'
+import { toShort, toFloat, toBoolean } from './util/bufferUtil'
 
 import handleZBPacket from './packetParser/ZB'
 import handleJMPacket from './packetParser/JM'
@@ -28,9 +28,9 @@ import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import { logVolumeToLinear, transitionValue } from './util/valueUtil'
 import ChannelSelector from './types/ChannelSelector'
-import { simplifyPathTokens, tokenisePath } from './util/treeUtil'
+import { tokenisePath } from './util/treeUtil'
 import ChannelCount from './types/ChannelCount'
-import { doesLookupMatch, IGNORE } from './util/ValueTransformer'
+import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
 
 // Forward discovery events
@@ -98,15 +98,15 @@ export class Client extends EventEmitter {
     this.on(MessageCode.ParamValue, ({ name, value }) => {
       name = tokenisePath(name)
 
-      for (let ignoreKey of ignorePV) {
+      for (const ignoreKey of ignorePV) {
         if (doesLookupMatch(ignoreKey, name)) return
       }
-      
+
       this.state.set(name, value)
     })
 
-    this.on(MessageCode.FaderPosition, function (MS: { [type in ChannelTypes]: number[] }) {
-      for (let [type, values] of Object.entries(MS)) {
+    this.on(MessageCode.FaderPosition, function (MS: { [_ in ChannelTypes]: number[] }) {
+      for (const [type, values] of Object.entries(MS)) {
         for (let i = 0; i < values.length; i++) {
           this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
         }
@@ -335,7 +335,7 @@ export class Client extends EventEmitter {
       targetString += '/mute'
     }
 
-    let state: boolean = status === 'toggle' ? !this.state.get(targetString, true) : status
+    const state: boolean = status === 'toggle' ? !this.state.get(targetString, true) : status
 
     this._sendPacket(
       MessageCode.ParamValue,
@@ -378,7 +378,8 @@ export class Client extends EventEmitter {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-          let odd = (selector.mixNumber - 1) | 1;
+        {
+          const odd = (selector.mixNumber - 1) | 1
           channelString += `/aux${odd}${odd + 1}_`
           if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
             channelString += isStereo ? 'stpan' : 'pan'
@@ -386,9 +387,10 @@ export class Client extends EventEmitter {
             // No need to pan a mono aux
             return
           }
-          break;
+          break
+        }
         default:
-          throw new Error("Unexpected mix type")
+          throw new Error('Unexpected mix type')
       }
     } else {
       channelString += '/' + (isStereo ? 'stereopan' : 'pan')
@@ -436,13 +438,11 @@ export class Client extends EventEmitter {
           targetString += `/FX${String.fromCharCode(0x40 + selector.mixNumber)}`
           break
         default:
-          throw new Error("Unexpected mix type")
+          throw new Error('Unexpected mix type')
       }
     } else {
       targetString += '/volume'
     }
-
-
 
     const assertReturn = () => {
       // Additional time to wait for response
@@ -470,7 +470,7 @@ export class Client extends EventEmitter {
       return assertReturn()
     }
 
-    let currentLevel = this.state.get(targetString, 0)
+    const currentLevel = this.state.get(targetString, 0)
 
     // Don't do anything if we already are on the same level
     if (currentLevel === targetLevel) {

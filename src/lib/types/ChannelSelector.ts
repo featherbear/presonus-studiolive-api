@@ -11,7 +11,6 @@ type ChannelSelector = ({
 } | {
     type: 'MAIN' | 'TALKBACK'
     channel?: 1
-}) & (MixSelector | {[key in keyof MixSelector]?: never})
-
+}) & (MixSelector | {[_ in keyof MixSelector]?: never})
 
 export default ChannelSelector

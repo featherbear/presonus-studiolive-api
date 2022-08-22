@@ -131,14 +131,14 @@ export default zlibParseNode
  * Extract the contents of a node
  */
 export function dumpNode(node: ZlibNode, recurseDepth?: number) {
-  let data: any = {}
+  const data: any = {}
   if (node[ZlibRangeSymbol]) data.range = node[ZlibRangeSymbol]
   if (node[ZlibStringEnumSymbol]) data.strings = node[ZlibStringEnumSymbol]
   if (node[ZlibKeySymbol]) data.key = node[ZlibKeySymbol]
 
   if (
-    (typeof recurseDepth === 'undefined' || recurseDepth > 0)
-    && Object.keys(node).length > 0
+    (typeof recurseDepth === 'undefined' || recurseDepth > 0) &&
+    Object.keys(node).length > 0
   ) {
     data.children = Object.entries(node).reduce((obj, [key, node]) => ({ ...obj, [key]: dumpNode(<ZlibNode>node, recurseDepth ? recurseDepth - 1 : recurseDepth) }), {})
   }
@@ -149,4 +149,4 @@ export function dumpNode(node: ZlibNode, recurseDepth?: number) {
   }
 
   return data
-} 
+}
