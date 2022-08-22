@@ -359,7 +359,7 @@ export class Client extends EventEmitter {
 
   /**
    * For a mono channel, the pan value is the pan value from 0 (hard left) to 100 (hard right)  
-   * TODO: For a stereo channel, the pan value is the width from 0 to 100 (stereo)
+   * For a stereo channel, the pan value is the width from 0 to 100 (stereo)
    */
   setPan(selector: ChannelSelector, pan: number) {
     /*
@@ -370,11 +370,34 @@ export class Client extends EventEmitter {
     initiator
     linkmaster = 1
     */
-    const isStereo = this.state.get(parseChannelString(selector) + '/link')
+
+    let channelString = parseChannelString(selector)
+
+    const isStereo = this.state.get(channelString + '/link')
+
+    if (selector.mixType) {
+      switch (selector.mixType) {
+        case 'AUX':
+          let odd = (selector.mixNumber - 1) | 1;
+          channelString += `/aux${odd}${odd + 1}_`
+          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+            channelString += isStereo ? 'stpan' : 'pan'
+          } else {
+            // No need to pan a mono aux
+            return
+          }
+          break;
+        default:
+          throw new Error("Unexpected mix type")
+      }
+    } else {
+      channelString += '/' + (isStereo ? 'stereopan' : 'pan')
+    }
+
     this._sendPacket(
       MessageCode.ParamValue,
       Buffer.concat([
-        Buffer.from(`${parseChannelString(selector)}/${isStereo ? 'stereopan' : 'pan'}\x00\x00\x00`),
+        Buffer.from(`${channelString}\x00\x00\x00`),
         toFloat(pan / 100)
       ])
     )

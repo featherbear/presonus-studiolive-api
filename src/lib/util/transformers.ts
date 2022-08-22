@@ -58,6 +58,12 @@ const transformers: {
   'line.*.aux*': {
     fromPV: DEFAULT_TRANSFORMS.buffer.float
   },
+  'line.*.pan': {
+    fromPV: DEFAULT_TRANSFORMS.buffer.float
+  },
+  'line.*.stereopan': {
+    fromPV: DEFAULT_TRANSFORMS.buffer.float
+  },
   'line.*.FX*': {
     fromPV: DEFAULT_TRANSFORMS.buffer.float
   },
