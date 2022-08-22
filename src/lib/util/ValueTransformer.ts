@@ -34,13 +34,8 @@ export const doesLookupMatch = (lookup: string | string[], symbolPath: string[])
 
       lookupIdx++;
 
-      for (let j = 0; j < symbolPath.length - symbolIdx; j++) {
-        if (doesLookupMatch(lookupPath.slice(lookupIdx), symbolPath.slice(symbolIdx + j))) {
-          return true
-        }
-      }
-
-      return false
+      return doesLookupMatch(lookupPath.slice(lookupIdx).reverse(), symbolPath.slice(symbolIdx).reverse())
+      
     } else if (currentToken.endsWith("*") && currentSymbol.startsWith(currentToken.slice(0, currentToken.indexOf('*')))) {
       symbolIdx++
       lookupIdx++
