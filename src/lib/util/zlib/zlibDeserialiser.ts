@@ -142,8 +142,8 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       // int64
       case 0x4c /* L */: {
         value = valueData.readBigInt64BE()
-        
-        console.warn(`Forcing ${keyData} buffer ${valueData.slice(0, 8).toString('hex')} to be 0}`)
+        // FIXME:
+        logger.debug(`Forcing ${keyData} buffer ${valueData.slice(0, 8).toString('hex')} to be 0`)
         value = 0
         break
       }

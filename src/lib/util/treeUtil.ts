@@ -26,9 +26,9 @@ export function simplifyPathTokens(path: string | string[]) {
    */
   const slice = tokens.slice(-2)
   if (slice[0] === 'dca') {
-    // const old = [...tokens]
+    const old = [...tokens]
     tokens = [...tokens.slice(0, -2), ...slice.slice(1)]
-    // console.log(`Converted to ${tokens.join('/')}`)
+    logger.debug({ oldPath: old.join('.'), newPath: tokens.join('.') }, 'Simplified path token')
   }
 
   return tokens

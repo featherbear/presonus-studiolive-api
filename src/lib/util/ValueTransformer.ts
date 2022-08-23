@@ -1,4 +1,5 @@
 import { tokenisePath } from './treeUtil'
+import { inspect } from 'util'
 
 export type ValueTransformer = (value: unknown, key?: string[]) => any
 
@@ -57,9 +58,18 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
 
   for (const [lookup, transformer] of Object.entries(valueTransformers)) {
     if (doesLookupMatch(lookup, symbolPath)) {
-      // const old = value
+      const old = value
       value = transformer(value, symbolPath)
-      // console.log(`Key '${symbolPath.join('.')}' matched transformer ${lookup}`, old, '->', value)
+      if (old !== value) {
+        logger.debug(
+          {
+            key: symbolPath.join('.'),
+            transformer: lookup,
+            oldValue: old instanceof Buffer ? inspect(old) : old,
+            newValue: value
+
+          }, 'Value transformed')
+      }
       break
     }
   }

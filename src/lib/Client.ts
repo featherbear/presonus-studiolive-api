@@ -33,6 +33,7 @@ import ChannelCount from './types/ChannelCount'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
 import handlePSPacket from './packetParser/PS'
+import './util/logging'
 
 // Forward discovery events
 const discovery = new Discovery()
