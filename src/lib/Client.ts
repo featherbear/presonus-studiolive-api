@@ -330,9 +330,16 @@ export class Client extends EventEmitter {
   }
 
   /**
-   * Set the mute status of a channel
+   * Get mute status of a channel
    */
-  setMute(selector: ChannelSelector, status: boolean | 'toggle') {
+  getMute(selector: ChannelSelector) {
+    return this.state.get(this._getMuteTargetString(selector))
+  }
+
+  /**
+   * @private
+   */
+  private _getMuteTargetString(selector: ChannelSelector) {
     let targetString = parseChannelString(selector)
 
     if (selector.mixType) {
@@ -341,6 +348,14 @@ export class Client extends EventEmitter {
       targetString += '/mute'
     }
 
+    return targetString
+  }
+
+  /**
+   * Set the mute status of a channel
+   */
+  setMute(selector: ChannelSelector, status: boolean | 'toggle') {
+    const targetString = this._getMuteTargetString(selector)
     const state: boolean = status === 'toggle' ? !this.state.get(targetString, true) : status
 
     this._sendPacket(
@@ -434,10 +449,6 @@ export class Client extends EventEmitter {
         toBoolean(link)
       ])
     )
-  }
-
-  setColour(...args: Parameters<this['setColor']>) {
-    return this.setColor.apply(this, args)
   }
 
   /**
