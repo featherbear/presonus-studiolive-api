@@ -12,27 +12,22 @@ import {
   createPacket
 } from './util/MessageProtocol'
 
+import ChannelCount from './types/ChannelCount'
+import SubscriptionOptions from './types/SubscriptionOptions'
+import ChannelSelector from './types/ChannelSelector'
+
+import * as packetParser from './packetParser'
+
 import { parseChannelString, setCounts } from './util/channelUtil'
 import { toShort, toFloat, toBoolean } from './util/bufferUtil'
-
-import handleZBPacket from './packetParser/ZB'
-import handleJMPacket from './packetParser/JM'
-import handlePVPacket from './packetParser/PV'
-import handleCKPacket from './packetParser/CK'
-
-import SubscriptionOptions from './types/SubscriptionOptions'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
-import handleMSPacket from './packetParser/MS'
 import CacheProvider from './util/CacheProvider'
-import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
-import { getZlibValue } from './util/zlib/zlibUtil'
-import { logVolumeToLinear, transitionValue } from './util/valueUtil'
-import ChannelSelector from './types/ChannelSelector'
 import { tokenisePath } from './util/treeUtil'
-import ChannelCount from './types/ChannelCount'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
-import handlePSPacket from './packetParser/PS'
+import { logVolumeToLinear, transitionValue } from './util/valueUtil'
+import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
+import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
 
 // Forward discovery events
@@ -263,12 +258,12 @@ export class Client extends EventEmitter {
     // Handle message types
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
-      [MessageCode.JSON]: handleJMPacket,
-      [MessageCode.ParamValue]: handlePVPacket,
-      [MessageCode.ParamString]: handlePSPacket,
-      [MessageCode.ZLIB]: handleZBPacket,
-      [MessageCode.FaderPosition]: handleMSPacket,
-      [MessageCode.Chunk]: handleCKPacket,
+      [MessageCode.JSON]: packetParser.handleJMPacket,
+      [MessageCode.ParamValue]: packetParser.handlePVPacket,
+      [MessageCode.ParamString]: packetParser.handlePSPacket,
+      [MessageCode.ZLIB]: packetParser.handleZBPacket,
+      [MessageCode.FaderPosition]: packetParser.handleMSPacket,
+      [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null
