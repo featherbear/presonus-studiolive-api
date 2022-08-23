@@ -63,7 +63,6 @@ export declare interface Client {
 export class Client extends EventEmitter {
   readonly serverHost: string
   readonly serverPort: number
-  readonly serverPortUDP: number
 
   meteringClient: Awaited<ReturnType<typeof MeterServer>>
   meteringData: any
@@ -82,7 +81,6 @@ export class Client extends EventEmitter {
 
     this.serverHost = host
     this.serverPort = port
-    this.serverPortUDP = 52704
 
     this.meteringClient = null
     this.meteringData = {}
@@ -149,9 +147,9 @@ export class Client extends EventEmitter {
    * Subscribe to the metering data
    */
   async meterSubscribe(port?: number) {
-    port = port || this.serverPortUDP
+    port = port ?? 0
     this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
-    this._sendPacket(MessageCode.Hello, toShort(port), 0x00)
+    this._sendPacket(MessageCode.Hello, toShort(this.meteringClient.address().port), 0x00)
   }
 
   /**

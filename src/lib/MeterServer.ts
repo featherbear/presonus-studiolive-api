@@ -13,7 +13,7 @@ import ChannelCount from './types/ChannelCount'
  * @param onData Callback
  */
 export default function createServer(port, channelCounts: ChannelCount, onData: (meterData) => any) {
-  if (typeof port !== 'number' || port <= 0 || port > 65535) {
+  if (typeof port !== 'number' || port < 0 || port > 65535) {
     throw Error('Invalid port number')
   }
 
