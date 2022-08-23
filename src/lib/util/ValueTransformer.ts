@@ -61,14 +61,21 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
       const old = value
       value = transformer(value, symbolPath)
       if (old !== value) {
-        logger.debug(
-          {
+        try {
+          logger.debug(
+            {
+              key: symbolPath.join('.'),
+              transformer: lookup,
+              oldValue: old instanceof Buffer ? inspect(old) : old,
+              newValue: value
+            }, 'Value transformed')
+        } catch (e) {
+          logger.debug({
             key: symbolPath.join('.'),
             transformer: lookup,
-            oldValue: old instanceof Buffer ? inspect(old) : old,
-            newValue: value
-
-          }, 'Value transformed')
+            error: e.toString()
+          }, 'Value transformed, but could not serialise values')
+        }
       }
       break
     }

@@ -105,6 +105,10 @@ export class Client extends EventEmitter {
       this.state.set(name, value)
     })
 
+    this.on(MessageCode.ParamChars, ({ name, value }) => {
+      this.state.set(name, value)
+    })
+
     this.on(MessageCode.FaderPosition, function (MS: { [_ in ChannelTypes]: number[] }) {
       for (const [type, values] of Object.entries(MS)) {
         for (let i = 0; i < values.length; i++) {
@@ -264,6 +268,7 @@ export class Client extends EventEmitter {
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
+      [MessageCode.ParamChars]: packetParser.handlePCPacket,
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null
@@ -349,13 +354,25 @@ export class Client extends EventEmitter {
 
   setColor(selector: ChannelSelector, hex: string, alpha: number = 0xFF) {
     this._sendPacket(
-      MessageCode.ParamColor,
+      MessageCode.ParamChars,
       Buffer.concat([
         Buffer.from(`${parseChannelString(selector)}/color\x00\x00\x00`),
         Buffer.from(hex, 'hex'),
         Buffer.from([alpha])
       ])
     )
+  }
+
+  setColour(...args: Parameters<this['setColor']>) {
+    return this.setColor.apply(this, args)
+  }
+
+  getColor(selector: ChannelSelector) {
+    return this.state.get(`${parseChannelString(selector)}/color`)
+  }
+
+  getColour(...args: Parameters<this['getColor']>) {
+    return this.getColor.apply(this, args)
   }
 
   /**

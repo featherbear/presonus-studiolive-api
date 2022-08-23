@@ -67,5 +67,6 @@ export default class KVTree {
 function repr(obj) {
   if (obj instanceof KVTree) return obj.toJSON()
   if (obj instanceof Buffer) return obj.toString('hex')
+  if (typeof obj === 'bigint') return obj.toString()
   return obj
 }

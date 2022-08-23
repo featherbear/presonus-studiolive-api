@@ -7,6 +7,11 @@ type TransformerType = {
   fromPV?: ValueTransformer | typeof IGNORE
 
   /**
+   * Transform values from the PC payload
+   */
+  fromPC?: ValueTransformer
+
+  /**
    * Transform values from the UBJSON payload
    * Generally from the ZB or CK<ZB> payload
    */
@@ -32,7 +37,8 @@ const DEFAULTS = {
    */
   passthrough: {
     fromPV: x => x,
-    fromUB: x => x
+    fromUB: x => x,
+    fromPC: x => x
   }
 }
 
@@ -86,6 +92,25 @@ const transformers: {
   'line.*.dca.fx*': {
     fromPV: IGNORE
   },
+  '**.color': {
+    fromPC(data: Buffer) {
+      return data.toString('hex')
+    },
+    fromUB(data: bigint) {
+      const buffer = Buffer.allocUnsafe(8)
+
+      if (typeof data === 'bigint') {
+        buffer.writeBigInt64BE(data)
+        buffer.reverse()
+      } else {
+        if (data === 0) return null
+        buffer.writeInt32LE(data)
+      }
+
+      return buffer.slice(0, 4).toString('hex')
+    }
+
+  },
   'permissions.access_code': DEFAULTS.passthrough,
   'permissions.device_list': DEFAULTS.passthrough,
   'permissions.mix_permissions': DEFAULTS.passthrough,
@@ -106,6 +131,15 @@ export const transformersPV: ValueTransformerLookup = Object.entries(transformer
 
 export const ignorePV = Object.keys(transformers)
   .filter(key => transformers[key].fromPV === IGNORE)
+
+export const transformersPC: ValueTransformerLookup = Object.entries(transformers)
+  .filter(([_, { fromPC }]) => fromPC)
+  .reduce((obj, [key, { fromPC }]) => {
+    return {
+      ...obj,
+      [key]: fromPC
+    }
+  }, {})
 
 export const transformersUB: ValueTransformerLookup = Object.entries(transformers)
   .filter(([_, { fromUB }]) => fromUB)
