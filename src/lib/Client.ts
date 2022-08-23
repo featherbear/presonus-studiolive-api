@@ -333,7 +333,11 @@ export class Client extends EventEmitter {
    * Get mute status of a channel
    */
   getMute(selector: ChannelSelector) {
-    return this.state.get(this._getMuteTargetString(selector))
+    const state = this.state.get(this._getMuteTargetString(selector))
+    if (state === null) return null
+
+    // AUX and FX mixes have inverted states
+    return selector.mixType ? !state : state
   }
 
   /**
@@ -356,7 +360,12 @@ export class Client extends EventEmitter {
    */
   setMute(selector: ChannelSelector, status: boolean | 'toggle') {
     const targetString = this._getMuteTargetString(selector)
-    const state: boolean = status === 'toggle' ? !this.state.get(targetString, true) : status
+
+    // AUX and FX mixes have inverted states
+    const shouldInvert = !!selector.mixType
+
+    let state: boolean = status === 'toggle' ? this.state.get(targetString, true) : status
+    if (shouldInvert) state = !state
 
     this._sendPacket(
       MessageCode.ParamValue,
