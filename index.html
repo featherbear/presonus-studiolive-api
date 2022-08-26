@@ -1036,7 +1036,7 @@ The first and third positions have some byte value (either <code>0x6a</code>, <c
 The first byte will be <strong>C-Byte A</strong>, and the third as <strong>C-Byte B</strong></p>
 
 <blockquote>
-<p>i.e If a message is sent with <code>[A] = j</code>, <code>[B] = e</code> a response will be sent containing <code>[A] = e</code>, <code>[B] = j</code> so that the response can be matched with the request.</p>
+<p>i.e If a message is sent with <code>{A: j, B: e}</code> a response will be sent containing <code>{A: e, B: j}</code> so that the response can be matched with the request.</p>
 </blockquote>
 
 <p>They seem to be used for matching responses to requests.  </p>
