@@ -1,3 +1,4 @@
+import { ConnectionState } from './constants/connection';
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
@@ -41,10 +42,13 @@ type dataFnCallback<T = any> = (obj: {
 
 export declare interface Client {
   on(event: MessageCode, listener: fnCallback): this;
+  on(event: ConnectionState, listener: dataFnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MessageCode, listener: fnCallback): this;
+  once(event: ConnectionState, listener: dataFnCallback): this;
   once(event: 'data', listener: dataFnCallback): this;
   off(event: MessageCode, listener: fnCallback): this;
+  off(event: ConnectionState, listener: dataFnCallback): this;
   off(event: 'data', listener: dataFnCallback): this;
   addListener(event: MessageCode, listener: fnCallback): this;
   addListener(event: 'data', listener: dataFnCallback): this;
@@ -163,12 +167,14 @@ export class Client extends EventEmitter {
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (err: Error) => {
-        this.connectPromise = null
+      const rejectHandler = (connectionState: ConnectionState) => (err: Error) => {
+        this.connectPromise = null;
+        this.emit(connectionState, err);
         return reject(err)
       }
 
-      this.conn.once('error', rejectHandler)
+      this.conn.once('error', rejectHandler(ConnectionState.Error))
+      this.conn.once('close', rejectHandler(ConnectionState.Closed))
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
