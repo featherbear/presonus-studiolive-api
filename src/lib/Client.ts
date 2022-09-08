@@ -245,9 +245,11 @@ export class Client extends EventEmitter {
           if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
             clearInterval(keepAliveLoop)
             if(!this.conn.destroyed) {
+              // if the socket is still alive and the connection is closed 
+              // because the keepalive packets have not been send in the last 1,5 seconds
+              // the connection is closed here
               this.conn.destroy()
             }
-            this.emit(ConnectionState.Closed)
             return
           }
           lastKeepAlive = now
