@@ -239,11 +239,15 @@ export class Client extends EventEmitter {
 
         // #region Keep alive
         // Send a KeepAlive packet every second
+        let lastKeepAlive = new Date().getTime();
         const keepAliveLoop = setInterval(() => {
-          if (this.conn.destroyed) {
+          const now = new Date().getTime();
+          if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
             clearInterval(keepAliveLoop)
+            this.emit(ConnectionState.Closed)
             return
           }
+          lastKeepAlive = now
           this._sendPacket(MessageCode.KeepAlive)
         }, 1000)
         // #endregion
