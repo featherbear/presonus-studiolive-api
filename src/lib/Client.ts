@@ -244,6 +244,9 @@ export class Client extends EventEmitter {
           const now = new Date().getTime();
           if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
             clearInterval(keepAliveLoop)
+            if(!this.conn.destroyed) {
+              this.conn.destroy()
+            }
             this.emit(ConnectionState.Closed)
             return
           }
