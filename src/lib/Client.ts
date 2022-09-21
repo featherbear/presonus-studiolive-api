@@ -25,10 +25,11 @@ import CacheProvider from './util/CacheProvider'
 import { tokenisePath } from './util/treeUtil'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
-import { logVolumeToLinear, transitionValue } from './util/valueUtil'
+import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUtil'
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
+import { LIST_TYPE } from './constants/files'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -269,6 +270,7 @@ export class Client extends EventEmitter {
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.ParamChars]: packetParser.handlePCPacket,
+      [MessageCode.FileData]: packetParser.handleFDPacket,
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null
@@ -285,11 +287,15 @@ export class Client extends EventEmitter {
     this.emit('data', { code: messageCode, data })
   }
 
-  sendList(key) {
+  sendList<T = any>(key: string): Promise<T> {
+    const id = UniqueRandom.get(16).request()
+    const idBuffer = Buffer.allocUnsafe(2)
+    idBuffer.writeUInt16BE(id)
+    
     this._sendPacket(
       MessageCode.FileRequest,
       Buffer.concat([
-        Buffer.from([0x01, 0x00]),
+        idBuffer,
         Buffer.from('List' + key.toString()),
         Buffer.from([0x00, 0x00])
       ])
