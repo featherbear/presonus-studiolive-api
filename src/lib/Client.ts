@@ -29,8 +29,8 @@ import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUt
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
-import Files, { LIST_TYPE } from './constants/files'
-import { ProjectItem } from './types/FD/ProjectItem'
+import Files from './constants/files'
+import { ChannelPresetItem, ProjectItem, SceneItem } from './types/FD/Listitem'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -292,7 +292,9 @@ export class Client extends EventEmitter {
     this.emit('data', { code: messageCode, data })
   }
 
+  sendList(key: ReturnType<typeof Files.SCENES_OF>): Promise<SceneItem[]>
   sendList(key: typeof Files.PROJECTS): Promise<ProjectItem[]>
+  sendList(key: typeof Files.CHANNEL_PRESETS): Promise<ChannelPresetItem[]>
   sendList<T = unknown>(key: string): Promise<T> {
     const id = UniqueRandom.get(16).request()
 
@@ -304,9 +306,16 @@ export class Client extends EventEmitter {
     const promise = new Promise<T>((resolve, reject) => {
       this.once(<any>`_${MessageCode.FileData}_${id}`, (data: any) => {
         switch (key) {
-          case Files.PROJECTS: {
-            data = data.files.filter(({ title }) => title !== '* Empty Location *')
+          case Files.PROJECTS:
+          case Files.CHANNEL_PRESETS: {
+            data = data?.files?.filter(({ title }) => title !== '* Empty Location *')
             break
+          }
+          
+          default: {
+            if (key.startsWith(Files.SCENES_OF(''))) {
+              data = data?.files?.filter(({ title }) => title !== '* Empty Location *')
+            }
           }
         }
         

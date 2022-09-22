@@ -1,4 +1,4 @@
-interface SceneOfString extends String {};
+type SceneOfString = string;
 
 const Files = {
   CHANNEL_PRESETS: 'presets/channel',
