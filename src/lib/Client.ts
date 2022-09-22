@@ -29,7 +29,8 @@ import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUt
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
-import { LIST_TYPE } from './constants/files'
+import Files, { LIST_TYPE } from './constants/files'
+import { ProjectItem } from './types/FD/ProjectItem'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -116,6 +117,10 @@ export class Client extends EventEmitter {
           this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
         }
       }
+    })
+
+    this.on(MessageCode.FileData, function({ id, data }) {
+      this.emit(`_${MessageCode.FileData}_${id}`, data)
     })
   }
 
@@ -287,11 +292,28 @@ export class Client extends EventEmitter {
     this.emit('data', { code: messageCode, data })
   }
 
-  sendList<T = any>(key: string): Promise<T> {
+  sendList(key: typeof Files.PROJECTS): Promise<ProjectItem[]>
+  sendList<T = unknown>(key: string): Promise<T> {
     const id = UniqueRandom.get(16).request()
+
+    // different to the bufferUtil::toShort() because this one uses big endian encoding
     const idBuffer = Buffer.allocUnsafe(2)
     idBuffer.writeUInt16BE(id)
-    
+   
+    // TODO: Put conditional parse logic outside of this main file
+    const promise = new Promise<T>((resolve, reject) => {
+      this.once(<any>`_${MessageCode.FileData}_${id}`, (data: any) => {
+        switch (key) {
+          case Files.PROJECTS: {
+            data = data.files.filter(({ title }) => title !== '* Empty Location *')
+            break
+          }
+        }
+        
+        return resolve(data)
+      })
+    })
+
     this._sendPacket(
       MessageCode.FileRequest,
       Buffer.concat([
@@ -300,6 +322,8 @@ export class Client extends EventEmitter {
         Buffer.from([0x00, 0x00])
       ])
     )
+
+    return promise
   }
 
   /**
