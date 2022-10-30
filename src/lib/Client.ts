@@ -173,6 +173,10 @@ export class Client extends EventEmitter {
         return reject(err)
       }
 
+      //remove possibly added listeners, so events are not fired multiple times
+      this.conn.removeAllListeners("error");
+      this.conn.removeAllListeners("close");
+
       this.conn.once('error', rejectHandler(ConnectionState.Error))
       this.conn.once('close', rejectHandler(ConnectionState.Closed))
 
