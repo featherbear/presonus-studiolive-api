@@ -1,3 +1,4 @@
+import { ConnectionState } from './constants/connection';
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
@@ -41,10 +42,13 @@ type dataFnCallback<T = any> = (obj: {
 
 export declare interface Client {
   on(event: MessageCode, listener: fnCallback): this;
+  on(event: ConnectionState, listener: dataFnCallback): this;
   on(event: 'data', listener: dataFnCallback): this;
   once(event: MessageCode, listener: fnCallback): this;
+  once(event: ConnectionState, listener: dataFnCallback): this;
   once(event: 'data', listener: dataFnCallback): this;
   off(event: MessageCode, listener: fnCallback): this;
+  off(event: ConnectionState, listener: dataFnCallback): this;
   off(event: 'data', listener: dataFnCallback): this;
   addListener(event: MessageCode, listener: fnCallback): this;
   addListener(event: 'data', listener: dataFnCallback): this;
@@ -163,12 +167,18 @@ export class Client extends EventEmitter {
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (err: Error) => {
-        this.connectPromise = null
+      const rejectHandler = (connectionState: ConnectionState) => (err: Error) => {
+        this.connectPromise = null;
+        this.emit(connectionState, err);
         return reject(err)
       }
 
-      this.conn.once('error', rejectHandler)
+      //remove possibly added listeners, so events are not fired multiple times
+      this.conn.removeAllListeners("error");
+      this.conn.removeAllListeners("close");
+
+      this.conn.once('error', rejectHandler(ConnectionState.Error))
+      this.conn.once('close', rejectHandler(ConnectionState.Closed))
 
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
@@ -233,11 +243,20 @@ export class Client extends EventEmitter {
 
         // #region Keep alive
         // Send a KeepAlive packet every second
+        let lastKeepAlive = new Date().getTime();
         const keepAliveLoop = setInterval(() => {
-          if (this.conn.destroyed) {
+          const now = new Date().getTime();
+          if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
             clearInterval(keepAliveLoop)
+            if(!this.conn.destroyed) {
+              // if the socket is still alive and the connection is closed 
+              // because the keepalive packets have not been send in the last 1,5 seconds
+              // the connection is closed here
+              this.conn.destroy()
+            }
             return
           }
+          lastKeepAlive = now
           this._sendPacket(MessageCode.KeepAlive)
         }, 1000)
         // #endregion
