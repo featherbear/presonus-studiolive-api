@@ -14,17 +14,16 @@ const client = new Client({
  * Raised after the Keep-Alive health check expires
  */
 client.on('reconnecting', function () {
-  console.log("evt: Reconnecting to console")
+  console.log('evt: Reconnecting to console')
 })
 
 client.on('closed', function () {
-  console.log('evt: Connection closed');
+  console.log('evt: Connection closed')
 })
 
 client.on('connected', function () {
   console.log('evt: Connected')
 })
-
 
 client.on('data', function ({ code, data }) {
   // 
@@ -35,5 +34,5 @@ client.on(MessageCode.ParamValue, function (data: SettingType) {
 })
 
 client.connect().then(() => {
-  console.log('Connection was established');
+  console.log('Connection was established')
 })
