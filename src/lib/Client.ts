@@ -79,8 +79,8 @@ export class Client {
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
-    this.conn.on('close', (...args) => this.emit('close', ...args))
-    this.conn.on('error', (...args) => this.emit('error', ...args))
+    // this.conn.on('close', (...args) => this.emit('close', ...args))
+    // this.conn.on('error', (...args) => this.emit('error', ...args))
 
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
@@ -190,19 +190,20 @@ export class Client {
   }
 
   async connect(subscribeData?: SubscriptionOptions) {
-    if (this.connectPromise) {
-      return this.connectPromise
-    }
+    if (this.connectPromise) return this.connectPromise
 
     return (this.connectPromise = new Promise((resolve, reject) => {
+      console.log('Try connect');
+
       const reconnect = () => {
-        delete this.connectPromise
-        this.connect(subscribeData)
+        console.log('Try reconnnect');
+        doConnect()
       }
-      
-      this.conn.once('error', reconnect)
-      this.conn.connect(this.serverPort, this.serverHost, () => {
+
+      this.conn.addListener('connect', () => {
         this.conn.removeListener('error', reconnect)
+
+        console.log('made it');
         // #region Connection handshake
 
         // The zlib payload may come either as a ZB or CK packet
@@ -253,14 +254,13 @@ export class Client {
               if (!this.conn.destroyed) this.conn.destroy()
               if (this.options?.autoreconnect) {
                 this.emit('reconnecting')
-
-                delete this.connectPromise
-                this.connect(subscribeData)
+                reconnect()
               }
               this.emit('close')
             })
 
           this.emit('connected')
+          console.log('yup');
           resolve(this)
         })
 
@@ -268,6 +268,14 @@ export class Client {
         this._sendPacket(MessageCode.JSON, craftSubscribe(subscribeData))
         // #endregion
       })
+
+      const doConnect = () => {
+        this.conn.destroy()
+        this.conn.connect(this.serverPort, this.serverHost)
+        this.conn.once('error', reconnect)
+      }
+
+      doConnect()
     }))
   }
 
@@ -449,17 +457,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-        {
-          const odd = (selector.mixNumber - 1) | 1
-          channelString += `/aux${odd}${odd + 1}_`
-          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-            channelString += isStereo ? 'stpan' : 'pan'
-          } else {
-            // No need to pan a mono aux
-            return
+          {
+            const odd = (selector.mixNumber - 1) | 1
+            channelString += `/aux${odd}${odd + 1}_`
+            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+              channelString += isStereo ? 'stpan' : 'pan'
+            } else {
+              // No need to pan a mono aux
+              return
+            }
+            break
           }
-          break
-        }
         default:
           throw new Error('Unexpected mix type')
       }
