@@ -244,6 +244,12 @@ export class Client {
               packets.forEach((bytes) => this._writeBytes(bytes))
             }, () => {
               if (!this.conn.destroyed) this.conn.destroy()
+              if (this.options?.autoreconnect) {
+                this.emit('reconnecting')
+                
+                delete this.connectPromise
+                this.connect(subscribeData)
+              }
               this.emit('close')
             })
 
