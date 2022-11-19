@@ -195,7 +195,14 @@ export class Client {
     }
 
     return (this.connectPromise = new Promise((resolve, reject) => {
+      const reconnect = () => {
+        delete this.connectPromise
+        this.connect(subscribeData)
+      }
+      
+      this.conn.once('error', reconnect)
       this.conn.connect(this.serverPort, this.serverHost, () => {
+        this.conn.removeListener('error', reconnect)
         // #region Connection handshake
 
         // The zlib payload may come either as a ZB or CK packet
@@ -246,7 +253,7 @@ export class Client {
               if (!this.conn.destroyed) this.conn.destroy()
               if (this.options?.autoreconnect) {
                 this.emit('reconnecting')
-                
+
                 delete this.connectPromise
                 this.connect(subscribeData)
               }
