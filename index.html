@@ -719,6 +719,8 @@ This event will be emitted after the specific event is emitted.</p>
 <span class="p">})</span>
 </code></pre></div>
 <p>To trigger a function when client has successfully connected to the console, listen to the <code>connected</code> event.  </p>
+
+<p>Other events: <code>closed</code>, <code>error</code>, <code>reconnecting</code></p>
 <div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Also connected to the device!</span><span class="dl">"</span><span class="p">)</span>
 <span class="p">})</span>
