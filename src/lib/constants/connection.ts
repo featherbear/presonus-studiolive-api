@@ -1,4 +1,4 @@
 export enum ConnectionState {
-    Error = "error",
-    Closed = "closed"
+    error = 'error',
+    close = 'close'
 }

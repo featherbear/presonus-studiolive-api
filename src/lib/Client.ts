@@ -1,4 +1,4 @@
-import { ConnectionState } from './constants/connection';
+import { ConnectionState } from './constants/connection'
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
@@ -30,6 +30,7 @@ import { logVolumeToLinear, transitionValue } from './util/valueUtil'
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
+import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -40,28 +41,17 @@ type dataFnCallback<T = any> = (obj: {
   data: T
 }) => void;
 
-export declare interface Client {
-  on(event: MessageCode, listener: fnCallback): this;
-  on(event: ConnectionState, listener: dataFnCallback): this;
-  on(event: 'data', listener: dataFnCallback): this;
-  once(event: MessageCode, listener: fnCallback): this;
-  once(event: ConnectionState, listener: dataFnCallback): this;
-  once(event: 'data', listener: dataFnCallback): this;
-  off(event: MessageCode, listener: fnCallback): this;
-  off(event: ConnectionState, listener: dataFnCallback): this;
-  off(event: 'data', listener: dataFnCallback): this;
-  addListener(event: MessageCode, listener: fnCallback): this;
-  addListener(event: 'data', listener: dataFnCallback): this;
-  removeListener(event: MessageCode, listener: fnCallback): this;
-  removeListener(event: 'data', listener: dataFnCallback): this;
-  removeAllListeners(event: MessageCode): this;
-  removeAllListeners(event: 'data'): this;
+type EventFunctionType<T> = {
+  (event: MessageCode, listener: fnCallback): T
+  (event: keyof typeof ConnectionState, listener: fnCallback): T
+  (event: 'data', listener: dataFnCallback): T
+  (event: 'dany', listener: dataFnCallback): T
 }
-
-// eslint-disable-next-line no-redeclare
-export class Client extends EventEmitter {
+export class Client {
   readonly serverHost: string
   readonly serverPort: number
+  readonly options: Partial<InstanceOptions>
+  #eventEmitter: EventEmitter
 
   meteringClient: Awaited<ReturnType<typeof MeterServer>>
   meteringData: any
@@ -74,17 +64,22 @@ export class Client extends EventEmitter {
   private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
-  constructor(host: string, port: number = 53000) {
-    super()
-    if (!host) throw new Error('Host address not supplied')
+  constructor(address: ConnectionAddress, options?: Partial<InstanceOptions>) {
+    if (!address?.host) throw new Error('Host address not supplied')
 
-    this.serverHost = host
-    this.serverPort = port
+    this.#eventEmitter = new EventEmitter()
+
+    this.serverHost = address.host
+    this.serverPort = address?.port || 53000
+    this.options = options
 
     this.meteringClient = null
     this.meteringData = {}
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
+
+    this.conn.on('close', (...args) => this.emit('close', ...args))
+    this.conn.on('error', (...args) => this.emit('error', ...args))
 
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
@@ -121,6 +116,35 @@ export class Client extends EventEmitter {
       }
     })
   }
+
+  emit(...args: Parameters<EventEmitter['emit']>) {
+    return this.#eventEmitter.emit(...args)
+  }
+
+  on = (function (...args) {
+    this.#eventEmitter.on(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  addListener = (function (...args) {
+    this.#eventEmitter.addListener(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  once = (function (...args) {
+    this.#eventEmitter.once(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  off = (function (...args) {
+    this.#eventEmitter.off(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  removeListener = (function (...args) {
+    this.#eventEmitter.removeListener(...args)
+    return this
+  }) as EventFunctionType<this>
 
   /**
    * Extracts the data structure and cache layer
@@ -165,41 +189,27 @@ export class Client extends EventEmitter {
   }
 
   async connect(subscribeData?: SubscriptionOptions) {
-    if (this.connectPromise) return this.connectPromise
+    if (this.connectPromise) {
+      return this.connectPromise
+    }
+
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (connectionState: ConnectionState) => (err: Error) => {
-        this.connectPromise = null;
-        this.emit(connectionState, err);
-        return reject(err)
-      }
-
-      //remove possibly added listeners, so events are not fired multiple times
-      this.conn.removeAllListeners("error");
-      this.conn.removeAllListeners("close");
-
-      this.conn.once('error', rejectHandler(ConnectionState.Error))
-      this.conn.once('close', rejectHandler(ConnectionState.Closed))
-
       this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
 
-        const compressedZlibInitCallback = (data) => {
-          this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
+        // The zlib payload may come either as a ZB or CK packet
+        const chunkedZlibInitCallback = (data) => {
+          this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
           this.emit(MessageCode.ZLIB, data)
         }
-
-        this.addListener(MessageCode.Chunk, compressedZlibInitCallback)
+        this.addListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
         Promise.all([
-          /**
-           * Await for the first zlib response to resolve channel counts
-           */
           new Promise((resolve) => {
-            const zlibInitCallback = () => {
-              this.removeListener(MessageCode.ZLIB, zlibInitCallback)
+            this.once(MessageCode.ZLIB, () => {
+              // De-register the listener in case the payload was not encapsulated in a CK packet 
+              this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
-              // ZB is not always encapsulated in the CK packet, so deregister the listener here too
-              this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
               setCounts((this.channelCounts = {
                 LINE: Object.keys(this.state.get('line')).length,
                 AUX: Object.keys(this.state.get('aux')).length,
@@ -214,8 +224,7 @@ export class Client extends EventEmitter {
               }))
 
               resolve(this)
-            }
-            this.addListener(MessageCode.ZLIB, zlibInitCallback)
+            })
           }),
 
           /**
@@ -231,7 +240,27 @@ export class Client extends EventEmitter {
             this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
-          this.conn.removeListener('error', rejectHandler)
+          console.log('connected')
+
+          // #region Keep alive
+          // Send a KeepAlive packet every second
+          let lastKeepAlive = new Date().getTime()
+          const keepAliveLoop = setInterval(() => {
+            const now = new Date().getTime()
+            if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
+              clearInterval(keepAliveLoop)
+              if (!this.conn.destroyed) {
+                // if the socket is still alive and the connection is closed 
+                // because the keepalive packets have not been send in the last 1,5 seconds
+                // the connection is closed here
+                this.conn.destroy()
+              }
+              return
+            }
+            lastKeepAlive = now
+            this._sendPacket(MessageCode.KeepAlive)
+          }, 1000)
+          // #endregion
 
           this.emit('connected')
           resolve(this)
@@ -239,26 +268,6 @@ export class Client extends EventEmitter {
 
         // Send subscription request
         this._sendPacket(MessageCode.JSON, craftSubscribe(subscribeData))
-        // #endregion
-
-        // #region Keep alive
-        // Send a KeepAlive packet every second
-        let lastKeepAlive = new Date().getTime();
-        const keepAliveLoop = setInterval(() => {
-          const now = new Date().getTime();
-          if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
-            clearInterval(keepAliveLoop)
-            if(!this.conn.destroyed) {
-              // if the socket is still alive and the connection is closed 
-              // because the keepalive packets have not been send in the last 1,5 seconds
-              // the connection is closed here
-              this.conn.destroy()
-            }
-            return
-          }
-          lastKeepAlive = now
-          this._sendPacket(MessageCode.KeepAlive)
-        }, 1000)
         // #endregion
       })
     }))
