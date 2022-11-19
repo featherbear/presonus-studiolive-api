@@ -4,6 +4,11 @@ import * as dgram from 'dgram'
 import { PacketHeader } from './constants'
 import ChannelCount from './types/ChannelCount'
 
+// TODO: 
+export interface MeterData {
+
+}
+
 /**
  * Create a UDP server and await data.  
  * This function **does not** send the packet to initiate the meter data request
@@ -12,7 +17,7 @@ import ChannelCount from './types/ChannelCount'
  * @param channelCounts Channel count data
  * @param onData Callback
  */
-export default function createServer(port, channelCounts: ChannelCount, onData: (meterData) => any) {
+export default function createServer(port, channelCounts: ChannelCount, onData: (data: MeterData) => any) {
   if (typeof port !== 'number' || port < 0 || port > 65535) {
     throw Error('Invalid port number')
   }
@@ -55,7 +60,7 @@ export default function createServer(port, channelCounts: ChannelCount, onData: 
        * @param skipBytes Bytes to skip ahead from
        */
       function readValues(count: number, skipBytes: number = 0) {
-        const values = []
+        const values: number[] = []
         for (let i = 0; i < count; i++) values.push(data.readUInt16LE((skipBytes + i) * 2))
         data = data.slice((skipBytes + count) * 2)
         return values
@@ -110,7 +115,7 @@ export default function createServer(port, channelCounts: ChannelCount, onData: 
         stageD: readValues(channelCounts.MAIN * 2)
       }
 
-      onData({
+      const result: MeterData = {
         input,
         channelStrip,
         aux_metering,
@@ -120,7 +125,9 @@ export default function createServer(port, channelCounts: ChannelCount, onData: 
         main,
         fx_chstrip,
         fxreturn_strip
-      })
+      }
+
+      onData(result)
     })
     UDPserver.on('listening', () => resolve(UDPserver))
     UDPserver.bind(port)

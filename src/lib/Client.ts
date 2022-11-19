@@ -5,7 +5,7 @@ import Discovery from './Discovery'
 import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
-import MeterServer from './MeterServer'
+import MeterServer, { MeterData } from './MeterServer'
 import { Channel, ChannelTypes, MessageCode } from './constants'
 
 import {
@@ -43,20 +43,19 @@ type dataFnCallback<T = any> = (obj: {
 
 type EventFunctionType<T> = {
   (event: MessageCode, listener: fnCallback): T
-  (event: keyof typeof ConnectionState, listener: fnCallback): T
+  (event: keyof typeof ConnectionState, listener: fnCallback<void>): T
+  (event: 'meter', listener: fnCallback<MeterData>): T
   (event: 'data', listener: dataFnCallback): T
-  (event: 'dany', listener: dataFnCallback): T
 }
 export class Client {
   readonly serverHost: string
   readonly serverPort: number
   readonly options: Partial<InstanceOptions>
-  #eventEmitter: EventEmitter
-
-  meteringClient: Awaited<ReturnType<typeof MeterServer>>
-  meteringData: any
 
   channelCounts: ChannelCount
+
+  meteringClient: Awaited<ReturnType<typeof MeterServer>>
+  #eventEmitter: EventEmitter
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -74,7 +73,6 @@ export class Client {
     this.options = options
 
     this.meteringClient = null
-    this.meteringData = {}
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
 
@@ -175,7 +173,7 @@ export class Client {
    */
   async meterSubscribe(port?: number) {
     port = port ?? 0
-    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData: MeterData) => this.emit('meter', meterData))
     this._sendPacket(MessageCode.Hello, toShort(this.meteringClient.address().port), 0x00)
   }
 
@@ -210,19 +208,17 @@ export class Client {
               // De-register the listener in case the payload was not encapsulated in a CK packet 
               this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
+              const getCount = (key) => Object.keys(this.state.get(key) ?? {}).length
               setCounts((this.channelCounts = {
-                LINE: Object.keys(this.state.get('line')).length,
-                AUX: Object.keys(this.state.get('aux')).length,
-                FX /* fxbus == fxreturn */: Object.keys(this.state.get('fxbus')).length,
-                FXRETURN: Object.keys(this.state.get('fxreturn')).length,
-                RETURN /* aka tape? */: Object.keys(this.state.get('return')).length,
-                TALKBACK: Object.keys(this.state.get('talkback')).length,
-                MAIN: Object.keys(this.state.get('main')).length,
-
-                // TODO: The 16R doesn't have SUB groups. Check against the 24R / 16
-                SUB: Object.keys(this.state.get('sub') ?? {}).length
+                LINE: getCount('line'),
+                AUX: getCount('aux'),
+                FX /* fxbus == fxreturn */: getCount('fxbus'),
+                FXRETURN: getCount('fxreturn'),
+                RETURN /* aka tape? */: getCount('return'),
+                TALKBACK: getCount('talkback'),
+                MAIN: getCount('main'),
+                SUB: getCount('sub') /* TODO: The 16R doesn't have SUB groups. Check against the 24R / 16 */
               }))
-
               resolve(this)
             })
           }),
@@ -242,20 +238,19 @@ export class Client {
         ]).then(() => {
           // #region Keep alive
           // Send a KeepAlive packet every second
-          let lastKeepAlive = new Date().getTime()
+          let lastKeepAliveSent = new Date().getTime()
           const keepAliveLoop = setInterval(() => {
             const now = new Date().getTime()
-            if (this.conn.destroyed || (now - lastKeepAlive > 1500)) {
+
+            // Check if the connection has been destroyed (TODO: Find better health check)
+            // Also checks if keep-alive packets were missed (e.g. device went to sleep)
+            if (this.conn.destroyed || (now - lastKeepAliveSent > 2500)) {
               clearInterval(keepAliveLoop)
-              if (!this.conn.destroyed) {
-                // if the socket is still alive and the connection is closed 
-                // because the keepalive packets have not been send in the last 1,5 seconds
-                // the connection is closed here
-                this.conn.destroy()
-              }
+              if (!this.conn.destroyed) this.conn.destroy()
+              this.emit('close')
               return
             }
-            lastKeepAlive = now
+            lastKeepAliveSent = now
             this._sendPacket(MessageCode.KeepAlive)
           }, 1000)
           // #endregion

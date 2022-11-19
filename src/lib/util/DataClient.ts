@@ -8,12 +8,6 @@ import Queue from 'queue'
 
 export default function (callback) {
   const TCPclient = new Socket()
-
-  TCPclient.on('timeout', () => {
-    console.warn('Timeout')
-  })
-
-  TCPclient.setKeepAlive(true)
   
   let remaining = 0
   let payload = Buffer.allocUnsafe(0)
