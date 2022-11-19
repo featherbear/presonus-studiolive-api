@@ -1,4 +1,4 @@
-import type { LogLevel } from "bunyan"
+import type { LogLevel } from 'bunyan'
 
 export interface InstanceOptions {
     autoreconnect: boolean

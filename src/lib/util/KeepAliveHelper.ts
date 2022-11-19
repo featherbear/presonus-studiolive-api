@@ -38,7 +38,7 @@ export default class KeepAliveHelper {
       const now = new Date().getTime()
 
       if (now - this.#lastRecv > this.#timeout) {
-        logger.debug("Timeout exceeded for keep-alive response")
+        logger.debug('Timeout exceeded for keep-alive response')
         clearInterval(this.#loop)
         return failFn()
       }
