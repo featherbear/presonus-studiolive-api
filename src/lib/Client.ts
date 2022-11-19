@@ -75,6 +75,10 @@ export class Client {
     this.serverPort = address?.port || 53000
     this.options = options
 
+    if (typeof this.options?.logLevel !== 'undefined') {
+      logger.level(this.options.logLevel)
+    }
+
     this.meteringClient = null
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
