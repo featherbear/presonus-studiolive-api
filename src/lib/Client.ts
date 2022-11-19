@@ -31,6 +31,7 @@ import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
 import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
+import KeepAliveHelper from './util/KeepAliveHelper'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -56,6 +57,7 @@ export class Client {
 
   meteringClient: Awaited<ReturnType<typeof MeterServer>>
   #eventEmitter: EventEmitter
+  #keepAliveHelper: KeepAliveHelper
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -67,6 +69,7 @@ export class Client {
     if (!address?.host) throw new Error('Host address not supplied')
 
     this.#eventEmitter = new EventEmitter()
+    this.#keepAliveHelper = new KeepAliveHelper(3000)
 
     this.serverHost = address.host
     this.serverPort = address?.port || 53000
@@ -236,24 +239,13 @@ export class Client {
             this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
-          // #region Keep alive
-          // Send a KeepAlive packet every second
-          let lastKeepAliveSent = new Date().getTime()
-          const keepAliveLoop = setInterval(() => {
-            const now = new Date().getTime()
-
-            // Check if the connection has been destroyed (TODO: Find better health check)
-            // Also checks if keep-alive packets were missed (e.g. device went to sleep)
-            if (this.conn.destroyed || (now - lastKeepAliveSent > 2500)) {
-              clearInterval(keepAliveLoop)
+          this.#keepAliveHelper.start(
+            (packets) => {
+              packets.forEach((bytes) => this._writeBytes(bytes))
+            }, () => {
               if (!this.conn.destroyed) this.conn.destroy()
               this.emit('close')
-              return
-            }
-            lastKeepAliveSent = now
-            this._sendPacket(MessageCode.KeepAlive)
-          }, 1000)
-          // #endregion
+            })
 
           this.emit('connected')
           resolve(this)
@@ -284,7 +276,7 @@ export class Client {
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
-      [MessageCode.ParamValue]: packetParser.handlePVPacket,
+      [MessageCode.ParamValue]: this.#keepAliveHelper.intercept(packetParser.handlePVPacket),
       [MessageCode.ParamString]: packetParser.handlePSPacket,
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
@@ -321,8 +313,11 @@ export class Client {
    * Send bytes to the console
    */
   private async _sendPacket(...params: Parameters<typeof createPacket>) {
+    return this._writeBytes(createPacket(...params))
+  }
+
+  private async _writeBytes(bytes: Buffer) {
     return new Promise((resolve) => {
-      const bytes = createPacket(...params)
       this.conn.write(bytes, null, (resp) => {
         resolve(resp)
       })
