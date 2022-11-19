@@ -745,7 +745,7 @@ This event will be emitted after the specific event is emitted.</p>
 <span class="c1">// Also import some enums</span>
 <span class="k">import</span> <span class="p">{</span> <span class="nx">MessageCode</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">presonus-studiolive-api</span><span class="dl">'</span>
 
-<span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">(</span><span class="dl">"</span><span class="s2">10.0.0.18</span><span class="dl">"</span><span class="p">,</span> <span class="mi">53000</span><span class="p">)</span>
+<span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">({</span><span class="na">host</span><span class="p">:</span> <span class="dl">"</span><span class="s2">10.0.0.18</span><span class="dl">"</span><span class="p">,</span> <span class="na">port</span><span class="p">:</span> <span class="mi">53000</span><span class="p">})</span>
 <span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span>
     <span class="na">clientDescription</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Console Remote</span><span class="dl">'</span>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
@@ -766,7 +766,7 @@ This event will be emitted after the specific event is emitted.</p>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Version </span><span class="p">${</span><span class="nx">client</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">global.mixer_version</span><span class="dl">'</span><span class="p">)}</span><span class="s2">`</span><span class="p">)</span>
 <span class="p">})</span>
 </code></pre></div>
-<p><code>new Client(host: string, port: number = 53000)</code><br>
+<p><code>new Client({host: string, port?: number = 53000}, {autoreconnect?: boolean, logLevel: [bunyan]})</code><br>
 Creates a Client object that will later connect to the console</p>
 
 <p><code>&lt;Client&gt;.connect(subscribeData?: SubscriptionOptions)</code><br>
