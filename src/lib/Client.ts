@@ -197,17 +197,17 @@ export class Client {
     if (this.connectPromise) return this.connectPromise
 
     return (this.connectPromise = new Promise((resolve, reject) => {
-      console.log('Try connect');
+      let fastReconnectTimer: ReturnType<typeof setTimeout>
+      logger.info({ host: this.serverHost, port: this.serverPort }, 'Connecting to console')
 
       const reconnect = () => {
-        console.log('Try reconnnect');
+        logger.debug('Reconnecting')
         doConnect()
       }
 
       this.conn.addListener('connect', () => {
-        this.conn.removeListener('error', reconnect)
+        clearTimeout(fastReconnectTimer)
 
-        console.log('made it');
         // #region Connection handshake
 
         // The zlib payload may come either as a ZB or CK packet
@@ -256,15 +256,17 @@ export class Client {
               packets.forEach((bytes) => this._writeBytes(bytes))
             }, () => {
               if (!this.conn.destroyed) this.conn.destroy()
+              logger.info("Connection closed")
+              this.emit('closed')
+
               if (this.options?.autoreconnect) {
                 this.emit('reconnecting')
                 reconnect()
               }
-              this.emit('close')
             })
 
+          logger.info('Connected')
           this.emit('connected')
-          console.log('yup');
           resolve(this)
         })
 
@@ -276,7 +278,8 @@ export class Client {
       const doConnect = () => {
         this.conn.destroy()
         this.conn.connect(this.serverPort, this.serverHost)
-        this.conn.once('error', reconnect)
+        fastReconnectTimer = setTimeout(() => reconnect(), 2000)
+        this.conn.once('error', () => { })
       }
 
       doConnect()

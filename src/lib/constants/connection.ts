@@ -1,6 +1,6 @@
 export enum ConnectionState {
     error = 'error',
-    close = 'close',
+    closed = 'closed',
     connected = 'connected',
     reconnecting = 'reconnecting'
 }
