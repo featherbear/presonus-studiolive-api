@@ -1,3 +1,3 @@
-export * from './channel'
-export * from './message'
-export * from './presonus'
+export * from './vendor/channel'
+export * from './vendor/message'
+export * from './vendor/presonus'

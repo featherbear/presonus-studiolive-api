@@ -1,10 +1,11 @@
+import { ConnectionState } from './constants/connection'
 import { EventEmitter } from 'events'
 
 import Discovery from './Discovery'
 import type DiscoveryType from './types/DiscoveryType'
 
 import DataClient from './util/DataClient'
-import MeterServer from './MeterServer'
+import MeterServer, { MeterData } from './MeterServer'
 import { Channel, ChannelTypes, MessageCode } from './constants'
 
 import {
@@ -29,6 +30,8 @@ import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUt
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
+import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
+import KeepAliveHelper from './util/KeepAliveHelper'
 import Files from './constants/files'
 import { ChannelPresetItem, ProjectItem, SceneItem } from './types/FD/Listitem'
 
@@ -41,30 +44,22 @@ type dataFnCallback<T = any> = (obj: {
   data: T
 }) => void;
 
-export declare interface Client {
-  on(event: MessageCode, listener: fnCallback): this;
-  on(event: 'data', listener: dataFnCallback): this;
-  once(event: MessageCode, listener: fnCallback): this;
-  once(event: 'data', listener: dataFnCallback): this;
-  off(event: MessageCode, listener: fnCallback): this;
-  off(event: 'data', listener: dataFnCallback): this;
-  addListener(event: MessageCode, listener: fnCallback): this;
-  addListener(event: 'data', listener: dataFnCallback): this;
-  removeListener(event: MessageCode, listener: fnCallback): this;
-  removeListener(event: 'data', listener: dataFnCallback): this;
-  removeAllListeners(event: MessageCode): this;
-  removeAllListeners(event: 'data'): this;
+type EventFunctionType<T> = {
+  (event: MessageCode, listener: fnCallback): T
+  (event: keyof typeof ConnectionState, listener: fnCallback<void>): T
+  (event: 'meter', listener: fnCallback<MeterData>): T
+  (event: 'data', listener: dataFnCallback): T
 }
-
-// eslint-disable-next-line no-redeclare
-export class Client extends EventEmitter {
+export class Client {
   readonly serverHost: string
   readonly serverPort: number
-
-  meteringClient: Awaited<ReturnType<typeof MeterServer>>
-  meteringData: any
+  readonly options: Partial<InstanceOptions>
 
   channelCounts: ChannelCount
+
+  meteringClient: Awaited<ReturnType<typeof MeterServer>>
+  #eventEmitter: EventEmitter
+  #keepAliveHelper: KeepAliveHelper
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -72,17 +67,26 @@ export class Client extends EventEmitter {
   private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
-  constructor(host: string, port: number = 53000) {
-    super()
-    if (!host) throw new Error('Host address not supplied')
+  constructor(address: ConnectionAddress, options?: Partial<InstanceOptions>) {
+    if (!address?.host) throw new Error('Host address not supplied')
 
-    this.serverHost = host
-    this.serverPort = port
+    this.#eventEmitter = new EventEmitter()
+    this.#keepAliveHelper = new KeepAliveHelper(3000)
+
+    this.serverHost = address.host
+    this.serverPort = address?.port || 53000
+    this.options = options
+
+    if (typeof this.options?.logLevel !== 'undefined') {
+      logger.level(this.options.logLevel)
+    }
 
     this.meteringClient = null
-    this.meteringData = {}
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
+
+    // this.conn.on('close', (...args) => this.emit('close', ...args))
+    // this.conn.on('error', (...args) => this.emit('error', ...args))
 
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
@@ -124,6 +128,35 @@ export class Client extends EventEmitter {
     })
   }
 
+  emit(...args: Parameters<EventEmitter['emit']>) {
+    return this.#eventEmitter.emit(...args)
+  }
+
+  on = (function (...args) {
+    this.#eventEmitter.on(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  addListener = (function (...args) {
+    this.#eventEmitter.addListener(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  once = (function (...args) {
+    this.#eventEmitter.once(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  off = (function (...args) {
+    this.#eventEmitter.off(...args)
+    return this
+  }) as EventFunctionType<this>
+
+  removeListener = (function (...args) {
+    this.#eventEmitter.removeListener(...args)
+    return this
+  }) as EventFunctionType<this>
+
   /**
    * Extracts the data structure and cache layer
    * @internal
@@ -153,7 +186,7 @@ export class Client extends EventEmitter {
    */
   async meterSubscribe(port?: number) {
     port = port ?? 0
-    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData) => this.emit('meter', meterData))
+    this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData: MeterData) => this.emit('meter', meterData))
     this._sendPacket(MessageCode.Hello, toShort(this.meteringClient.address().port), 0x00)
   }
 
@@ -168,50 +201,47 @@ export class Client extends EventEmitter {
 
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
+
     return (this.connectPromise = new Promise((resolve, reject) => {
-      const rejectHandler = (err: Error) => {
-        this.connectPromise = null
-        return reject(err)
+      let fastReconnectTimer: ReturnType<typeof setTimeout>
+      logger.info({ host: this.serverHost, port: this.serverPort }, 'Connecting to console')
+
+      const reconnect = () => {
+        logger.debug('Reconnecting')
+        doConnect()
       }
 
-      this.conn.once('error', rejectHandler)
+      this.conn.addListener('connect', () => {
+        clearTimeout(fastReconnectTimer)
 
-      this.conn.connect(this.serverPort, this.serverHost, () => {
         // #region Connection handshake
 
-        const compressedZlibInitCallback = (data) => {
-          this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
+        // The zlib payload may come either as a ZB or CK packet
+        const chunkedZlibInitCallback = (data) => {
+          this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
           this.emit(MessageCode.ZLIB, data)
         }
-
-        this.addListener(MessageCode.Chunk, compressedZlibInitCallback)
+        this.addListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
         Promise.all([
-          /**
-           * Await for the first zlib response to resolve channel counts
-           */
           new Promise((resolve) => {
-            const zlibInitCallback = () => {
-              this.removeListener(MessageCode.ZLIB, zlibInitCallback)
+            this.once(MessageCode.ZLIB, () => {
+              // De-register the listener in case the payload was not encapsulated in a CK packet 
+              this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
-              // ZB is not always encapsulated in the CK packet, so deregister the listener here too
-              this.removeListener(MessageCode.Chunk, compressedZlibInitCallback)
+              const getCount = (key) => Object.keys(this.state.get(key) ?? {}).length
               setCounts((this.channelCounts = {
-                LINE: Object.keys(this.state.get('line')).length,
-                AUX: Object.keys(this.state.get('aux')).length,
-                FX /* fxbus == fxreturn */: Object.keys(this.state.get('fxbus')).length,
-                FXRETURN: Object.keys(this.state.get('fxreturn')).length,
-                RETURN /* aka tape? */: Object.keys(this.state.get('return')).length,
-                TALKBACK: Object.keys(this.state.get('talkback')).length,
-                MAIN: Object.keys(this.state.get('main')).length,
-
-                // TODO: The 16R doesn't have SUB groups. Check against the 24R / 16
-                SUB: Object.keys(this.state.get('sub') ?? {}).length
+                LINE: getCount('line'),
+                AUX: getCount('aux'),
+                FX /* fxbus == fxreturn */: getCount('fxbus'),
+                FXRETURN: getCount('fxreturn'),
+                RETURN /* aka tape? */: getCount('return'),
+                TALKBACK: getCount('talkback'),
+                MAIN: getCount('main'),
+                SUB: getCount('sub') /* TODO: The 16R doesn't have SUB groups. Check against the 24R / 16 */
               }))
-
               resolve(this)
-            }
-            this.addListener(MessageCode.ZLIB, zlibInitCallback)
+            })
           }),
 
           /**
@@ -227,8 +257,21 @@ export class Client extends EventEmitter {
             this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
-          this.conn.removeListener('error', rejectHandler)
+          this.#keepAliveHelper.start(
+            (packets) => {
+              packets.forEach((bytes) => this._writeBytes(bytes))
+            }, () => {
+              if (!this.conn.destroyed) this.conn.destroy()
+              logger.info('Connection closed')
+              this.emit('closed')
 
+              if (this.options?.autoreconnect) {
+                this.emit('reconnecting')
+                reconnect()
+              }
+            })
+
+          logger.info('Connected')
           this.emit('connected')
           resolve(this)
         })
@@ -236,18 +279,16 @@ export class Client extends EventEmitter {
         // Send subscription request
         this._sendPacket(MessageCode.JSON, craftSubscribe(subscribeData))
         // #endregion
-
-        // #region Keep alive
-        // Send a KeepAlive packet every second
-        const keepAliveLoop = setInterval(() => {
-          if (this.conn.destroyed) {
-            clearInterval(keepAliveLoop)
-            return
-          }
-          this._sendPacket(MessageCode.KeepAlive)
-        }, 1000)
-        // #endregion
       })
+
+      const doConnect = () => {
+        this.conn.destroy()
+        this.conn.connect(this.serverPort, this.serverHost)
+        fastReconnectTimer = setTimeout(() => reconnect(), 2000)
+        this.conn.once('error', () => { })
+      }
+
+      doConnect()
     }))
   }
 
@@ -269,7 +310,7 @@ export class Client extends EventEmitter {
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
-      [MessageCode.ParamValue]: packetParser.handlePVPacket,
+      [MessageCode.ParamValue]: this.#keepAliveHelper.intercept(packetParser.handlePVPacket),
       [MessageCode.ParamString]: packetParser.handlePSPacket,
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
@@ -339,8 +380,11 @@ export class Client extends EventEmitter {
    * Send bytes to the console
    */
   private async _sendPacket(...params: Parameters<typeof createPacket>) {
+    return this._writeBytes(createPacket(...params))
+  }
+
+  private async _writeBytes(bytes: Buffer) {
     return new Promise((resolve) => {
-      const bytes = createPacket(...params)
       this.conn.write(bytes, null, (resp) => {
         resolve(resp)
       })

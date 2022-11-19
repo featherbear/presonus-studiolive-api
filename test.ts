@@ -1,151 +1,38 @@
 
-import { CHANNELS, ChannelSelector, Client, MESSAGETYPES, ZlibPayload } from './src/api'
-import { intToLE } from './src/lib/util/bufferUtil'
+import { Client, MessageCode, SettingType } from './src/api'
 
-// const stream = createWriteStream('100.csv', { flags: 'a' })
+const client = new Client({
+  host: '192.168.0.29',
+  port: 53000
+}, {
+  autoreconnect: true,
+  logLevel: process.env.DEBUG ? 'debug' : 'info'
+})
 
-function doIt() {
-  const client = new Client('192.168.0.18', 53000)
-  // client.on('data', function ({ code, data }) {
-  //   // console.log('Got payload with code', code, data)
-  // })
+/**
+ * Reconnect if the connection is lost and autoreconnect is enabled
+ * Raised after the Keep-Alive health check expires
+ */
+client.on('reconnecting', function () {
+  console.log('evt: Reconnecting to console')
+})
 
-  // client.on(MESSAGETYPES.FaderPosition, function (MS) {
-  //   // LINEAR
-  //   function OPLog(d: { [a: string]: number | number[] }) {
-  //     console.log(
-  //       Object.entries(d).reduce(
-  //         (o, [k, v]) => ({
-  //           ...o,
-  //           [k]:
-  //                         (Array.isArray(v) ? v : [v]).map(
-  //                           (v) =>
-  //                             v.toString().padStart(5, ' ')).join(', ')
-  //         }), {}
-  //       )
-  //     )
-  //   }
+client.on('closed', function () {
+  console.log('evt: Connection closed')
+})
 
-  //   // OPLog(MS)
-  //   // console.log(MS.length, MS);
-  // })
+client.on('connected', function () {
+  console.log('evt: Connected')
+})
 
-  // client.on(MESSAGETYPES.Setting, function (PV) {
-  //   // LOGARITHMIC
-  //   const { name, value }: { name: string, value: Buffer } = PV
+client.on('data', function ({ code, data }) {
+  // 
+})
 
-  //   if (!name.startsWith('line')) return
+client.on(MessageCode.ParamValue, function (data: SettingType) {
+  //
+})
 
-  //   const r = {
-  //     name
-  //   }
-  //   const R: any = r
-  //   let pv: any = {
-  //     buffer: value
-  //   }
-
-  //   if (Buffer.isBuffer(value)) {
-  //     // Logarithmic?
-  //     pv = {
-  //       ...pv,
-  //       value: value.readUInt32LE(0),
-  //       value_scaled: value.readUInt32LE(0) - 1063699898, // 0x3f66c5ba,
-  //       value_scaled_ratio: (value.readUInt32LE(0) - 1063699898) / 143369 // 0x23009,
-  //     }
-  //   }
-  //   R.PV = pv
-
-  //   /* Volume controls are sent from 0x3af..... to 0x00000000 */
-
-  //   if (ZB) {
-  //     const zbVal = getZlibValue<number>(ZB, name)
-  //     R.ZB = {
-  //       value: zbVal,
-  //       value_scaled: Math.max(0, (zbVal - 1008981765)),
-  //       value_scaled_ratio: Math.max(0, (zbVal - 1008981765)) / 56371451
-  //     }
-
-  //     // y = 0.2292ln(x) - 0.06
-  //     // upper bound - 1065353216
-  //     // lower bound - 1008981765
-
-  //     // stream.write(`${R.PV.value_scaled_ratio},${R.ZB.value_scaled_ratio}\n`)
-  //   }
-
-  //   if (name.endsWith('/volume')) {
-  //     (r as any).type = 'volume'
-  //     // Here, have some random constants
-
-  //     // console.info('S', value.slice(0, 4), value.readUInt32LE(0) - 0x3f66c5ba, (value.readUInt32LE(0) - 0x3f66c5ba) / 0x23009)
-  //   }
-  //   console.log(r)
-  //   // client.close().then(() => {
-  //   //   doIt()
-  //   // })
-  // })
-
-  let ZB = null
-  client.on(MESSAGETYPES.ZLIB, function (_ZB) {
-    ZB = _ZB
-    console.log('ready')
-  })
-  // console.log('access code', getZlibValue(ZB, 'permissions.access_code'))
-  // console.log(getZlibValue(ZB, 'global'))
-  // )
-  //   function intToLE(i) {
-  //     const res = Buffer.allocUnsafe(4)
-  //     res.writeUInt32BE(i)
-  //     return res
-  //   }
-  //   const floor = 0x3a970133
-  //   const { chnum, name, username, color, select, solo, volume, mute, pan } = ZB.children.line.children.ch1.values
-  //   console.log({
-  //     chnum,
-  //     name,
-  //     username,
-  //     color,
-  //     select,
-  //     solo,
-  //     volume,
-  //     volume2: intToLE(volume),
-  //     volume3:
-
-  //             intToLE(volume).readInt32LE() === 0 ? 0 : (intToLE(volume).readInt32LE() - floor) / (0X3f800000 - floor),
-  //     mute,
-  //     pan
-  //   })
-
-  // big endian actually hey
-  // ["00000000", "3d76bf3a", "3e018acb", "3e4b90f6", "3ea062b2", "3ec25031", "3ed4d1bb", "3f031597", "3f250315", "3f2e43da", "3f3a9a36", 0, "3f3f3a9b", "3f4a062c", "3f565c88", "3f62b2e6", "3f73a9a2", "3f7b5f9d", "3f800000"]
-
-  // writeFileSync('file.json', JSON.stringify([...JSON.parse(readFileSync('file.json', 'utf8')), intToLE(volume).toString('hex')]))
-  //   exit(1)
-
-
-  // client.on('discover', console.table)
-  // client.discoverySubscribe()
-
-  client.on(MESSAGETYPES.FaderPosition, function (MS) {
-    console.log(MS);
-  })
-
-  client.connect().then(() => {
-    // setInterval(() => {
-    //   console.log(
-    //     {
-    //       consoleName: client.state.get('global.mixer_name'),
-    //       consoleType: client.state.get('global.devicename'),
-    //       version: client.state.get('global.mixer_version'),
-    //       versionDate: client.state.get('global.mixer_version_date'),
-    //       serial: client.state.get('global.mixer_serial'),
-    //       registeredUser: client.state.get('global.registered_user'),
-
-    //     }
-    //   )
-    // }, 500)
-  })
-}
-
-
-console.log('go')
-doIt()
+client.connect().then(() => {
+  console.log('Connection was established')
+})
