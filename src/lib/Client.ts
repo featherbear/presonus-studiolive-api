@@ -240,8 +240,6 @@ export class Client {
             this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
-          console.log('connected')
-
           // #region Keep alive
           // Send a KeepAlive packet every second
           let lastKeepAlive = new Date().getTime()
