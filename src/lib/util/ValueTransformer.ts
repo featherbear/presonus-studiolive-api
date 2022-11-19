@@ -62,7 +62,7 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
       value = transformer(value, symbolPath)
       if (old !== value) {
         try {
-          logger.debug(
+          logger.trace(
             {
               key: symbolPath.join('.'),
               transformer: lookup,
@@ -70,7 +70,7 @@ export function valueTransform(path: string | string[], value: any, valueTransfo
               newValue: value
             }, 'Value transformed')
         } catch (e) {
-          logger.debug({
+          logger.warn({
             key: symbolPath.join('.'),
             transformer: lookup,
             error: e.toString()

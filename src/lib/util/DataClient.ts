@@ -1,5 +1,5 @@
 /**
- * TCP data client to receive messages from UCNET devices
+ * TCP data client to receive messages from UCNet devices
  */
 
 import { Socket } from 'net'
@@ -8,7 +8,7 @@ import Queue from 'queue'
 
 export default function (callback) {
   const TCPclient = new Socket()
-
+  
   let remaining = 0
   let payload = Buffer.allocUnsafe(0)
   const Q = new Queue({
