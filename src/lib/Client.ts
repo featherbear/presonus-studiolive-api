@@ -32,7 +32,7 @@ import { getZlibValue } from './util/zlib/zlibUtil'
 import './util/logging'
 import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
 import KeepAliveHelper from './util/KeepAliveHelper'
-import Files from './constants/files'
+import * as FDHelper from './constants/files'
 import { ChannelPresetItem, ProjectItem, SceneItem } from './types/FD/Listitem'
 
 // Forward discovery events
@@ -123,7 +123,7 @@ export class Client {
       }
     })
 
-    this.on(MessageCode.FileData, function({ id, data }) {
+    this.on(MessageCode.FileData, function ({ id, data }) {
       this.emit(`_${MessageCode.FileData}_${id}`, data)
     })
   }
@@ -333,47 +333,48 @@ export class Client {
     this.emit('data', { code: messageCode, data })
   }
 
-  sendList(key: ReturnType<typeof Files.SCENES_OF>): Promise<SceneItem[]>
-  sendList(key: typeof Files.PROJECTS): Promise<ProjectItem[]>
-  sendList(key: typeof Files.CHANNEL_PRESETS): Promise<ChannelPresetItem[]>
+  sendList(key: typeof FDHelper.PROJECTS): Promise<ProjectItem[]>
+  sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<ChannelPresetItem[]>
+  sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<SceneItem[]>
   sendList<T = unknown>(key: string): Promise<T> {
     const id = UniqueRandom.get(16).request()
 
     // different to the bufferUtil::toShort() because this one uses big endian encoding
     const idBuffer = Buffer.allocUnsafe(2)
     idBuffer.writeUInt16BE(id)
-   
+
     // TODO: Put conditional parse logic outside of this main file
-    const promise = new Promise<T>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
+      // eslint-disable-next-line prefer-const 
+      let timeout: ReturnType<typeof setTimeout>
+
       this.once(<any>`_${MessageCode.FileData}_${id}`, (data: any) => {
-        switch (key) {
-          case Files.PROJECTS:
-          case Files.CHANNEL_PRESETS: {
-            data = data?.files?.filter(({ title }) => title !== '* Empty Location *')
-            break
-          }
-          
-          default: {
-            if (key.startsWith(Files.SCENES_OF(''))) {
-              data = data?.files?.filter(({ title }) => title !== '* Empty Location *')
-            }
-          }
+        clearTimeout(timeout)
+
+        if (
+          key === FDHelper.PROJECTS ||
+          key === FDHelper.CHANNEL_PRESETS ||
+          key.startsWith(FDHelper.SCENES_OF(''))
+        ) {
+          data = data?.files
+            ?.filter(({ title }) => title !== '* Empty Location *')
+            ?.filter(({ name }) => !(name.endsWith('.lock') || name.endsWith('.cnfg')))
         }
-        
+
         return resolve(data)
       })
+
+      this._sendPacket(
+        MessageCode.FileRequest,
+        Buffer.concat([
+          idBuffer,
+          Buffer.from('List' + key.toString()),
+          Buffer.from([0x00, 0x00])
+        ])
+      )
+
+      timeout = setTimeout(() => reject(new Error('Timeout')), 10 * 1000)
     })
-
-    this._sendPacket(
-      MessageCode.FileRequest,
-      Buffer.concat([
-        idBuffer,
-        Buffer.from('List' + key.toString()),
-        Buffer.from([0x00, 0x00])
-      ])
-    )
-
-    return promise
   }
 
   /**

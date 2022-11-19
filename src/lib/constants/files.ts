@@ -1,11 +1,8 @@
 type SceneOfString = string;
 
-const Files = {
-  CHANNEL_PRESETS: 'presets/channel',
-  PROJECTS: 'presets/proj',
-  SCENES_OF(file: string): SceneOfString {
-    return 'presets/proj/' + file
-  }
-} as const
+export const CHANNEL_PRESETS = 'presets/channel'
+export const PROJECTS = 'presets/proj'
 
-export default Files
+export function SCENES_OF(file: string): SceneOfString {
+  return 'presets/proj/' + file
+}
