@@ -26,6 +26,7 @@ import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import KeepAliveHelper from './util/KeepAliveHelper'
 import * as FDHelper from './util/fileRequestUtil'
+import { JSONtoPacketBuffer } from './util/jsonPacketUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -385,6 +386,38 @@ export class Client {
         resolve(resp)
       })
     })
+  }
+
+  /**
+   * @param projFile e.g 01.Showfile.proj
+   */
+  recallProject(projFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        presetTarget: '',
+        presetTargetSlave: 0,
+        presetFile: 'presets/proj/' + projFile
+      }
+    ))
+  }
+
+  /**
+   * 
+   * @param projFile e.g. 01.Showfile.proj
+   * @param sceneFile e.g. 02.SceneBackup.scn
+   */
+  recallProjectScene(projFile: string, sceneFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        presetTarget: '',
+        presetTargetSlave: 0,
+        presetFile: `presets/proj/${projFile}/${sceneFile}`
+      })
+    )
   }
 
   /**
