@@ -471,6 +471,19 @@ export class Client {
     )
   }
 
+  recallChannelStrip(selector: ChannelSelector, chanFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        // FIXME: Implement whitelist
+        presetTarget: parseChannelString(selector, ['LINE', 'AUX', 'FX' /* 'FXRETURN' ??? */, 'MAIN']),
+        presetTargetSlave: 0,
+        presetFile: 'presets/channel/' + chanFile
+      }
+    ))
+  }
+
   /**
    * Mute a given channel
    */
@@ -583,17 +596,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-        {
-          const odd = (selector.mixNumber - 1) | 1
-          channelString += `/aux${odd}${odd + 1}_`
-          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-            channelString += isStereo ? 'stpan' : 'pan'
-          } else {
-            // No need to pan a mono aux
-            return
+          {
+            const odd = (selector.mixNumber - 1) | 1
+            channelString += `/aux${odd}${odd + 1}_`
+            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+              channelString += isStereo ? 'stpan' : 'pan'
+            } else {
+              // No need to pan a mono aux
+              return
+            }
+            break
           }
-          break
-        }
         default:
           throw new Error('Unexpected mix type')
       }
