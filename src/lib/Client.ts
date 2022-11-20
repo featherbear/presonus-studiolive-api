@@ -1,24 +1,19 @@
-import { ConnectionState } from './constants/connection'
+import './util/logging'
+
+import type { DiscoveryType, ChannelCount, SubscriptionOptions, ChannelSelector, FileListItem } from './types'
+import type * as InstanceOptions from './types/InstanceOptions'
+import type { MeterData } from './MeterServer'
+
+import { Channel, ChannelTypes, MessageCode, ConnectionState } from './constants'
+
 import { EventEmitter } from 'events'
 
+import * as packetParser from './packetParser'
 import Discovery from './Discovery'
-import type DiscoveryType from './types/DiscoveryType'
+import MeterServer from './MeterServer'
 
 import DataClient from './util/DataClient'
-import MeterServer, { MeterData } from './MeterServer'
-import { Channel, ChannelTypes, MessageCode } from './constants'
-
-import {
-  analysePacket,
-  createPacket
-} from './util/MessageProtocol'
-
-import ChannelCount from './types/ChannelCount'
-import SubscriptionOptions from './types/SubscriptionOptions'
-import ChannelSelector from './types/ChannelSelector'
-
-import * as packetParser from './packetParser'
-
+import { analysePacket, createPacket } from './util/messageProtocol'
 import { parseChannelString, setCounts } from './util/channelUtil'
 import { toShort, toFloat, toBoolean } from './util/bufferUtil'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
@@ -29,11 +24,8 @@ import { ignorePV } from './util/transformers'
 import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUtil'
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import './util/logging'
-import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
 import KeepAliveHelper from './util/KeepAliveHelper'
-import * as FDHelper from './constants/files'
-import { ChannelPresetItem, ProjectItem, SceneItem } from './types/FD/Listitem'
+import * as FDHelper from './util/fileRequestUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -53,7 +45,7 @@ type EventFunctionType<T> = {
 export class Client {
   readonly serverHost: string
   readonly serverPort: number
-  readonly options: Partial<InstanceOptions>
+  readonly options: Partial<InstanceOptions.InstanceOptions>
 
   channelCounts: ChannelCount
 
@@ -67,7 +59,7 @@ export class Client {
   private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
-  constructor(address: ConnectionAddress, options?: Partial<InstanceOptions>) {
+  constructor(address: InstanceOptions.ConnectionAddress, options?: Partial<InstanceOptions.InstanceOptions>) {
     if (!address?.host) throw new Error('Host address not supplied')
 
     this.#eventEmitter = new EventEmitter()
@@ -83,9 +75,6 @@ export class Client {
     this.meteringClient = null
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
-
-    // this.conn.on('close', (...args) => this.emit('close', ...args))
-    // this.conn.on('error', (...args) => this.emit('error', ...args))
 
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
@@ -334,9 +323,9 @@ export class Client {
     this.emit('data', { code: messageCode, data })
   }
 
-  sendList(key: typeof FDHelper.PROJECTS): Promise<ProjectItem[]>
-  sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<ChannelPresetItem[]>
-  sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<SceneItem[]>
+  sendList(key: typeof FDHelper.PROJECTS): Promise<FileListItem.ProjectItem[]>
+  sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<FileListItem.ChannelPresetItem[]>
+  sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<FileListItem.SceneItem[]>
   sendList<T = unknown>(key: string): Promise<T> {
     const id = UniqueRandom.get(16).request()
 
@@ -344,7 +333,6 @@ export class Client {
     const idBuffer = Buffer.allocUnsafe(2)
     idBuffer.writeUInt16BE(id)
 
-    // TODO: Put conditional parse logic outside of this main file
     return new Promise<T>((resolve, reject) => {
       // eslint-disable-next-line prefer-const 
       let timeout: ReturnType<typeof setTimeout>

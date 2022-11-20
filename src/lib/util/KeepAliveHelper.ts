@@ -1,5 +1,5 @@
 import { MessageCode } from '../constants'
-import { createPacket } from './MessageProtocol'
+import { createPacket } from './messageProtocol'
 import { UniqueRandom } from './valueUtil'
 
 export default class KeepAliveHelper {
