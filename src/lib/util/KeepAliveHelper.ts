@@ -1,33 +1,30 @@
 import { MessageCode } from '../constants'
-import { toBoolean } from './bufferUtil'
-import { createPacket } from './MessageProtocol'
-
-const testKey = 'global/identify'
+import { createPacket } from './messageProtocol'
+import { UniqueRandom } from './valueUtil'
 
 export default class KeepAliveHelper {
-  #state: boolean
   #lastRecv: number
   #timeout: number
   #loop: ReturnType<typeof setInterval>
+  #ids: number[]
 
   constructor(timeout: number = 3000) {
-    this.#state = false
     this.#lastRecv = null
     this.#timeout = timeout
+    this.#ids = []
   }
 
-  intercept<T>(fn: (data: Buffer) => T): (data: Buffer) => T {
+  intercept(fn: (data: Buffer) => { id: number, data: any }): (data: Buffer) => ReturnType<typeof fn> {
     return (data: Buffer) => {
-      const idx = data.indexOf(0x00) // Find the NULL terminator of the key string
-      if (idx !== -1) {
-        const key = data.slice(0, idx).toString()
-        if (key === testKey) {
-          this.#lastRecv = new Date().getTime()
-          return null
-        }
+      const result = fn(data)
+
+      if (!!result && this.#ids.includes(result.id)) {
+        this.#ids = this.#ids.filter(id => id !== result.id)
+        this.#lastRecv = new Date().getTime()
+        return null
       }
 
-      return fn(data)
+      return result
     }
   }
 
@@ -43,13 +40,19 @@ export default class KeepAliveHelper {
         return failFn()
       }
 
+      const id = UniqueRandom.get(16).request()
+      this.#ids.push(id)
+      const idBuffer = Buffer.allocUnsafe(2)
+      idBuffer.writeUInt16BE(id)
+
       checkFn([
         createPacket(MessageCode.KeepAlive),
         createPacket(
-          MessageCode.ParamValue,
+          MessageCode.FileRequest,
           Buffer.concat([
-            Buffer.from(testKey + '\x00\x00\x00'),
-            toBoolean((this.#state = !this.#state))
+            idBuffer,
+            Buffer.from([0x46, 0x74, 98, 0o162]),
+            Buffer.from([0x00, 0x00])
           ])
         )
       ])

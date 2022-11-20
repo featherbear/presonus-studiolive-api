@@ -1,24 +1,19 @@
-import { ConnectionState } from './constants/connection'
+import './util/logging'
+
+import type { DiscoveryType, ChannelCount, SubscriptionOptions, ChannelSelector, FileListItem } from './types'
+import type * as InstanceOptions from './types/InstanceOptions'
+import type { MeterData } from './MeterServer'
+
+import { Channel, ChannelTypes, MessageCode, ConnectionState } from './constants'
+
 import { EventEmitter } from 'events'
 
+import * as packetParser from './packetParser'
 import Discovery from './Discovery'
-import type DiscoveryType from './types/DiscoveryType'
+import MeterServer from './MeterServer'
 
 import DataClient from './util/DataClient'
-import MeterServer, { MeterData } from './MeterServer'
-import { Channel, ChannelTypes, MessageCode } from './constants'
-
-import {
-  analysePacket,
-  createPacket
-} from './util/MessageProtocol'
-
-import ChannelCount from './types/ChannelCount'
-import SubscriptionOptions from './types/SubscriptionOptions'
-import ChannelSelector from './types/ChannelSelector'
-
-import * as packetParser from './packetParser'
-
+import { analysePacket, createPacket } from './util/messageProtocol'
 import { parseChannelString, setCounts } from './util/channelUtil'
 import { toShort, toFloat, toBoolean } from './util/bufferUtil'
 import { craftSubscribe, unsubscribePacket } from './util/subscriptionUtil'
@@ -26,12 +21,11 @@ import CacheProvider from './util/CacheProvider'
 import { tokenisePath } from './util/treeUtil'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
-import { logVolumeToLinear, transitionValue } from './util/valueUtil'
+import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUtil'
 import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
-import './util/logging'
-import { ConnectionAddress, InstanceOptions } from './types/InstanceOptions'
 import KeepAliveHelper from './util/KeepAliveHelper'
+import * as FDHelper from './util/fileRequestUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -51,7 +45,7 @@ type EventFunctionType<T> = {
 export class Client {
   readonly serverHost: string
   readonly serverPort: number
-  readonly options: Partial<InstanceOptions>
+  readonly options: Partial<InstanceOptions.InstanceOptions>
 
   channelCounts: ChannelCount
 
@@ -65,11 +59,10 @@ export class Client {
   private conn: ReturnType<typeof DataClient>
   private connectPromise: Promise<Client>
 
-  constructor(address: ConnectionAddress, options?: Partial<InstanceOptions>) {
+  constructor(address: InstanceOptions.ConnectionAddress, options?: Partial<InstanceOptions.InstanceOptions>) {
     if (!address?.host) throw new Error('Host address not supplied')
 
     this.#eventEmitter = new EventEmitter()
-    this.#keepAliveHelper = new KeepAliveHelper(3000)
 
     this.serverHost = address.host
     this.serverPort = address?.port || 53000
@@ -82,9 +75,6 @@ export class Client {
     this.meteringClient = null
 
     this.conn = DataClient(this.handleRecvPacket.bind(this))
-
-    // this.conn.on('close', (...args) => this.emit('close', ...args))
-    // this.conn.on('error', (...args) => this.emit('error', ...args))
 
     this.state = CacheProvider({
       get: (key) => this.zlibData ? getZlibValue(this.zlibData, key) : null
@@ -119,6 +109,10 @@ export class Client {
           this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
         }
       }
+    })
+
+    this.on(MessageCode.FileData, function ({ id, data }) {
+      this.emit(`_${MessageCode.FileData}_${id}`, data)
     })
   }
 
@@ -207,6 +201,8 @@ export class Client {
 
       this.conn.addListener('connect', () => {
         clearTimeout(fastReconnectTimer)
+
+        this.#keepAliveHelper = new KeepAliveHelper(3000)
 
         // #region Connection handshake
 
@@ -304,12 +300,13 @@ export class Client {
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
-      [MessageCode.ParamValue]: this.#keepAliveHelper.intercept(packetParser.handlePVPacket),
+      [MessageCode.ParamValue]: packetParser.handlePVPacket,
       [MessageCode.ParamString]: packetParser.handlePSPacket,
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.ParamChars]: packetParser.handlePCPacket,
+      [MessageCode.FileData]: this.#keepAliveHelper.intercept(packetParser.handleFDPacket),
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null
@@ -326,15 +323,53 @@ export class Client {
     this.emit('data', { code: messageCode, data })
   }
 
-  sendList(key) {
-    this._sendPacket(
-      MessageCode.FileRequest,
-      Buffer.concat([
-        Buffer.from([0x01, 0x00]),
-        Buffer.from('List' + key.toString()),
-        Buffer.from([0x00, 0x00])
-      ])
-    )
+  sendList(key: typeof FDHelper.PROJECTS): Promise<FileListItem.ProjectItem[]>
+  sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<FileListItem.ChannelPresetItem[]>
+  sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<FileListItem.SceneItem[]>
+  sendList<T = unknown>(key: string): Promise<T> {
+    const id = UniqueRandom.get(16).request()
+
+    const idBuffer = Buffer.allocUnsafe(2)
+    idBuffer.writeUInt16BE(id) // Different to bufferUtil::toShort()
+
+    return new Promise<T>((resolve, reject) => {
+      // eslint-disable-next-line prefer-const 
+      let timeout: ReturnType<typeof setTimeout>
+
+      const callback = (data: any) => {
+        clearTimeout(timeout)
+
+        if (
+          key === FDHelper.PROJECTS ||
+          key === FDHelper.CHANNEL_PRESETS ||
+          key.startsWith(FDHelper.SCENES_OF(''))
+        ) {
+          data = data?.files
+            ?.filter(({ title }) => title !== '* Empty Location *')
+            ?.filter(({ name }) => !(name.endsWith('.lock') || name.endsWith('.cnfg')))
+        }
+
+        return resolve(data)
+      }
+
+      const eventName = `_${MessageCode.FileData}_${id}`
+      this.once(<any>eventName, callback)
+
+      this._sendPacket(
+        MessageCode.FileRequest,
+        Buffer.concat([
+          idBuffer,
+          Buffer.from('List' + key.toString()),
+          Buffer.from([0x00, 0x00])
+        ])
+      )
+
+      timeout = setTimeout(() => {
+        this.removeListener(<any>eventName, callback)
+        UniqueRandom.get(16).release(id)
+        reject(new Error('Timeout'))
+      }, 10 * 1000)
+    })
   }
 
   /**

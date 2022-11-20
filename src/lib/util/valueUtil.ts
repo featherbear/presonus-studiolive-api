@@ -87,3 +87,35 @@ export function transitionValue(from: number, to: number, duration: number, fn: 
 
   return cancelTransition
 }
+
+export class UniqueRandom {
+  static #instances: { [bits: number]: UniqueRandom } = {}
+  static get(bits: number) {
+    if (!this.#instances[bits]) this.#instances[bits] = new this(bits)
+    return this.#instances[bits]
+  }
+
+  #max: number
+  #active: number[]
+
+  constructor(bits: number) {
+    this.#max = Math.pow(2, bits) - 1
+    this.#active = []
+  }
+
+  request() {
+    let current: number
+
+    while (this.#active.includes((current = Math.floor(Math.random() * (this.#max + 1))))) continue
+    this.#active.push(current)
+    return current
+  }
+
+  release(value: number) {
+    this.#active = this.#active.filter(v => v !== value)
+  }
+
+  get active() {
+    return [...this.#active]
+  }
+}

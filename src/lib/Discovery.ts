@@ -3,7 +3,7 @@
  * Listen to the `discover` event with <Discover>.on('discover', callback)
  */
 
-import { analysePacket } from './util/MessageProtocol'
+import { analysePacket } from './util/messageProtocol'
 import { EventEmitter } from 'events'
 import * as dgram from 'dgram'
 import DiscoveryType from './types/DiscoveryType'
