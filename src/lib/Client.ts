@@ -329,15 +329,14 @@ export class Client {
   sendList<T = unknown>(key: string): Promise<T> {
     const id = UniqueRandom.get(16).request()
 
-    // different to the bufferUtil::toShort() because this one uses big endian encoding
     const idBuffer = Buffer.allocUnsafe(2)
-    idBuffer.writeUInt16BE(id)
+    idBuffer.writeUInt16BE(id) // Different to bufferUtil::toShort()
 
     return new Promise<T>((resolve, reject) => {
       // eslint-disable-next-line prefer-const 
       let timeout: ReturnType<typeof setTimeout>
 
-      this.once(<any>`_${MessageCode.FileData}_${id}`, (data: any) => {
+      const callback = (data: any) => {
         clearTimeout(timeout)
 
         if (
@@ -351,7 +350,10 @@ export class Client {
         }
 
         return resolve(data)
-      })
+      }
+
+      const eventName = `_${MessageCode.FileData}_${id}`
+      this.once(<any>eventName, callback)
 
       this._sendPacket(
         MessageCode.FileRequest,
@@ -362,7 +364,11 @@ export class Client {
         ])
       )
 
-      timeout = setTimeout(() => reject(new Error('Timeout')), 10 * 1000)
+      timeout = setTimeout(() => {
+        this.removeListener(<any>eventName, callback)
+        UniqueRandom.get(16).release(id)
+        reject(new Error('Timeout'))
+      }, 10 * 1000)
     })
   }
 
@@ -493,17 +499,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-        {
-          const odd = (selector.mixNumber - 1) | 1
-          channelString += `/aux${odd}${odd + 1}_`
-          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-            channelString += isStereo ? 'stpan' : 'pan'
-          } else {
-            // No need to pan a mono aux
-            return
+          {
+            const odd = (selector.mixNumber - 1) | 1
+            channelString += `/aux${odd}${odd + 1}_`
+            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+              channelString += isStereo ? 'stpan' : 'pan'
+            } else {
+              // No need to pan a mono aux
+              return
+            }
+            break
           }
-          break
-        }
         default:
           throw new Error('Unexpected mix type')
       }

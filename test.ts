@@ -1,5 +1,7 @@
 
 import { Client, MessageCode, SettingType } from './src/api'
+import { SCENES_OF } from './src/lib/util/fileRequestUtil'
+import { createPacket } from './src/lib/util/messageProtocol'
 
 const client = new Client({
   host: '192.168.0.29',
@@ -35,4 +37,17 @@ client.on(MessageCode.ParamValue, function (data: SettingType) {
 
 client.connect().then(() => {
   console.log('Connection was established')
+
+  // client.hehe().then(j => console.log(j))
+
+  // client.sendList('presets/channel').then(j => {
+  //   console.log('Got channel list', j)
+  // })
+
+  // client.sendList('presets/proj').then(j => {
+  //   console.log('Got proj list', j)
+  //   client.sendList(SCENES_OF(j[0].name)).then(j => {
+  //     console.log('Got scene list', j)
+  //   })
+  // })
 })
