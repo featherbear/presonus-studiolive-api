@@ -1,5 +1,5 @@
 import SubscriptionOptions, { _InternalSubscriptionOptions } from '../types/SubscriptionOptions'
-import { toShort } from './bufferUtil'
+import { JSONtoPacketBuffer } from './jsonPacketUtil'
 
 /**
  * Create subscription packet
@@ -18,21 +18,7 @@ export function craftSubscribe(overrides: SubscriptionOptions = {}) {
     ...overrides
   }
 
-  return prependLengthData(
-    Buffer.from(JSON.stringify(data, null, ' '))
-  )
+  return JSONtoPacketBuffer(data)
 }
 
-export const unsubscribePacket = prependLengthData(Buffer.from(JSON.stringify({ id: 'Unsubscribe' })))
-
-/**
- * Add length metadata
- * @param buffer 
- * @returns length16LE 0x00 0x00 DATA
- */
-function prependLengthData(buffer: Buffer) {
-  return Buffer.concat([
-    toShort(buffer.length), Buffer.from([0, 0]), // TODO: Perhaps the length can be 32LE 
-    buffer
-  ])
-}
+export const unsubscribePacket = JSONtoPacketBuffer({ id: 'Unsubscribe' })
