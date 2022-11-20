@@ -324,6 +324,57 @@ export class Client {
     this.emit('data', { code: messageCode, data })
   }
 
+  /**
+   * Get projects stored on the console
+   * @param complete Should scenes be fetched as well
+   */
+  async getProjects(complete: true): Promise<FileListItem.ProjectItem<{ scenes: FileListItem.SceneItem[] }>[]>
+  async getProjects(complete?: false): Promise<FileListItem.ProjectItem[]>
+  async getProjects(complete?: boolean) {
+    if (!complete) return this.sendList(FDHelper.PROJECTS)
+
+    const result: FileListItem.ProjectItem<{ scenes: FileListItem.SceneItem[] }>[] = []
+
+    for (const project of await this.getProjects(false)) {
+      result.push({
+        ...project,
+        scenes: await this.getScenesOfProject(project.name)
+      })
+    }
+
+    return result
+  }
+
+  /**
+   * Get channel presets stored on the console
+   */
+  getChannelPresets(): Promise<FileListItem.ChannelPresetItem[]> {
+    return this.sendList(FDHelper.CHANNEL_PRESETS)
+  }
+
+  /**
+   * Get scenes of a project stored on the console
+   */
+  getScenesOfProject(projFile: string): Promise<FileListItem.SceneItem[]> {
+    return this.sendList(FDHelper.SCENES_OF(projFile))
+  }
+
+  /**
+   * Current loaded scene
+   */
+  get currentScene() {
+    const path: string = this.state.get('presets.loaded_scene_name', '')
+    return path.slice(path.lastIndexOf('/') + 1) || null
+  }
+
+  /**
+   * Current loaded project
+   */
+  get currentProject() {
+    const path: string = this.state.get('presets.loaded_project_name', '')
+    return path.slice(path.lastIndexOf('/') + 1) || null
+  }
+
   sendList(key: typeof FDHelper.PROJECTS): Promise<FileListItem.ProjectItem[]>
   sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<FileListItem.ChannelPresetItem[]>
   sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<FileListItem.SceneItem[]>
@@ -532,17 +583,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-          {
-            const odd = (selector.mixNumber - 1) | 1
-            channelString += `/aux${odd}${odd + 1}_`
-            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-              channelString += isStereo ? 'stpan' : 'pan'
-            } else {
-              // No need to pan a mono aux
-              return
-            }
-            break
+        {
+          const odd = (selector.mixNumber - 1) | 1
+          channelString += `/aux${odd}${odd + 1}_`
+          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+            channelString += isStereo ? 'stpan' : 'pan'
+          } else {
+            // No need to pan a mono aux
+            return
           }
+          break
+        }
         default:
           throw new Error('Unexpected mix type')
       }
