@@ -71,7 +71,6 @@ export class Client {
     if (!address?.host) throw new Error('Host address not supplied')
 
     this.#eventEmitter = new EventEmitter()
-    this.#keepAliveHelper = new KeepAliveHelper(3000)
 
     this.serverHost = address.host
     this.serverPort = address?.port || 53000
@@ -214,6 +213,8 @@ export class Client {
       this.conn.addListener('connect', () => {
         clearTimeout(fastReconnectTimer)
 
+        this.#keepAliveHelper = new KeepAliveHelper(3000)
+
         // #region Connection handshake
 
         // The zlib payload may come either as a ZB or CK packet
@@ -310,13 +311,13 @@ export class Client {
     // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
-      [MessageCode.ParamValue]: this.#keepAliveHelper.intercept(packetParser.handlePVPacket),
+      [MessageCode.ParamValue]: packetParser.handlePVPacket,
       [MessageCode.ParamString]: packetParser.handlePSPacket,
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.ParamChars]: packetParser.handlePCPacket,
-      [MessageCode.FileData]: packetParser.handleFDPacket,
+      [MessageCode.FileData]: this.#keepAliveHelper.intercept(packetParser.handleFDPacket),
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null

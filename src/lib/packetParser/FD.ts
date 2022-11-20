@@ -18,10 +18,10 @@ type Chunk = {
 }
 const BufferCollector = new class {
   #ids = UniqueRandom.get(16)
-  #files: {[id: number]: Chunk} = {}
+  #files: { [id: number]: Chunk } = {}
 
   put(data: Buffer) {
-    let ret: {id: number, data: Buffer}
+    let ret: { id: number, data: Buffer }
 
     const chunk = parseChunk(data)
 
@@ -79,10 +79,10 @@ const BufferCollector = new class {
 
 function parseChunk(data: Buffer) {
   let header = data.slice(0, 14)
-  
+
   const id = header.readUInt16BE()
   header = header.slice(2)
-  
+
   const bytesRead = header.readUInt16LE()
   header = header.slice(2)
 
@@ -102,7 +102,7 @@ function parseChunk(data: Buffer) {
   return {
     id,
     data,
-    
+
     bytesRead,
     totalSize,
     payloadSize
@@ -111,10 +111,15 @@ function parseChunk(data: Buffer) {
 
 export default function handleFDPacket(data: Buffer) {
   const result = BufferCollector.put(data)
+
   if (result) {
+    try {
+      data = JSON.parse(result.data.toString())
+    } catch { }
+
     return {
       id: result.id,
-      data: JSON.parse(result.data.toString())
+      data
     }
   }
 }
