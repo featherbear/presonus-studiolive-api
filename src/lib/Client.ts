@@ -103,7 +103,7 @@ export class Client {
       this.state.set(name, value)
     })
 
-    this.on(MessageCode.FaderPosition, function (MS: { [_ in ChannelTypes]: number[] }) {
+    this.on(MessageCode.FaderPosition, (MS: { [_ in ChannelTypes]: number[] }) => {
       for (const [type, values] of Object.entries(MS)) {
         for (let i = 0; i < values.length; i++) {
           this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
@@ -111,7 +111,7 @@ export class Client {
       }
     })
 
-    this.on(MessageCode.FileData, function ({ id, data }) {
+    this.on(MessageCode.FileData, ({ id, data }) => {
       this.emit(`_${MessageCode.FileData}_${id}`, data)
     })
   }

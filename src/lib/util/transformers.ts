@@ -53,7 +53,7 @@ const transformers: {
   'line.*.dca.volume': {
     fromPV: IGNORE
   },
-  'line.*.volume': {
+  '*.ch*.volume': {
     fromUB(value: number) {
       return value * 100
     }
