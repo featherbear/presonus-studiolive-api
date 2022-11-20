@@ -596,17 +596,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-          {
-            const odd = (selector.mixNumber - 1) | 1
-            channelString += `/aux${odd}${odd + 1}_`
-            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-              channelString += isStereo ? 'stpan' : 'pan'
-            } else {
-              // No need to pan a mono aux
-              return
-            }
-            break
+        {
+          const odd = (selector.mixNumber - 1) | 1
+          channelString += `/aux${odd}${odd + 1}_`
+          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+            channelString += isStereo ? 'stpan' : 'pan'
+          } else {
+            // No need to pan a mono aux
+            return
           }
+          break
+        }
         default:
           throw new Error('Unexpected mix type')
       }
