@@ -439,13 +439,18 @@ export class Client {
    */
   setMute(selector: ChannelSelector, status: boolean | 'toggle') {
     const targetString = this._getMuteTargetString(selector)
-    const newState = status === 'toggle' ? !this.getMute(selector) : status
+
+    // AUX and FX mixes have inverted states
+    const shouldInvert = !!selector.mixType
+
+    let state: boolean = status === 'toggle' ? this.state.get(targetString, true) : status
+    if (shouldInvert) state = !state
 
     this._sendPacket(
       MessageCode.ParamValue,
       Buffer.concat([
         Buffer.from(targetString + '\x00\x00\x00'),
-        toBoolean(newState)
+        toBoolean(state)
       ])
     )
   }
