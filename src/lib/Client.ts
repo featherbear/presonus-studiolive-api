@@ -443,8 +443,8 @@ export class Client {
     // AUX and FX mixes have inverted states
     const shouldInvert = !!selector.mixType
 
-    let state: boolean = status === 'toggle' ? this.state.get(targetString, true) : status
-    if (shouldInvert) state = !state
+    let state: boolean = (status === 'toggle') ? !this.state.get(targetString) : status
+    if (status !== 'toggle' && shouldInvert) state = !state
 
     this._sendPacket(
       MessageCode.ParamValue,
