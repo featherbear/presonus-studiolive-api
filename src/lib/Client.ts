@@ -539,11 +539,7 @@ export class Client {
     )
   }
 
-  /**
-   * @internal Send a level command to the target
-   * targetLevel - [0, 100]
-   */
-  private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
+  private _getLevelString(selector: ChannelSelector) {
     let targetString = parseChannelString(selector)
 
     if (selector.mixType) {
@@ -560,6 +556,22 @@ export class Client {
     } else {
       targetString += '/volume'
     }
+
+    return targetString
+  }
+
+  getLevel(selector: ChannelSelector) {
+    return this.state.get(this._getLevelString(selector))
+  }
+
+  /**
+   * @internal Send a level command to the target
+   * targetLevel - [0, 100]
+   */
+  private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
+    const targetString = this._getLevelString(selector)
+
+    console.log('call set level', targetString, targetLevel)
 
     const assertReturn = () => {
       // Additional time to wait for response
@@ -587,7 +599,7 @@ export class Client {
       return assertReturn()
     }
 
-    const currentLevel = this.state.get(targetString, 0)
+    const currentLevel = this.getLevel(selector) ?? 0
 
     // Don't do anything if we already are on the same level
     if (currentLevel === targetLevel) {
