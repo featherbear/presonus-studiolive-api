@@ -103,7 +103,7 @@ export class Client {
       this.state.set(name, value)
     })
 
-    this.on(MessageCode.FaderPosition, function (MS: { [_ in ChannelTypes]: number[] }) {
+    this.on(MessageCode.FaderPosition, (MS: { [_ in ChannelTypes]: number[] }) => {
       for (const [type, values] of Object.entries(MS)) {
         for (let i = 0; i < values.length; i++) {
           this.state.set(`${Channel[type]}/ch${i + 1}/volume`, values[i])
@@ -111,7 +111,7 @@ export class Client {
       }
     })
 
-    this.on(MessageCode.FileData, function ({ id, data }) {
+    this.on(MessageCode.FileData, ({ id, data }) => {
       this.emit(`_${MessageCode.FileData}_${id}`, data)
     })
   }
@@ -443,8 +443,8 @@ export class Client {
     // AUX and FX mixes have inverted states
     const shouldInvert = !!selector.mixType
 
-    let state: boolean = status === 'toggle' ? this.state.get(targetString, true) : status
-    if (shouldInvert) state = !state
+    let state: boolean = (status === 'toggle') ? !this.state.get(targetString) : status
+    if (status !== 'toggle' && shouldInvert) state = !state
 
     this._sendPacket(
       MessageCode.ParamValue,
@@ -539,11 +539,7 @@ export class Client {
     )
   }
 
-  /**
-   * @internal Send a level command to the target
-   * targetLevel - [0, 100]
-   */
-  private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
+  private _getLevelString(selector: ChannelSelector) {
     let targetString = parseChannelString(selector)
 
     if (selector.mixType) {
@@ -560,6 +556,22 @@ export class Client {
     } else {
       targetString += '/volume'
     }
+
+    return targetString
+  }
+
+  getLevel(selector: ChannelSelector) {
+    return this.state.get(this._getLevelString(selector))
+  }
+
+  /**
+   * @internal Send a level command to the target
+   * targetLevel - [0, 100]
+   */
+  private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
+    const targetString = this._getLevelString(selector)
+
+    console.log('call set level', targetString, targetLevel)
 
     const assertReturn = () => {
       // Additional time to wait for response
@@ -587,7 +599,7 @@ export class Client {
       return assertReturn()
     }
 
-    const currentLevel = this.state.get(targetString, 0)
+    const currentLevel = this.getLevel(selector) ?? 0
 
     // Don't do anything if we already are on the same level
     if (currentLevel === targetLevel) {
