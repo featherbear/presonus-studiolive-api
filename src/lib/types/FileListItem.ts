@@ -5,8 +5,8 @@ type GenericListItem = {
 
 export type SceneItem = GenericListItem
 
-export type ProjectItem = GenericListItem & {
+export type ProjectItem<Extra = {}> = GenericListItem & {
     dir?: number
-}
+} & Extra
 
 export type ChannelPresetItem = GenericListItem

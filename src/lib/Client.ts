@@ -26,6 +26,7 @@ import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import KeepAliveHelper from './util/KeepAliveHelper'
 import * as FDHelper from './util/fileRequestUtil'
+import { JSONtoPacketBuffer } from './util/jsonPacketUtil'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -323,6 +324,57 @@ export class Client {
     this.emit('data', { code: messageCode, data })
   }
 
+  /**
+   * Get projects stored on the console
+   * @param complete Should scenes be fetched as well
+   */
+  async getProjects(complete: true): Promise<FileListItem.ProjectItem<{ scenes: FileListItem.SceneItem[] }>[]>
+  async getProjects(complete?: false): Promise<FileListItem.ProjectItem[]>
+  async getProjects(complete?: boolean) {
+    if (!complete) return this.sendList(FDHelper.PROJECTS)
+
+    const result: FileListItem.ProjectItem<{ scenes: FileListItem.SceneItem[] }>[] = []
+
+    for (const project of await this.getProjects(false)) {
+      result.push({
+        ...project,
+        scenes: await this.getScenesOfProject(project.name)
+      })
+    }
+
+    return result
+  }
+
+  /**
+   * Get channel presets stored on the console
+   */
+  getChannelPresets(): Promise<FileListItem.ChannelPresetItem[]> {
+    return this.sendList(FDHelper.CHANNEL_PRESETS)
+  }
+
+  /**
+   * Get scenes of a project stored on the console
+   */
+  getScenesOfProject(projFile: string): Promise<FileListItem.SceneItem[]> {
+    return this.sendList(FDHelper.SCENES_OF(projFile))
+  }
+
+  /**
+   * Current loaded scene
+   */
+  get currentScene() {
+    const path: string = this.state.get('presets.loaded_scene_name', '')
+    return path.slice(path.lastIndexOf('/') + 1) || null
+  }
+
+  /**
+   * Current loaded project
+   */
+  get currentProject() {
+    const path: string = this.state.get('presets.loaded_project_name', '')
+    return path.slice(path.lastIndexOf('/') + 1) || null
+  }
+
   sendList(key: typeof FDHelper.PROJECTS): Promise<FileListItem.ProjectItem[]>
   sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<FileListItem.ChannelPresetItem[]>
   sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<FileListItem.SceneItem[]>
@@ -385,6 +437,51 @@ export class Client {
         resolve(resp)
       })
     })
+  }
+
+  /**
+   * @param projFile e.g 01.Showfile.proj
+   */
+  recallProject(projFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        presetTarget: '',
+        presetTargetSlave: 0,
+        presetFile: 'presets/proj/' + projFile
+      }
+    ))
+  }
+
+  /**
+   * 
+   * @param projFile e.g. 01.Showfile.proj
+   * @param sceneFile e.g. 02.SceneBackup.scn
+   */
+  recallProjectScene(projFile: string, sceneFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        presetTarget: '',
+        presetTargetSlave: 0,
+        presetFile: `presets/proj/${projFile}/${sceneFile}`
+      })
+    )
+  }
+
+  recallChannelStrip(selector: ChannelSelector, chanFile: string) {
+    this._sendPacket(MessageCode.JSON, JSONtoPacketBuffer(
+      {
+        id: 'RestorePreset',
+        url: 'presets',
+        // FIXME: Implement whitelist
+        presetTarget: parseChannelString(selector, ['LINE', 'AUX', 'FX' /* 'FXRETURN' ??? */, 'MAIN']),
+        presetTargetSlave: 0,
+        presetFile: 'presets/channel/' + chanFile
+      }
+    ))
   }
 
   /**

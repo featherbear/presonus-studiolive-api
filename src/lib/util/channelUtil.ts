@@ -1,4 +1,4 @@
-import { Channel } from '../constants'
+import { Channel, ChannelTypes } from '../constants'
 import ChannelCount from '../types/ChannelCount'
 import ChannelSelector from '../types/ChannelSelector'
 
@@ -8,8 +8,10 @@ export function setCounts(channelCount: ChannelCount) {
   counts = channelCount
 }
 
+// FIXME: Add channel whitelist
 export function parseChannelString(
-  selector: ChannelSelector
+  selector: ChannelSelector,
+  whitelist?: ChannelTypes[]
 ) {
   let { type, channel } = selector
   const { mixType, mixNumber } = selector
