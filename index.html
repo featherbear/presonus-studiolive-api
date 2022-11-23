@@ -1431,7 +1431,8 @@ These payloads have their own 4-byte little-endian size header.</p>
 Example packet trace: <a href="https://github.com/featherbear/presonus-studiolive-api/blob/7e9239cd64de21fab03168fc57503144061bdf6c/dumps/connect_and_idle_UC_SL16R.pcapng">connect_and_idle_UC_SL16R.pcapng</a></p>
 </blockquote>
 
-<p><code>CK</code> payloads are multi-part data of a single larger data payload. Whilst a single <code>CK</code> payload can span multiple packets (whose TCP contiguity is guaranteed), <code>CK</code> payloads belonging to the same larger data payload can be dispersed between other payloads</p>
+<p><code>CK</code> payloads are multi-part portions of a single larger payload. The underlying type of the larger payload is provided in the chunk.<br>
+Whilst a single <code>CK</code> payload can span multiple packets (whose TCP contiguity is guaranteed), <code>CK</code> payloads belonging to the same larger payload can be dispersed between other payloads</p>
 
 <table><thead>
 <tr>
@@ -1505,6 +1506,90 @@ Example packet trace: <a href="https://github.com/featherbear/presonus-studioliv
 <td style="text-align: center">32</td>
 <td style="text-align: center">...</td>
 <td style="text-align: left">Current Chunk Data</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody></table>
+<h3 id='file-data'>File Data</h3>
+<p><code>FD</code> packets are multi-part portions of a single larger data payload. Whilst similar to Chunk Data (<code>CK</code>), File Data payloads are prefixed with an identifier number to associate a response to a a request. The underlying nature of the underlying data is arbitrary, and is left to the the initiator of a File Request (<code>FR</code>) packet.</p>
+
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>FD</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">14</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Request ID</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">16</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Bytes Read</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">18</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">20</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Larger Data Size</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">22</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">26</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Current Payload Size</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">28</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">Current Payload Data</td>
 <td style="text-align: left"></td>
 </tr>
 </tbody></table>
