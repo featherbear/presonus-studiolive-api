@@ -804,15 +804,33 @@ Optionally provide a <code>duration</code> (in milliseconds) to set the transiti
 <p><code>&lt;Client&gt;.setLink(selector: ChannelSelector, link: boolean)</code><br>
 Link/unlink a stereo channel pair</p>
 
-<p><code>&lt;Client&gt;.setLink(selector: ChannelSelector, link: boolean)</code><br>
-Link/unlink a stereo channel pair</p>
-
 <p><code>&lt;Client&gt;.setColor(selector: ChannelSelector, hex: string, alpha?: number)</code><br>
 <code>&lt;Client&gt;.setColour(selector: ChannelSelector, hex: string, alpha?: number)</code><br>
 Set the colour of a channel, provide a colour hex string (e.g. <code>ffa7a4</code>), and optionally an alpha (transparency) value (between <code>0</code> and <code>255</code>)</p>
 
 <p><code>&lt;Client&gt;.setPan(selector: ChannelSelector, pan: number)</code><br>
 Pan a channel (mono) (L = <code>0</code>, C = <code>50</code>, R = <code>100</code>), or set the stereo width of a stereo chanel pair (between <code>0</code> and <code>100</code>).</p>
+
+<p><code>&lt;Client&gt;.getChannelPresets()</code><br>
+Get channel presets stored on the console</p>
+
+<p><code>&lt;Client&gt;.getProjects(complete?: boolean)</code><br>
+Get projects stored on the console, and optionally scenes as well</p>
+
+<p><code>&lt;Client&gt;.getScenesOfProject(projFile: string)</code><br>
+Get scenes of a project</p>
+
+<p><code>&lt;Client&gt;.recallProject(projFile: string)</code><br>
+Recall a project</p>
+
+<p><code>&lt;Client&gt;.recallProjectScene(projFile: string, sceneFile: string)</code><br>
+Recall a scene</p>
+
+<p><code>&lt;Client&gt;.currentScene</code><br>
+Current project scene</p>
+
+<p><code>&lt;Client&gt;.currentProject</code><br>
+Current project</p>
 
 <p><a name="23-meteringmd"></a></p>
 <h2 id='metering'>Metering</h2><div class="highlight"><pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">meter</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">metering</span><span class="p">)</span> <span class="p">{</span>
