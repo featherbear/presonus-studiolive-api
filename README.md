@@ -13,7 +13,7 @@ Tested against the following models
 
 # Install
 
-`npm install featherbear/presonus-studiolive-api`
+`npm install featherbear/presonus-studiolive-api#v1.4.2`
 
 # Usage
 
