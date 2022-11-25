@@ -2,7 +2,7 @@
 
 // https://github.com/featherbear/presonus-studiolive-api/issues/13
 
-export const enum MessageCode {
+export enum MessageCode {
     KeepAlive = 'KA',
     
     Hello = 'UM',
