@@ -47,6 +47,7 @@ const transformers: {
 } = {
   'line.*.select': DEFAULTS.boolean,
   '**.mute': DEFAULTS.boolean,
+  '**.solo': DEFAULTS.boolean,
   'line.*.48v': DEFAULTS.boolean,
   'line.*.link': DEFAULTS.boolean,
   '**.assign_*': DEFAULTS.boolean,

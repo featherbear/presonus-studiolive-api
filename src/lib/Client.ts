@@ -517,21 +517,6 @@ export class Client {
   }
 
   /**
-   * @private
-   */
-  private _getMuteTargetString(selector: ChannelSelector) {
-    let targetString = parseChannelString(selector)
-
-    if (selector.mixType) {
-      targetString += `/assign_${selector.mixType.toLowerCase()}${selector.mixNumber}`
-    } else {
-      targetString += '/mute'
-    }
-
-    return targetString
-  }
-
-  /**
    * Set the mute status of a channel
    */
   setMute(selector: ChannelSelector, status: boolean | 'toggle') {
@@ -550,6 +535,67 @@ export class Client {
         toBoolean(state)
       ])
     )
+  }
+
+  /**
+   * @private
+   */
+  private _getMuteTargetString(selector: ChannelSelector) {
+    let targetString = parseChannelString(selector)
+
+    if (selector.mixType) {
+      targetString += `/assign_${selector.mixType.toLowerCase()}${selector.mixNumber}`
+    } else {
+      targetString += '/mute'
+    }
+
+    return targetString
+  }
+
+  /**
+   * Toggle the solo status of a channel
+   */
+  toggleSolo(selector: ChannelSelector) {
+    this.setSolo(selector, 'toggle')
+  }
+
+  /**
+   * Get solo status of a channel
+   */
+  getSolo(selector: ChannelSelector) {
+    const state = this.state.get(this._getSoloTargetString(selector))
+    if (state === null) return null
+    return state
+  }
+
+  /**
+   * Set the solo status of a channel
+   */
+  setSolo(selector: ChannelSelector, status: boolean | 'toggle') {
+    const targetString = this._getSoloTargetString(selector)
+
+    // AUX and FX mixes have inverted states
+    const shouldInvert = !!selector.mixType
+
+    let state: boolean = (status === 'toggle') ? !this.state.get(targetString) : status
+    if (status !== 'toggle' && shouldInvert) state = !state
+
+    this._sendPacket(
+      MessageCode.ParamValue,
+      Buffer.concat([
+        Buffer.from(targetString + '\x00\x00\x00'),
+        toBoolean(state)
+      ])
+    )
+  }
+
+  /**
+   * @private
+   */
+  private _getSoloTargetString(selector: ChannelSelector) {
+    let targetString = parseChannelString(selector)
+    targetString += '/solo'
+    return targetString
   }
 
   setColor(selector: ChannelSelector, hex: string, alpha: number = 0xFF) {
