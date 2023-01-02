@@ -5,6 +5,7 @@ import ChannelSelector from '../types/ChannelSelector'
 let counts: ChannelCount
 
 export function setCounts(channelCount: ChannelCount) {
+  console.log('Setting channel count', channelCount);
   counts = channelCount
 }
 

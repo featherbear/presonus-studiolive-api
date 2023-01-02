@@ -1,10 +1,12 @@
-import zlib from 'zlib'
-import zlibParse from '../util/zlib/zlibUtil'
+import { createFragment, PacketParser } from '../types/PacketParser'
+import { parseCompressed } from '../util/zlib/zlibUtil'
 
-export default function handleZBPacket(data) {
-  return parseCompressed(data.slice(4))
-}
+export default <PacketParser>function handleZBPacket(data) {
+  return [
+    createFragment(null, parseCompressed(data.slice(4)), {
+      index: 4,
+      count: data.length - 4,
+    })
+  ]
 
-export function parseCompressed(data: Buffer) {
-  return zlibParse(zlib.inflateSync(data))
 }

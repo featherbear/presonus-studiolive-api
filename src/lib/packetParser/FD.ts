@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: "off" */
 
+import { createFragment, PacketParser } from '../types/PacketParser'
 import { UniqueRandom } from '../util/valueUtil'
 
 interface ChunkSet {
@@ -142,7 +143,7 @@ function parseChunk(data: Buffer) {
   }
 }
 
-export default function handleFDPacket(data: Buffer) {
+export default <PacketParser>function handleFDPacket(data: Buffer) {
   const result = BufferCollector.put(data)
 
   if (result) {
@@ -150,9 +151,10 @@ export default function handleFDPacket(data: Buffer) {
       data = JSON.parse(result.data.toString())
     } catch { }
 
-    return {
-      id: result.id,
-      data
-    }
+    return [
+      createFragment(
+        'id', result.id),
+      createFragment('data', data)
+    ]
   }
 }

@@ -1,9 +1,11 @@
 import type Client from '../Client'
-import { parseCompressed } from './ZB'
+import { createFragment, PacketParser } from '../types/PacketParser'
+import { parseCompressed } from '../util/zlib/zlibUtil'
 
 let chunkBuffer: Buffer[] = []
 
-export default function handleCKPacket(this: Client, data: Buffer) {
+export default <PacketParser>function handleCKPacket(this: Client, data: Buffer) {
+
   data = data.slice(4)
 
   const chunkOffset = data.readUInt32LE(0)
@@ -18,6 +20,8 @@ export default function handleCKPacket(this: Client, data: Buffer) {
     const fullBuffer = chunkBuffer
     chunkBuffer = []
 
-    return parseCompressed(Buffer.concat(fullBuffer))
+    return [
+      createFragment(null, parseCompressed(Buffer.concat(fullBuffer)))
+    ]
   }
 }

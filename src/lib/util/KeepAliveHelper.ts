@@ -1,4 +1,5 @@
 import { MessageCode } from '../constants'
+import { PacketParser } from '../types/PacketParser'
 import { createPacket } from './messageProtocol'
 import { UniqueRandom } from './valueUtil'
 
@@ -14,12 +15,14 @@ export default class KeepAliveHelper {
     this.#ids = []
   }
 
-  intercept(fn: (data: Buffer) => { id: number, data: any }): (data: Buffer) => ReturnType<typeof fn> {
+  intercept(
+    fn: PacketParser
+  ): (data: Buffer) => ReturnType<typeof fn> {
     return (data: Buffer) => {
       const result = fn(data)
 
-      if (!!result && this.#ids.includes(result.id)) {
-        this.#ids = this.#ids.filter(id => id !== result.id)
+      if (!!result && this.#ids.includes(<number>result[0][1])) {
+        this.#ids = this.#ids.filter(id => id !== result[0][1])
         this.#lastRecv = new Date().getTime()
         return null
       }

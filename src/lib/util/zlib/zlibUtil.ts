@@ -5,6 +5,7 @@
 import { simplifyPathTokens, tokenisePath } from '../treeUtil'
 import zlibDeserialiseBuffer from './zlibDeserialiser'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibRangeSymbol, ZlibStringEnumSymbol, ZlibValueSymbol } from './zlibNodeParser'
+import zlib from 'zlib'
 
 /**
  * Deserialise and parse a zlib buffer into an object tree
@@ -12,7 +13,7 @@ import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibRangeSymbol, ZlibStringEnum
 export function zlibParse(zlib: Buffer) {
   const payload = zlibDeserialiseBuffer(zlib)
   if (payload.id !== 'Synchronize') {
-    console.warn('Unexpected zlib payload id', payload.id)
+    logger.warn('Unexpected zlib payload id', payload.id)
     return
   }
 
@@ -36,6 +37,10 @@ export function getZlibValue<RType = ZlibNode<unknown>>(node: ZlibNode, key: str
   if (cur === undefined) return null
 
   return cur as RType
+}
+
+export function parseCompressed(data: Buffer) {
+  return zlibParse(zlib.inflateSync(data))
 }
 
 /**

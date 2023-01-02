@@ -4,29 +4,29 @@
 
 export enum MessageCode {
     KeepAlive = 'KA',
-    
+
     Hello = 'UM',
-    
+
     // JSON Message
     JSON = 'JM',
-    
+
     /**
      * @deprecated Use ParamValue
      */
     Setting = 'PV',
     ParamValue = 'PV',
-    
+
     ParamChars = 'PC',
     ParamString = 'PS',
-    
+
     /**
      * @deprecated Use ParamStrList
      */
     DeviceList = 'PL',
     ParamStrList = 'PL',
-    
+
     FileRequest = 'FR',
-    
+
     FileData = 'FD',
 
     // BZ-Message
@@ -41,7 +41,12 @@ export enum MessageCode {
      * Assume the B means byte (8)
      */
     // Meter8
+
+    /**
+     * @deprecated MeterByte
+     */
     Unknown3 = 'MB',
+    MeterByte = 'MB',
 
     /**
      * Linear position of faders
@@ -49,5 +54,9 @@ export enum MessageCode {
      * Assume the S means short (16)
      */
     // Meter16
-    FaderPosition = 'MS'
+    /**
+     * @deprecated Use MeterShort
+     */
+    FaderPosition = 'MS',
+    MeterShort = 'MS'
 }

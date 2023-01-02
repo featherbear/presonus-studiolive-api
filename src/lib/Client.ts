@@ -27,6 +27,7 @@ import { getZlibValue } from './util/zlib/zlibUtil'
 import KeepAliveHelper from './util/KeepAliveHelper'
 import * as FDHelper from './util/fileRequestUtil'
 import { JSONtoPacketBuffer } from './util/jsonPacketUtil'
+import { ParsedPacket, PacketParser, UnnamedKey } from './types/PacketParser'
 
 // Forward discovery events
 const discovery = new Discovery()
@@ -299,29 +300,59 @@ export class Client {
 
     // Handle message types
     // eslint-disable-next-line
-    const handlers: { [k in MessageCode]?: (data) => any } = {
+    const handlers: { [k in MessageCode]?: PacketParser } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
       [MessageCode.ParamValue]: packetParser.handlePVPacket,
       [MessageCode.ParamString]: packetParser.handlePSPacket,
       [MessageCode.ZLIB]: packetParser.handleZBPacket,
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
+      [MessageCode.MeterByte]: packetParser.handleMBPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.ParamChars]: packetParser.handlePCPacket,
-      [MessageCode.FileData]: this.#keepAliveHelper.intercept(packetParser.handleFDPacket),
-      [MessageCode.DeviceList]: null,
-      [MessageCode.Unknown1]: null,
-      [MessageCode.Unknown3]: null
+      [MessageCode.FileData]: this.#keepAliveHelper.intercept(packetParser.handleFDPacket)
+      // ,
+      // [MessageCode.DeviceList]: null,
+      // [MessageCode.Unknown1]: null,
+      // [MessageCode.Unknown3]: null
     }
 
+    let fragments: ParsedPacket | null
     if (Object.prototype.hasOwnProperty.call(handlers, messageCode)) {
-      data = handlers[messageCode]?.call?.(this, data)
+      fragments = handlers[messageCode]?.call?.(this, data)
     } else {
       console.warn('Unhandled message code', messageCode)
     }
 
-    if (!data) return
-    this.emit(messageCode, data)
-    this.emit('data', { code: messageCode, data })
+    if (!fragments || !fragments.length) return
+
+    // TODO: Internal fragments
+
+
+    let object =
+      fragments[0][0] === UnnamedKey
+        ? fragments[0][1]
+        : fragments.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+
+    this.emit(messageCode, object)
+    this.emit('data', { code: messageCode, data: object })
+  
+  
+  
+    // Build an object from the fragment keys and values
+    if (true) {
+      // TODO: Rewrite
+      this.emit('fragment',
+        {
+          code: messageCode,
+          fragments,
+          raw: data,
+          data: object
+        }
+      )
+      
+    }
+  
+  
   }
 
   /**
@@ -642,17 +673,17 @@ export class Client {
     if (selector.mixType) {
       switch (selector.mixType) {
         case 'AUX':
-        {
-          const odd = (selector.mixNumber - 1) | 1
-          channelString += `/aux${odd}${odd + 1}_`
-          if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
-            channelString += isStereo ? 'stpan' : 'pan'
-          } else {
-            // No need to pan a mono aux
-            return
+          {
+            const odd = (selector.mixNumber - 1) | 1
+            channelString += `/aux${odd}${odd + 1}_`
+            if (this.state.get(`aux.ch${selector.mixNumber}.link`)) {
+              channelString += isStereo ? 'stpan' : 'pan'
+            } else {
+              // No need to pan a mono aux
+              return
+            }
+            break
           }
-          break
-        }
         default:
           throw new Error('Unexpected mix type')
       }
