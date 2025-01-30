@@ -4,13 +4,13 @@ on: push
 
 jobs:
   checks:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@master
 
     - uses: actions/setup-node@v1
       with:
-        node-version: '14.x'
+        node-version: '22.x'
 
     - name: Install packages
       run: yarn install --no-scripts
