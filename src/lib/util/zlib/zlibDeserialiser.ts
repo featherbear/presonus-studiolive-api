@@ -93,12 +93,18 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
         break
       }
 
+      // uint8
+      case 0x55 /* U */: {
+        length = 1
+        break
+      }
+
       // int32
       case 0x6c /* l */: {
         length = 4
         break
       }
-      
+
       // int64
       case 0x4c /* L */: {
         length = 8
@@ -130,6 +136,12 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
       // int8
       case 0x69 /* i */: {
         value = valueData.readInt8()
+        break
+      }
+
+      // uint8
+      case 0x55 /* U */: {
+        value = valueData.readUInt8()
         break
       }
 
