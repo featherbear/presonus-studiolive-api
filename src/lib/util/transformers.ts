@@ -19,13 +19,13 @@ type TransformerType = {
 }
 
 /**
- * 
+ *
  * Ignoring this type because IntelliSense stops offering suggestions
- * 
+ *
  * {
  * [key: string]: TransformerType
  * }
- * 
+ *
 */
 const DEFAULTS = {
   boolean: {
@@ -55,6 +55,7 @@ const transformers: {
     fromPV: IGNORE
   },
   '*.ch*.volume': {
+    fromPV: DEFAULT_TRANSFORMS.buffer.float,
     fromUB(value: number) {
       return value * 100
     }

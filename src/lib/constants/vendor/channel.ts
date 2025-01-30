@@ -9,7 +9,8 @@ export const Channel = {
   SUB: 'sub',
   FX: 'fxbus',
   FXRETURN: 'fxreturn',
-  RETURN: 'return' // e.g. Aux In 1
+  RETURN: 'return', // e.g. Aux In 1
+  DCA: 'filtergroup'
 }
 
 export type ChannelTypes = keyof typeof Channel
