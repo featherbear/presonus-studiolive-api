@@ -217,7 +217,7 @@ export class Client {
         Promise.all([
           new Promise((resolve) => {
             this.once(MessageCode.ZLIB, () => {
-              // De-register the listener in case the payload was not encapsulated in a CK packet 
+              // De-register the listener in case the payload was not encapsulated in a CK packet
               this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
               const getCount = (key) => Object.keys(this.state.get(key) ?? {}).length
@@ -229,6 +229,7 @@ export class Client {
                 RETURN /* aka tape? */: getCount('return'),
                 TALKBACK: getCount('talkback'),
                 MAIN: getCount('main'),
+                DCA: getCount('filtergroup'),
                 SUB: getCount('sub') /* TODO: The 16R doesn't have SUB groups. Check against the 24R / 16 */
               }))
               resolve(this)
@@ -385,7 +386,7 @@ export class Client {
     idBuffer.writeUInt16BE(id) // Different to bufferUtil::toShort()
 
     return new Promise<T>((resolve, reject) => {
-      // eslint-disable-next-line prefer-const 
+      // eslint-disable-next-line prefer-const
       let timeout: ReturnType<typeof setTimeout>
 
       const callback = (data: any) => {
@@ -455,7 +456,7 @@ export class Client {
   }
 
   /**
-   * 
+   *
    * @param projFile e.g. 01.Showfile.proj
    * @param sceneFile e.g. 02.SceneBackup.scn
    */
@@ -622,7 +623,7 @@ export class Client {
   }
 
   /**
-   * For a mono channel, the pan value is the pan value from 0 (hard left) to 100 (hard right)  
+   * For a mono channel, the pan value is the pan value from 0 (hard left) to 100 (hard right)
    * For a stereo channel, the pan value is the width from 0 to 100 (stereo)
    */
   setPan(selector: ChannelSelector, pan: number) {
@@ -630,7 +631,7 @@ export class Client {
     When channels are grouped
     link = 1
     panlinkstate = 1
-    
+
     initiator
     linkmaster = 1
     */
@@ -670,7 +671,7 @@ export class Client {
   }
 
   /**
-   * @internal By original nature, only an odd numbered channel is targeted (& ~1) 
+   * @internal By original nature, only an odd numbered channel is targeted (& ~1)
    */
   setLink(selector: ChannelSelector, link: boolean) {
     this._sendPacket(
@@ -764,8 +765,8 @@ export class Client {
 
   /**
    * Set volume (decibels)
-   * 
-   * @param channel 
+   *
+   * @param channel
    * @param level range: -84 dB to 10 dB
    */
   async setChannelVolumeLogarithmic(selector: ChannelSelector, decibel: number, duration?: number) {
@@ -774,10 +775,10 @@ export class Client {
 
   /**
    * Set volume (pseudo intensity)
-   * 
-   * @description Sound is difficult, so this function attempts to provide a "what-you-see-is-what-you-get" interface to control the volume levels.  
-   *              `100` Sets the fader to the top (aka +10 dB)  
-   *              `72` Sets the fader to unity (aka 0 dB) or a value close enough  
+   *
+   * @description Sound is difficult, so this function attempts to provide a "what-you-see-is-what-you-get" interface to control the volume levels.
+   *              `100` Sets the fader to the top (aka +10 dB)
+   *              `72` Sets the fader to unity (aka 0 dB) or a value close enough
    *              `0` Sets the fader to the bottom (aka -84 dB)
    * @see http://www.sengpielaudio.com/calculator-levelchange.htm
    */
@@ -788,10 +789,10 @@ export class Client {
   /**
    * Look at metering data and adjust channel fader so that the level is of a certain loudness
    * NOTE: This is not perceived loudness. Not very practical, but useful in a pinch?
-   * 
-   * @param channel 
-   * @param level 
-   * @param duration 
+   *
+   * @param channel
+   * @param level
+   * @param duration
    */
   async normaliseChannelTo(channel, level, duration?: number) {
     // TODO:
