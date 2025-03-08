@@ -1,15 +1,16 @@
 /* eslint no-unused-vars: "off" */
 
-// Values are set by PreSonus
+// Enum values are set by PreSonus
+// This is in order of the data received from the mixer
 export const Channel = {
   LINE: 'line',
-  MAIN: 'main',
+  RETURN: 'return', // e.g. Aux In 1
+  FXRETURN: 'fxreturn',
   TALKBACK: 'talkback',
   AUX: 'aux',
-  SUB: 'sub',
   FX: 'fxbus',
-  FXRETURN: 'fxreturn',
-  RETURN: 'return' // e.g. Aux In 1
+  SUB: 'sub',
+  MAIN: 'main'
 }
 
 export type ChannelTypes = keyof typeof Channel

@@ -8,8 +8,8 @@
     "build:fix": "npm-run-all lint:fix clean transpile",
     "clean": "rimraf dist",
     "transpile": "tsc",
-    "lint": "standardx src/**/*.{ts,js} | snazzy",
-    "lint:fix": "standardx --fix src/**/*.{ts,js} | snazzy",
+    "lint": "standardx src/**/*.ts | snazzy",
+    "lint:fix": "standardx --fix src/**/*.ts | snazzy",
     "install": "npm run --silent transpile",
     "test": "sucrase-node test.ts | bunyan",
     "test:debug": "cross-env DEBUG=1 sucrase-node test.ts | bunyan"
@@ -25,21 +25,21 @@
   },
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
-    "@types/node": "^14.14.6",
-    "bunyan": "^1.8.15",
-    "queue": "^6.0.1",
-    "typescript": "^4.5.4"
+    "queue": "^6.0.1"
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.8",
+    "@types/node": "^14.14.6",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
+    "bunyan": "^1.8.15",
     "cross-env": "^7.0.3",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "snazzy": "^9.0.0",
     "standardx": "^7.0.0",
-    "sucrase": "^3.20.3"
+    "sucrase": "^3.20.3",
+    "typescript": "^4.5.4"
   },
   "eslintConfig": {
     "globals": {
