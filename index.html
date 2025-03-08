@@ -411,8 +411,8 @@
 <p>This node.js package is only hosted on <a href="https://github.com/featherbear/presonus-studiolive-api/">GitHub</a>, however you can install packages from <code>npm</code> and <code>yarn</code> in the same way as you would with any other package.</p>
 
 <ul>
-<li><code>npm install featherbear/presonus-studiolive-api#v1.4.2</code></li>
-<li><code>yarn add featherbear/presonus-studiolive-api#v1.4.2</code></li>
+<li><code>npm install featherbear/presonus-studiolive-api#v1.5.0</code></li>
+<li><code>yarn add featherbear/presonus-studiolive-api#v1.5.0</code></li>
 </ul>
 
 <p><a name="20-documentationmd"></a></p>
@@ -512,7 +512,7 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 <tr>
 <td style="text-align: center"><code>FaderPosition</code></td>
 <td style="text-align: center"><code>MS</code></td>
-<td style="text-align: left">Fader position packet</td>
+<td style="text-align: left">Main mix channel levels and mix bus data packet</td>
 </tr>
 </tbody></table>
 
@@ -567,12 +567,13 @@ If using multiple instances of this API, it is recommended to modify the <code>c
 <h3 id='key-channeltypes'>key:<code>ChannelTypes</code></h3>
 <ul>
 <li><code>LINE</code></li>
-<li><code>MAIN</code></li>
+<li><code>RETURN</code></li>
+<li><code>FXRETURN</code></li>
 <li><code>TALKBACK</code></li>
 <li><code>AUX</code></li>
-<li><code>SUB</code></li>
 <li><code>FX</code></li>
-<li><code>FXRETURN</code></li>
+<li><code>SUB</code></li>
+<li><code>MAIN</code></li>
 </ul>
 <h3 id='type-channelselector'>type:<code>ChannelSelector</code></h3>
 <table><thead>
@@ -790,8 +791,17 @@ Unmute a channel</p>
 <p><code>&lt;Client&gt;.toggleMute(selector: ChannelSelector)</code><br>
 Toggle the mute status of a channel</p>
 
-<p><code>&lt;Client&gt;.setMute(selector: ChannelSelector, status: boolean)</code><br>
+<p><code>&lt;Client&gt;.setMute(selector: ChannelSelector, status: boolean | &#39;toggle&#39;)</code><br>
 Set the mute status of a channel</p>
+
+<p><code>&lt;Client&gt;.getSolo(selector: ChannelSelector)</code><br>
+Get solo status of a channel</p>
+
+<p><code>&lt;Client&gt;.toggleSolo(selector: ChannelSelector)</code><br>
+Toggle the solo status of a channel</p>
+
+<p><code>&lt;Client&gt;.setSolo(selector: ChannelSelector, status: boolean | &#39;toggle&#39;)</code><br>
+Set the solo status of a channel</p>
 
 <p><code>&lt;Client&gt;.setChannelVolumeLogarithmic(selector: ChannelSelector, decibel: number, duration?: number)</code><br>
 Set the level of a channel to a certain decibel (between <code>-84</code> and <code>10</code>).<br>
@@ -1591,6 +1601,67 @@ Whilst a single <code>CK</code> payload can span multiple packets (whose TCP con
 <td style="text-align: center">...</td>
 <td style="text-align: left">Current Payload Data</td>
 <td style="text-align: left"></td>
+</tr>
+</tbody></table>
+<h3 id='fader-positions'>Fader Positions</h3>
+<p><code>MS</code> payloads contain short (<code>uint16</code> (LE)) values used to report main mix fader levels, as well mix bus levels.<br>
+They are also used for metering, to report signal levels.</p>
+
+<table><thead>
+<tr>
+<th style="text-align: center">Offset</th>
+<th style="text-align: center">Length</th>
+<th style="text-align: left">Description</th>
+<th style="text-align: left">Note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Header</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">4</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Size</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">6</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Payload Type</td>
+<td style="text-align: left"><code>FD</code></td>
+</tr>
+<tr>
+<td style="text-align: center">8</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">C-Bytes</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">12</td>
+<td style="text-align: center">4</td>
+<td style="text-align: left">Batch type</td>
+<td style="text-align: left"><code>fdrs</code>, <code>levl</code></td>
+</tr>
+<tr>
+<td style="text-align: center">16</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">??</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: center">18</td>
+<td style="text-align: center">2</td>
+<td style="text-align: left">Channel count</td>
+<td style="text-align: left"><code>uint16</code> (LE)</td>
+</tr>
+<tr>
+<td style="text-align: center">20...</td>
+<td style="text-align: center">...</td>
+<td style="text-align: left">...</td>
+<td style="text-align: left">...</td>
 </tr>
 </tbody></table>
 
