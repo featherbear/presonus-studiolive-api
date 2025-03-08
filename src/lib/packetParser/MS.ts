@@ -1,28 +1,60 @@
-import Client from '../Client'
-import { ChannelTypes } from '../constants'
+import Client from "../Client";
+import { ChannelTypes } from "../constants";
 
-function readValues(buffer: Buffer, count: number) {
-  const values = []
-  for (let i = 0; i < count; i++) values.push(buffer.readUInt16LE(i * 2) / 655.35)
-  return values
-}
-
-export default function handleMSPacket(this: Client, data): {
-
-} {
+type MSData = Record<ChannelTypes, number[]>;
+export default function handleMSPacket(this: Client, data: Buffer): MSData {
   // First 4 bytes SHOULD be 'fdrs', but for now we won't check
-  data = data.slice(8)
+  const batchType = data.slice(0, 4).toString();
+  if (batchType !== "fdrs") {
+    throw new Error("Invalid batch type");
+  }
 
-  const channelCounts = this.channelCounts
-  const order: ChannelTypes[] = ['LINE', 'RETURN', 'FXRETURN', 'TALKBACK', 'AUX', 'FX', 'MAIN']
+  const numberOfChannels = data.readUInt16LE(6); // 41 00
 
-  const values: { [_ in ChannelTypes]: number[] } = <any>{}
+  data = data.slice(8);
 
-  for (const type of order) {
-    values[type] = readValues(data, channelCounts[type])
-    data = data.slice(channelCounts[type] * 2)
+  const channelValues: number[] = [];
+  for (let i = 0; i < numberOfChannels; i++) {
+    channelValues.push(data.readUInt16LE(i * 2) / 655.35);
+  }
+
+  data = data.slice(numberOfChannels * 2);
+
+  /*******
+  08
+  00 00 00 00 20 00 
+  01 00 20 00 03 00
+  02 00 23 00 04 00
+  03 00 27 00 01 00
+  04 00 28 00 10 00
+  05 00 38 00 04 00
+  06 00 3c 00 04 00
+  07 00 40 00 01 00
+  *******/
+
+  // TODO: Confirm if SUBS are included in the 16R, or if the value is set to 0
+  const values: MSData = <any>{};
+
+  const order: ChannelTypes[] = ["LINE", "RETURN", "FXRETURN", "TALKBACK", "AUX", "FX", "SUB", "MAIN"];
+
+  // Assign the values to the correct channel types
+  const groupCount = data.readUInt8(0);
+  if (groupCount !== order.length) {
+    throw new Error("Unexpected group count");
+  }
+
+  for (let i = 0; i < groupCount; i++) {
+    const dataOffset = 1 + i * 6;
+
+    const groupNumber = data.readUInt16LE(dataOffset);
+
+    const offset = data.readUInt16LE(dataOffset + 2);
+    const count = data.readUInt16LE(dataOffset + 4);
+
+    values[order[i]] = channelValues.slice(offset, offset + count);
   }
 
   // TODO: Position of the faders for busses, groups, dcas, etc...
-  return values
+  // not included in the usual MS packet
+  return values;
 }
