@@ -44,8 +44,7 @@ export enum MessageCode {
     Unknown3 = 'MB',
 
     /**
-     * Linear position of faders
-     * Only message sent for main fader changes
+     * Linear position of main mix faders and sends
      * Assume the S means short (16)
      */
     // Meter16
