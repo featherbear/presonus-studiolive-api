@@ -1,11 +1,9 @@
-import ZlibPayload from '../../types/ZlibPayload'
-
 /**
  * Deserialise a zlib buffer into a raw object payload
  * Partially implements the UBJSON specification
  * https://ubjson.org
  */
-export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
+export function deserialiseUBJSON<T>(buf: Buffer): T {
   let idx = 0
   if (buf[idx++] !== 0x7b) return null
 
@@ -118,7 +116,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
 
     const valueData = buf.slice(idx, idx + length)
 
-    let value
+    let value: any
 
     switch (type) {
       // string
@@ -171,7 +169,7 @@ export function zlibDeserialiseBuffer(buf: Buffer): ZlibPayload {
     }
   }
 
-  return rootTree as ZlibPayload
+  return <T>rootTree
 }
 
-export default zlibDeserialiseBuffer
+export default deserialiseUBJSON

@@ -2,15 +2,16 @@
  * Parse Zlib packets
  */
 
+import type { ZlibPayload } from '../../types'
 import { simplifyPathTokens, tokenisePath } from '../treeUtil'
-import zlibDeserialiseBuffer from './zlibDeserialiser'
+import deserialiseUBJSON from './ubjson'
 import zlibParseNode, { ZlibInputNode, ZlibNode, ZlibRangeSymbol, ZlibStringEnumSymbol, ZlibValueSymbol } from './zlibNodeParser'
 
 /**
  * Deserialise and parse a zlib buffer into an object tree
  */
 export function zlibParse(zlib: Buffer) {
-  const payload = zlibDeserialiseBuffer(zlib)
+  const payload = deserialiseUBJSON<ZlibPayload>(zlib)
   if (payload.id !== 'Synchronize') {
     console.warn('Unexpected zlib payload id', payload.id)
     return
