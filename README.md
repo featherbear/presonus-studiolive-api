@@ -13,7 +13,7 @@ Tested against the following models
 
 # Install
 
-`npm install featherbear/presonus-studiolive-api#v1.4.2`
+`npm install featherbear/presonus-studiolive-api#v1.5.0`
 
 # Usage
 
@@ -23,7 +23,7 @@ Tested against the following models
 
 ## License
 
-Copyright © 2019 - 2022 Andrew Wong  
+Copyright © 2019 - 2025 Andrew Wong  
 
 This software is licensed under the [MIT License](https://opensource.org/licenses/MIT).  
 You are free to redistribute it and/or modify it under the [terms](https://opensource.org/licenses/MIT) of the [license](https://opensource.org/licenses/MIT).
