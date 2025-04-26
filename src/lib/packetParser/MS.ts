@@ -35,13 +35,16 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
   // TODO: Confirm if SUBS are included in the 16R, or if the value is set to 0
   const values: MSData = <any>{};
 
+  // FIXME: there are more types here. i.e. the 64S has 9 items
   const order: ChannelTypes[] = ["LINE", "RETURN", "FXRETURN", "TALKBACK", "AUX", "FX", "SUB", "MAIN"];
 
   // Assign the values to the correct channel types
   const groupCount = data.readUInt8(0);
-  if (groupCount !== order.length) {
-    throw new Error("Unexpected group count");
-  }
+  
+  // Not all packets contain all channel types
+  // if (groupCount !== order.length) {
+  //   throw new Error("Unexpected group count");
+  // }
 
   for (let i = 0; i < groupCount; i++) {
     const dataOffset = 1 + i * 6;
@@ -51,7 +54,7 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
     const offset = data.readUInt16LE(dataOffset + 2);
     const count = data.readUInt16LE(dataOffset + 4);
 
-    values[order[i]] = channelValues.slice(offset, offset + count);
+    values[order[groupNumber]] = channelValues.slice(offset, offset + count);
   }
 
   // TODO: Position of the faders for busses, groups, dcas, etc...
