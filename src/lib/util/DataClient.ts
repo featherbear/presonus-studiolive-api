@@ -6,8 +6,8 @@ import { Socket } from 'net'
 import { PacketHeader } from '../constants'
 import Queue from 'queue'
 
-export default function (callback) {
-  const TCPclient = new Socket()
+export default function (callback, customSocket: Socket = null) {
+  const TCPclient = customSocket ?? new Socket()
   
   let remaining = 0
   let payload = Buffer.allocUnsafe(0)
