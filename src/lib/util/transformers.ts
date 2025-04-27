@@ -32,6 +32,9 @@ const DEFAULTS = {
     fromPV: DEFAULT_TRANSFORMS.buffer.boolean,
     fromUB: DEFAULT_TRANSFORMS.integer.boolean
   },
+  float: {
+    fromPV: DEFAULT_TRANSFORMS.buffer.float
+  },
   /**
    * Define a key with passthrough methods to skip wildcard matching
    */
@@ -51,6 +54,10 @@ const transformers: {
   'line.*.48v': DEFAULTS.boolean,
   'line.*.link': DEFAULTS.boolean,
   '**.assign_*': DEFAULTS.boolean,
+
+  'line.*.preampgain': DEFAULTS.float,
+  'line.*.digitalgain': DEFAULTS.float,
+
   'line.*.dca.volume': {
     fromPV: IGNORE
   },
@@ -59,6 +66,16 @@ const transformers: {
       return value * 100
     }
   },
+  '**.filter.hpf': DEFAULTS.float,
+  '**.busdelay': DEFAULTS.float,
+  '**.delay': DEFAULTS.float,
+
+  '**.gate.keylisten': DEFAULTS.boolean,
+  '**.gate.expander': DEFAULTS.boolean,
+  '**.gate.*': DEFAULTS.float,
+
+  '*.anysolo': DEFAULTS.boolean,
+
   ...{
     'line.*.dca.aux*': {
       fromPV: IGNORE
@@ -68,28 +85,15 @@ const transformers: {
     }
   },
   ...{
-    'line.*.aux*': {
-      fromPV: DEFAULT_TRANSFORMS.buffer.float
-    },
-    'fxreturn.*.aux*': {
-      fromPV: DEFAULT_TRANSFORMS.buffer.float
-    },
-    'return.*.aux*': {
-      fromPV: DEFAULT_TRANSFORMS.buffer.float
-    },
-    'talkback.*.aux*': {
-      fromPV: DEFAULT_TRANSFORMS.buffer.float
-    }
+    'line.*.aux*': DEFAULTS.float,
+    'fxreturn.*.aux*': DEFAULTS.float,
+    'return.*.aux*': DEFAULTS.float,
+    'talkback.*.aux*': DEFAULTS.float,
   },
-  'line.*.pan': {
-    fromPV: DEFAULT_TRANSFORMS.buffer.float
-  },
-  'line.*.stereopan': {
-    fromPV: DEFAULT_TRANSFORMS.buffer.float
-  },
-  'line.*.FX*': {
-    fromPV: DEFAULT_TRANSFORMS.buffer.float
-  },
+  'line.*.pan': DEFAULTS.float,
+  'line.*.stereopan': DEFAULTS.float,
+  'line.*.FX*': DEFAULTS.float,
+  'return.*.FX*': DEFAULTS.float,
   'line.*.dca.fx*': {
     fromPV: IGNORE
   },
