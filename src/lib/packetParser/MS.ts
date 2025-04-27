@@ -44,8 +44,16 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
     5: "FX",
     6: "SUB",
     7: "MAIN",
-    // 8: '???',
-    // 0x0b: "???"
+    
+    
+    /**
+     * StudioLive 64S
+     */
+    8: "MONO",
+    /**
+     * StudioLive 64S
+     */
+    11: "MASTER"
   };
 
   // Assign the values to the correct channel types
