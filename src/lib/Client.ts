@@ -52,7 +52,7 @@ export class Client {
 
   meteringClient: Awaited<ReturnType<typeof MeterServer>>
   #eventEmitter: EventEmitter
-  #keepAliveHelper: KeepAliveHelper
+  private keepAliveHelper: KeepAliveHelper
 
   readonly state: ReturnType<typeof CacheProvider>
   private zlibData?: ZlibNode
@@ -203,7 +203,7 @@ export class Client {
       this.conn.addListener('connect', () => {
         clearTimeout(fastReconnectTimer)
 
-        this.#keepAliveHelper = new KeepAliveHelper(3000)
+        this.keepAliveHelper = new KeepAliveHelper(3000)
 
         // #region Connection handshake
 
@@ -248,7 +248,7 @@ export class Client {
             this.addListener(MessageCode.JSON, subscribeCallback)
           })
         ]).then(() => {
-          this.#keepAliveHelper.start(
+          this.keepAliveHelper.start(
             (packets) => {
               packets.forEach((bytes) => this._writeBytes(bytes))
             }, () => {
@@ -307,7 +307,7 @@ export class Client {
       [MessageCode.FaderPosition]: packetParser.handleMSPacket,
       [MessageCode.Chunk]: packetParser.handleCKPacket,
       [MessageCode.ParamChars]: packetParser.handlePCPacket,
-      [MessageCode.FileData]: this.#keepAliveHelper.intercept(packetParser.handleFDPacket),
+      [MessageCode.FileData]: this.keepAliveHelper.intercept(packetParser.handleFDPacket),
       [MessageCode.DeviceList]: null,
       [MessageCode.Unknown1]: null,
       [MessageCode.Unknown3]: null

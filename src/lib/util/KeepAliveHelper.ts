@@ -14,13 +14,17 @@ export default class KeepAliveHelper {
     this.#ids = []
   }
 
+  updateTime() {
+    this.#lastRecv = new Date().getTime()
+  }
+
   intercept(fn: (data: Buffer) => { id: number, data: any }): (data: Buffer) => ReturnType<typeof fn> {
     return (data: Buffer) => {
       const result = fn(data)
 
       if (!!result && this.#ids.includes(result.id)) {
         this.#ids = this.#ids.filter(id => id !== result.id)
-        this.#lastRecv = new Date().getTime()
+        this.updateTime()
         return null
       }
 
@@ -58,6 +62,6 @@ export default class KeepAliveHelper {
       ])
     }, 1000)
 
-    this.#lastRecv = new Date().getTime()
+    this.updateTime()
   }
 }
