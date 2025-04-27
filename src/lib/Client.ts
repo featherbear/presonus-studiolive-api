@@ -274,8 +274,8 @@ export class Client {
 
       const doConnect = () => {
         this.conn.destroy()
-        this.conn.connect(this.serverPort, this.serverHost)
         fastReconnectTimer = setTimeout(() => reconnect(), 2000)
+        this.conn.connect(this.serverPort, this.serverHost)
         this.conn.once('error', () => { })
       }
 
