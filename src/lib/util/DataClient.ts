@@ -65,6 +65,9 @@ export default function (callback, customSocket: Socket = null) {
             if (remaining < 0) {
               throw Error('Extracted more bytes than the payload specified')
             }
+          } else {
+            // remaining is zero but the header is not matching
+            throw new Error('Header not matching and remaining is zero')
           }
         }
       })()
