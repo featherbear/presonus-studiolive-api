@@ -35,8 +35,18 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
   // TODO: Confirm if SUBS are included in the 16R, or if the value is set to 0
   const values: MSData = <any>{};
 
-  // FIXME: there are more types here. i.e. the 64S has 9 items
-  const order: ChannelTypes[] = ["LINE", "RETURN", "FXRETURN", "TALKBACK", "AUX", "FX", "SUB", "MAIN"];
+  const mapping: Record<number, ChannelTypes> = {
+    0: "LINE",
+    1: "RETURN",
+    2: "FXRETURN",
+    3: "TALKBACK",
+    4: "AUX",
+    5: "FX",
+    6: "SUB",
+    7: "MAIN",
+    // 8: '???',
+    // 0x0b: "???"
+  };
 
   // Assign the values to the correct channel types
   const groupCount = data.readUInt8(0);
@@ -54,7 +64,14 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
     const offset = data.readUInt16LE(dataOffset + 2);
     const count = data.readUInt16LE(dataOffset + 4);
 
-    values[order[groupNumber]] = channelValues.slice(offset, offset + count);
+    let channelType = mapping[groupNumber]
+    if (!channelType) {
+      console.warn("Unknown channel type", groupNumber);
+      // continue
+      channelType = "unknown--" + groupNumber;
+    }
+
+    values[channelType] = channelValues.slice(offset, offset + count);
   }
 
   // TODO: Position of the faders for busses, groups, dcas, etc...
