@@ -67,7 +67,7 @@ export function createPacket(messageCode: Buffer | string, data?: Buffer | strin
   let cursor = 0
   b.fill(PacketHeader)
   b.fill(lengthLE, (cursor += PacketHeader.length))
-  b.write(messageCode instanceof Buffer ? messageCode.toString() : messageCode, (cursor += lengthLE.length))
+  b.write(typeof messageCode === 'string' ? messageCode : messageCode.toString('utf8'), (cursor += lengthLE.length))
   b.fill(connIdentity, (cursor += messageCode.length))
 
   if (typeof data === 'string') b.write(data, (cursor += connIdentity.length))
