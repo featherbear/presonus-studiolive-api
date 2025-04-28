@@ -4,9 +4,9 @@ import type { DiscoveryType, ChannelCount, SubscriptionOptions, ChannelSelector,
 import type * as InstanceOptions from './types/InstanceOptions'
 import type { MeterData } from './MeterServer'
 
-import { Channel, ChannelTypes, MessageCode, ConnectionState } from './constants'
+import { Channel, type ChannelTypes, MessageCode, type ConnectionState } from './constants'
 
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 
 import * as packetParser from './packetParser'
 import Discovery from './Discovery'
@@ -22,7 +22,7 @@ import { tokenisePath } from './util/treeUtil'
 import { doesLookupMatch } from './util/ValueTransformer'
 import { ignorePV } from './util/transformers'
 import { logVolumeToLinear, transitionValue, UniqueRandom } from './util/valueUtil'
-import { dumpNode, ZlibNode } from './util/zlib/zlibNodeParser'
+import { dumpNode, type ZlibNode } from './util/zlib/zlibNodeParser'
 import { getZlibValue } from './util/zlib/zlibUtil'
 import KeepAliveHelper from './util/KeepAliveHelper'
 import * as FDHelper from './util/fileRequestUtil'
@@ -157,6 +157,22 @@ export class Client {
     }
   }
 
+  // introspectStateType(key: string | string[]) {
+  //   enum PropertyType {
+  //     String,
+  //     Float,
+  //     Number,
+  //     Boolean
+  //   }
+
+  //   let value = getZlibValue(this.zlibData, key)  
+  //   switch (typeof value) {
+  //     case 'string': {
+  //       return 
+  //     }
+  //   }
+  // }
+
   static async discover(timeout = 10 * 1000) {
     const devices: { [serial: string]: DiscoveryType } = {}
     const func = device => {
@@ -191,7 +207,7 @@ export class Client {
   async connect(subscribeData?: SubscriptionOptions) {
     if (this.connectPromise) return this.connectPromise
 
-    return (this.connectPromise = new Promise((resolve, reject) => {
+    const connectPromise = new Promise<this>((resolve, reject) => {
       let fastReconnectTimer: ReturnType<typeof setTimeout>
       logger.info({ host: this.serverHost, port: this.serverPort }, 'Connecting to console')
 
@@ -221,7 +237,7 @@ export class Client {
               this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback)
 
               const getCount = (key) => Object.keys(this.state.get(key) ?? {}).length
-              setCounts((this.channelCounts = {
+              const channelCounts: ChannelCount = {
                 LINE: getCount('line'),
                 AUX: getCount('aux'),
                 FX /* fxbus == fxreturn */: getCount('fxbus'),
@@ -229,8 +245,23 @@ export class Client {
                 RETURN /* aka tape? */: getCount('return'),
                 TALKBACK: getCount('talkback'),
                 MAIN: getCount('main'),
-                SUB: getCount('sub') /* TODO: The 16R doesn't have SUB groups. Check against the 24R / 16 */
-              }))
+                /**
+                 * 16R doesn't have SUB groups
+                 */
+                SUB: getCount('sub'),
+
+                /**
+                 * Exclusive to the 64S
+                 */
+                MASTER: getCount('master'),
+                
+                /**
+                 * Exclusive to the 64S
+                 */
+                MONO: getCount('mono')
+              }
+              this.channelCounts = channelCounts
+              setCounts(channelCounts)
               resolve(this)
             })
           }),
@@ -256,6 +287,7 @@ export class Client {
               logger.info('Connection closed')
               this.emit('closed')
 
+              console.log('conn was closed so will reconnect')
               if (this.options?.autoreconnect) {
                 this.emit('reconnecting')
                 reconnect()
@@ -280,7 +312,9 @@ export class Client {
       }
 
       doConnect()
-    }))
+    })
+    this.connectPromise = connectPromise
+    return connectPromise
   }
 
   async close() {
@@ -713,9 +747,7 @@ export class Client {
    */
   private _setLevel(this: Client, selector: ChannelSelector, targetLevel, duration: number = 0): Promise<null> {
     const targetString = this._getLevelString(selector)
-
-    console.log('call set level', targetString, targetLevel)
-
+    
     const assertReturn = () => {
       // Additional time to wait for response
       return new Promise<null>((resolve) => {
@@ -795,6 +827,7 @@ export class Client {
    */
   async normaliseChannelTo(channel, level, duration?: number) {
     // TODO:
+    throw new Error('Not implemented yet')
   }
 }
 

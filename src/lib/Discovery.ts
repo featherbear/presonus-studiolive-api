@@ -4,9 +4,9 @@
  */
 
 import { analysePacket } from './util/messageProtocol'
-import { EventEmitter } from 'events'
-import * as dgram from 'dgram'
-import DiscoveryType from './types/DiscoveryType'
+import { EventEmitter } from 'node:events'
+import dgram from 'node:dgram'
+import type DiscoveryType from './types/DiscoveryType'
 
 export default class extends EventEmitter {
   socket: dgram.Socket
@@ -63,9 +63,8 @@ export default class extends EventEmitter {
         cur < payload.length;
         cur += f.length + 1
       ) {
-        fragments.push(
-          (f = payload.slice(cur, payload.indexOf('\x00', cur))).toString()
-        )
+        f = payload.slice(cur, payload.indexOf('\x00', cur))
+        fragments.push(f.toString('utf8'))
       }
 
       // eslint-disable-next-line

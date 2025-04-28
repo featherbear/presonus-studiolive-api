@@ -47,8 +47,8 @@ const BufferCollector = new class {
         data: chunk.data
       }
     } else {
-      let currChunkSet: ChunkSet
-      if (!(currChunkSet = this.#files[chunk.id])) {
+      let currChunkSet = this.#files[chunk.id]
+      if (!currChunkSet) {
         // Create new entry for the chunk set
         currChunkSet = this.#files[chunk.id] = {
           max: chunk.totalSize,
@@ -92,7 +92,7 @@ const BufferCollector = new class {
 
 function parseChunk(data: Buffer) {
   let header = data.slice(0, 14)
-
+  
   const id = header.readUInt16BE()
   header = header.slice(2)
 

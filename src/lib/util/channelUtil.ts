@@ -4,6 +4,9 @@ import ChannelSelector from '../types/ChannelSelector'
 
 let counts: ChannelCount
 
+/**
+ * TODO: Create a proper context
+ */
 export function setCounts(channelCount: ChannelCount) {
   counts = channelCount
 }

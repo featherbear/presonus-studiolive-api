@@ -1,4 +1,4 @@
-import zlib from 'zlib'
+import zlib from 'node:zlib'
 import zlibParse from '../util/zlib/zlibUtil'
 
 export default function handleZBPacket(data) {

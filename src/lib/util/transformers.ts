@@ -88,7 +88,7 @@ const transformers: {
     'line.*.aux*': DEFAULTS.float,
     'fxreturn.*.aux*': DEFAULTS.float,
     'return.*.aux*': DEFAULTS.float,
-    'talkback.*.aux*': DEFAULTS.float,
+    'talkback.*.aux*': DEFAULTS.float
   },
   'line.*.pan': DEFAULTS.float,
   'line.*.stereopan': DEFAULTS.float,
