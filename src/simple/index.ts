@@ -2,14 +2,14 @@ import StudioLiveAPI, {
   ChannelSelector,
   Channel,
   MessageCode
-} from '@'
-import type { ChannelTypes } from '@'
+} from '@/api'
+import type { ChannelTypes } from '@/api'
 
 import LevelEvent from './types/LevelEvent'
 import MuteEvent from './types/MuteEvent'
 import SoloEvent from './types/SoloEvent'
 
-export * from '@'
+export * from '@/api'
 
 type CallbackWithData<T> = (data: T) => any;
 
