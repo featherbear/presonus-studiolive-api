@@ -2,7 +2,7 @@
   "name": "presonus-studiolive-api",
   "version": "1.6.0",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
-  "main": "dist/api.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npm-run-all lint clean transpile",
     "build:fix": "npm-run-all lint:fix clean transpile",
@@ -16,12 +16,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/featherbear/PreSonus-StudioLive-API.git"
+    "url": "git+https://github.com/featherbear/presonus-studiolive-api.git"
   },
   "author": "featherbear",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/featherbear/PreSonus-StudioLive-API/issues"
+    "url": "https://github.com/featherbear/presonus-studiolive-api/issues"
   },
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
