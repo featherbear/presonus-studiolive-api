@@ -233,4 +233,4 @@ class SimpleClient extends StudioLiveAPI {
   }
 }
 
-export default SimpleClient
+export { SimpleClient }
