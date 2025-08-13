@@ -47,7 +47,7 @@ export function parseChannelString(
   if (
     // `channel` must be a whole number larger than zero
     !(Math.trunc(channel) > 0) ||
-    (channel != (channel = Math.trunc(channel))) || // eslint-disable-line eqeqeq
+    (channel != (channel = Math.trunc(channel))) ||
 
     // `channel` must also be less than the known maximum (if a max is provided)
     (counts && !(counts[type] && counts[type] >= channel))

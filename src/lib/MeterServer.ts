@@ -1,10 +1,11 @@
-/* eslint-disable camelcase */
+ 
 
 import * as dgram from 'dgram'
 import { PacketHeader } from './constants'
 import ChannelCount from './types/ChannelCount'
 
 // TODO: 
+// eslint-disable-next-line
 export interface MeterData {
 
 }

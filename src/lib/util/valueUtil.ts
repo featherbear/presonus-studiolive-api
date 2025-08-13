@@ -39,7 +39,7 @@ type CancelTransitionFn = () => void
  * @param callback Completion callback
  * @returns Cancel function
  */
-export function transitionValue(from: number, to: number, duration: number, fn: (value: number) => any, callback?: Function) {
+export function transitionValue(from: number, to: number, duration: number, fn: (value: number) => any, callback?: () => void) {
   if (duration <= 0 || from === to) {
     fn(to)
     callback?.()

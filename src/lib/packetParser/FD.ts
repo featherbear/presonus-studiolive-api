@@ -148,7 +148,9 @@ export default function handleFDPacket(data: Buffer) {
   if (result) {
     try {
       data = JSON.parse(result.data.toString())
-    } catch { }
+    } catch {
+      data = undefined
+     }
 
     return {
       id: result.id,

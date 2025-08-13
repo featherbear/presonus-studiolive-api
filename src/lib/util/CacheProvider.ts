@@ -12,7 +12,7 @@ interface FallbackInterface {
 type Node<root> = {
   [key in keyof root]:
   (root[key] extends { children } ? Node<root[key]['children']> : Node<root[key]>)
-  & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : {})
+  & (root[key] extends { values } ? { [k in keyof root[key]['values']]: root[key]['values'][k] } : object)
   // & (root[key] extends { ranges, values} ? { [k in keyof root[key]['values']]: root[key]['values'][k] & root[key]['ranges'][k] } : {})
 }
 

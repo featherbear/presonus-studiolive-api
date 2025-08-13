@@ -8,6 +8,7 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
   if (buf[idx++] !== 0x7b) return null
 
   const rootTree = {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const workingSet: Array<[] | {}> = [rootTree]
 
   while (idx !== buf.length) {

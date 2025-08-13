@@ -2,14 +2,14 @@ import StudioLiveAPI, {
   ChannelSelector,
   Channel,
   MessageCode
-} from '@/api'
-import type { ChannelTypes } from '@/api'
+} from '../api'
+import type { ChannelTypes } from '../api'
 
 import LevelEvent from './types/LevelEvent'
 import MuteEvent from './types/MuteEvent'
 import SoloEvent from './types/SoloEvent'
 
-export * from '@/api'
+export * from '../api'
 
 type CallbackWithData<T> = (data: T) => any;
 
@@ -45,7 +45,8 @@ type ExtendedEvents<T> = StudioLiveAPI['on'] & {
   (event, listener: CallbackWithData<any>): T;
 };
 
-declare interface Client extends StudioLiveAPI {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+declare interface SimpleClient extends StudioLiveAPI {
   on: ExtendedEvents<this>;
   addListener: ExtendedEvents<this>;
   once: ExtendedEvents<this>;
@@ -53,9 +54,9 @@ declare interface Client extends StudioLiveAPI {
   removeListener: ExtendedEvents<this>;
 }
 
-// eslint-disable-next-line no-redeclare
-class Client extends StudioLiveAPI {
-  #MS_last: {};
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+class SimpleClient extends StudioLiveAPI {
+  #MS_last: unknown;
 
   constructor(...args: ConstructorParameters<typeof StudioLiveAPI>) {
     super(...args)
@@ -234,4 +235,4 @@ class Client extends StudioLiveAPI {
   }
 }
 
-export default Client
+export default SimpleClient

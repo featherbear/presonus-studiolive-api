@@ -58,7 +58,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
 
   // #region Tree generation
 
-  // eslint-disable-next-line
+   
   const keyHandlers: { [k in keyof ZlibInputNode]: (data) => void } & { [k: string]: ((data) => void) | null } = {
     children(data) {
       for (const [key, value] of Object.entries(data)) {

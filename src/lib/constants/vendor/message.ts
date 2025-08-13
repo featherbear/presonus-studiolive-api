@@ -1,4 +1,4 @@
-/* eslint no-unused-vars: "off" */
+/* eslint @typescript-eslint/no-duplicate-enum-values: "off" */
 
 // https://github.com/featherbear/presonus-studiolive-api/issues/13
 

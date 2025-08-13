@@ -15,7 +15,7 @@ This wrapper attaches common events to the client. Refer to the [main project](h
 ## Example
 
 ```ts
-import Client from 'presonus-studiolive-api/simple'
+import { SimpleClient as Client } from 'presonus-studiolive-api'
 
 let client = new Client("192.168.0.21")
 

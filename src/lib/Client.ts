@@ -332,7 +332,6 @@ export class Client {
     if (messageCode === null) return
 
     // Handle message types
-    // eslint-disable-next-line
     const handlers: { [k in MessageCode]?: (data) => any } = {
       [MessageCode.JSON]: packetParser.handleJMPacket,
       [MessageCode.ParamValue]: packetParser.handlePVPacket,
@@ -419,7 +418,6 @@ export class Client {
     idBuffer.writeUInt16BE(id) // Different to bufferUtil::toShort()
 
     return new Promise<T>((resolve, reject) => {
-      // eslint-disable-next-line prefer-const 
       let timeout: ReturnType<typeof setTimeout>
 
       const callback = (data: any) => {
