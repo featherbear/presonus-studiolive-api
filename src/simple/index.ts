@@ -9,8 +9,6 @@ import LevelEvent from './types/LevelEvent'
 import MuteEvent from './types/MuteEvent'
 import SoloEvent from './types/SoloEvent'
 
-export * from '../api'
-
 type CallbackWithData<T> = (data: T) => any;
 
 const channelLookup = Object.entries(Channel).reduce(
