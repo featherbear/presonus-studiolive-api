@@ -31,18 +31,17 @@ import { JSONtoPacketBuffer } from './util/jsonPacketUtil'
 // Forward discovery events
 const discovery = new Discovery()
 
-type fnCallback<T = any> = (obj: T) => void;
-type dataFnCallback<T = any> = (obj: {
-  code: any,
-  data: T
-}) => void;
+type APIEventMap =
+    & { [_ in keyof typeof ConnectionState]: [void] }
+    & { [_ in MessageCode]: [any] }
+    & {
+        meter: [ MeterData ],
+        data: [{
+          code: MessageCode,
+          data: any
+        }]
+      }
 
-type EventFunctionType<T> = {
-  (event: MessageCode, listener: fnCallback): T
-  (event: keyof typeof ConnectionState, listener: fnCallback<void>): T
-  (event: 'meter', listener: fnCallback<MeterData>): T
-  (event: 'data', listener: dataFnCallback): T
-}
 export class Client {
   readonly serverHost: string
   readonly serverPort: number
@@ -51,7 +50,9 @@ export class Client {
   channelCounts: ChannelCount
 
   meteringClient: Awaited<ReturnType<typeof MeterServer>>
-  #eventEmitter: EventEmitter
+  private eventEmitter: EventEmitter<APIEventMap>
+  private fileDataEmitter: EventEmitter
+  
   private keepAliveHelper: KeepAliveHelper
 
   readonly state: ReturnType<typeof CacheProvider>
@@ -63,7 +64,8 @@ export class Client {
   constructor(address: InstanceOptions.ConnectionAddress, options?: Partial<InstanceOptions.InstanceOptions>) {
     if (!address?.host) throw new Error('Host address not supplied')
 
-    this.#eventEmitter = new EventEmitter()
+    this.eventEmitter = new EventEmitter()
+    this.fileDataEmitter = new EventEmitter()
 
     this.serverHost = address.host
     this.serverPort = address?.port || 53000
@@ -113,39 +115,38 @@ export class Client {
     })
 
     this.on(MessageCode.FileData, ({ id, data }) => {
-      this.emit(`_${MessageCode.FileData}_${id}`, data)
+      this.fileDataEmitter.emit(id, data)
     })
   }
 
-  emit(...args: Parameters<EventEmitter['emit']>) {
-    return this.#eventEmitter.emit(...args)
+  protected emit<K extends keyof APIEventMap>(event: K, ...data: APIEventMap[K]): this {
+    this.eventEmitter.emit(event, ...data as any);
+    return this;
   }
 
-  on = (function (...args) {
-    this.#eventEmitter.on(...args)
-    return this
-  }) as EventFunctionType<this>
+  on<K extends keyof APIEventMap>(event: K, listener: (...arg: APIEventMap[K]) => void): this {
+    this.eventEmitter.on(event, listener as any);
+    return this;
+  }
 
-  addListener = (function (...args) {
-    this.#eventEmitter.addListener(...args)
-    return this
-  }) as EventFunctionType<this>
+  once<K extends keyof APIEventMap>(event: K, listener: (...arg: APIEventMap[K]) => void): this {
+    this.eventEmitter.once(event, listener as any);
+    return this;
+  }
 
-  once = (function (...args) {
-    this.#eventEmitter.once(...args)
-    return this
-  }) as EventFunctionType<this>
+  off<K extends keyof APIEventMap>(event: K, listener: (...arg: APIEventMap[K]) => void): this {
+    this.eventEmitter.off(event, listener as any);
+    return this;
+  }
+  addListener<K extends keyof APIEventMap>(event: K, listener: (...arg: APIEventMap[K]) => void): this {
+    this.eventEmitter.addListener(event, listener as any);
+    return this;
+  }
 
-  off = (function (...args) {
-    this.#eventEmitter.off(...args)
-    return this
-  }) as EventFunctionType<this>
-
-  removeListener = (function (...args) {
-    this.#eventEmitter.removeListener(...args)
-    return this
-  }) as EventFunctionType<this>
-
+  removeListener<K extends keyof APIEventMap>(event: K, listener: (...arg: APIEventMap[K]) => void): this {
+    this.eventEmitter.removeListener(event, listener as any);
+    return this;
+  }
   /**
    * Extracts the data structure and cache layer
    * @internal
@@ -436,8 +437,8 @@ export class Client {
         return resolve(data)
       }
 
-      const eventName = `_${MessageCode.FileData}_${id}`
-      this.once(<any>eventName, callback)
+      const eventName = id.toString()
+      this.fileDataEmitter.once(eventName, callback)
 
       this._sendPacket(
         MessageCode.FileRequest,
@@ -449,7 +450,7 @@ export class Client {
       )
 
       timeout = setTimeout(() => {
-        this.removeListener(<any>eventName, callback)
+        this.fileDataEmitter.removeListener(eventName, callback)
         UniqueRandom.get(16).release(id)
         reject(new Error('Timeout'))
       }, 10 * 1000)

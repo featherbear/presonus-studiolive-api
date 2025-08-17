@@ -1,7 +1,6 @@
-import { CByte, PacketHeader } from '../constants'
+import { CByte, MessageCode, PacketHeader } from '../constants'
 import { toShort } from './bufferUtil'
 
-type MessageCode = string
 /**
  * Decode packet buffer
  * @returns message code
@@ -25,7 +24,7 @@ export function analysePacket(
   }
 
   return [
-    packet.slice(6, 8).toString(),
+    packet.slice(6, 8).toString() as MessageCode,
     // Skip bytes 8-11 (C-Byte identifier pair)
     packet.slice(12)
   ]
