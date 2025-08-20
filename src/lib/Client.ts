@@ -174,6 +174,9 @@ export class Client {
   //   }
   // }
 
+  /**
+   * @param timeout Default 10s
+   */
   static async discover(timeout = 10 * 1000) {
     const devices: { [serial: string]: DiscoveryType } = {}
     const func = device => {
