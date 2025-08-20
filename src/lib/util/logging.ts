@@ -1,9 +1,6 @@
 import bunyan from 'bunyan'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { name } = require('../../../package.json')
-
 globalThis.logger = bunyan.createLogger({
-  name,
+  name: "presonus-studiolive-api",
   level: 61 // fatal + 1
 })
