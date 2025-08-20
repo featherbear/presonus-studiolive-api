@@ -8,7 +8,7 @@ import { EventEmitter } from 'node:events'
 import dgram from 'node:dgram'
 import type DiscoveryType from './types/DiscoveryType'
 
-export default class extends EventEmitter {
+export default class Discovery extends EventEmitter {
   socket: dgram.Socket
 
   /**
