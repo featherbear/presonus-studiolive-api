@@ -1,136 +1,137 @@
- 
+import * as dgram from "dgram";
+import { MessageCode, PacketHeader } from "./constants";
+import ChannelCount from "./types/ChannelCount";
 
-import * as dgram from 'dgram'
-import { PacketHeader } from './constants'
-import ChannelCount from './types/ChannelCount'
-
-// TODO: 
-// eslint-disable-next-line
-export interface MeterData {
-
-}
+export interface MeterData {}
 
 /**
- * Create a UDP server and await data.  
- * This function **does not** send the packet to initiate the meter data request
- * 
+ * Create a UDP server and await data.
+ *
+ * This function **does not** send the packet to initiate the meter data request,
+ * it relies on a request sent from the <API>.meterSubscribe method
+ *
  * @param port UDP port to listen on
  * @param channelCounts Channel count data
  * @param onData Callback
  */
-export default function createServer(port, channelCounts: ChannelCount, onData: (data: MeterData) => any) {
-  if (typeof port !== 'number' || port < 0 || port > 65535) {
-    throw Error('Invalid port number')
+export default function createServer(
+  port,
+  channelCounts: ChannelCount,
+  onData: (data: MeterData) => any
+) {
+  if (typeof port !== "number" || port < 0 || port > 65535) {
+    throw Error("Invalid port number");
   }
 
   // Create UDP Server to listen to metering data
-  const UDPserver = dgram.createSocket('udp4')
+  const UDPserver = dgram.createSocket("udp4");
 
-  UDPserver.on('error', err => {
-    UDPserver.close()
-    throw Error('Meter server error: ' + err.stack)
-  })
+  UDPserver.on("error", (err) => {
+    UDPserver.close();
+    throw Error("Meter server error: " + err.stack);
+  });
 
   return new Promise<dgram.Socket>((resolve) => {
-    UDPserver.on('message', (msg, rinfo) => {
-      let data = Buffer.from(msg)
+    UDPserver.on("message", (msg, rinfo) => {
+      let data = Buffer.from(msg);
 
-      if (
-        !data.slice(0, 4).equals(PacketHeader) ||
-        data.slice(6, 8).toString() !== 'MS'
-      ) {
-        return
-      }
+      if (!data.subarray(0, 4).equals(PacketHeader)) return;
+      if (data.subarray(6, 8).toString() !== MessageCode.Meter16) return;
 
       // const PORT = data.slice(4, 6) // length is given as cf08 = 53000, but the payload is only 1041 long
 
-      // Only 'levl'  implemented
-      if (data.slice(12, 16).toString() !== 'levl') return
+      const type = data.subarray(12, 16).toString();
 
-      // TODO: Investigate this number
-      //   // eslint-disable-next-line
-      // const _ = data.slice(16, 20) // 00 00 c0 00
-      // console.log(_.join(', '), data.length);
+      switch (type) {
+        case "levl": {
+          const valueCount = data.readUInt16LE(18);
 
-      // Reduce buffer size
-      data = data.slice(20) // , 20 + 192 * 2 - 8)
+          // All the values (u16) are stored together
+          let values: number[] = [];
+          for (let i = 0; i < valueCount; i++) {
+            values.push(data.readUInt16LE(20 + i * 2));
+          }
 
-      /**
-       * Consume the buffer, modifying it after reading
-       * @param count Number of values to read
-       * @param skipBytes Bytes to skip ahead from
-       */
-      function readValues(count: number, skipBytes: number = 0) {
-        const values: number[] = []
-        for (let i = 0; i < count; i++) values.push(data.readUInt16LE((skipBytes + i) * 2))
-        data = data.slice((skipBytes + count) * 2)
-        return values
+          // There is a count (u8) of groups that describe the values
+          const descriptorsCount = data[20 + valueCount * 2];
+
+          if (21 + valueCount * 2 + descriptorsCount * 6 !== data.length) {
+            throw new Error("Decode error: Algorithm incorrect");
+          }
+
+          enum Groups {
+            INPUT_SIGNAL = 0x0000,
+            /* Basically the same as the input signal */
+            INPUT_GATE_IN = 0x0001,
+            INPUT_GATE_OUT = 0x0002,
+            INPUT_STRIP1_OUT = 0x0003,
+            INPUT_STRIP2_OUT = 0x0004,
+            INPUT_LIMITER_OUT = 0x0005,
+
+            /**
+             * i.e. FX Returns, Digital Return, Talkback
+             */
+            RETURNS = 0x0200,
+
+            AUX_SENDS = 0x0400,
+            // 0402 - When an aux is set to matrix, the value is 0
+            AUX_STRIP_IN = 0x0402,
+            AUX_STRIP1_OUT = 0x0403,
+            AUX_STRIP2_OUT = 0x0404,
+            AUX_LIMITER_OUT = 0x0405,
+
+            FX_SENDS = 0x0500,
+
+            MAIN_SENDS = 0x0700,
+            MAIN_STRIP_IN = 0x0702,
+            MAIN_STRIP1_OUT = 0x0703,
+            MAIN_STRIP2_OUT = 0x0704,
+            MAIN_LIMITER_OUT = 0x0705,
+          }
+
+          for (let i = 0; i < descriptorsCount; i++) {
+            // Read each descriptor
+            const descriptorOffset = 21 + valueCount * 2 + i * 6;
+            const [groupNumber, offset, count] = [
+              data.readInt16BE(descriptorOffset),
+              data.readInt16LE(descriptorOffset + 2),
+              data.readInt16LE(descriptorOffset + 4),
+            ];
+            const groupValues: number[] = values.slice(offset, offset + count);
+
+            // console.log(
+            //   `${(
+            //     Groups[groupNumber] ||
+            //     "> " + groupNumber.toString(16).padStart(4, "0")
+            //   ).padEnd(20, " ")} [${count.toString().padStart(2, " ")}]: ` +
+            //     groupValues
+            //       .map((v: number) => v.toString(16).padStart(4, "0"))
+            //       .join(" ")
+            // );
+          }
+          // console.log("-------");
+
+          break;
+        }
+        case "redu": {
+          // reduction
+          // from both the EQ and Limiter, probably also from the compressor
+          break;
+        }
+        case "rtan": {
+          // realtime analyzer
+          break;
+        }
+        default: {
+          console.warn("Unknown message type:", type);
+        }
       }
+    });
 
-      const input = readValues(channelCounts.LINE)
-
-      const channelStrip = {
-        stripA: readValues(channelCounts.LINE, 3),
-        stripB: readValues(channelCounts.LINE),
-        stripC: readValues(channelCounts.LINE),
-        stripD: readValues(channelCounts.LINE),
-        stripE: readValues(channelCounts.LINE)
-      }
-
-      // Metering values for the main mix
-      const mainMixFaders = readValues(channelCounts.LINE)
-
-      // Stereo
-      const fxreturn_strip = {
-        input: readValues(channelCounts.FXRETURN * 2, 8),
-        stripA: readValues(channelCounts.FXRETURN * 2),
-        stripB: readValues(channelCounts.FXRETURN * 2),
-        stripC: readValues(channelCounts.FXRETURN * 2)
-      }
-
-      /**
-       * Aux output meters
-       */
-      const aux_metering = readValues(channelCounts.AUX)
-
-      const aux_chstrip = {
-        stripA: readValues(channelCounts.AUX),
-        stripB: readValues(channelCounts.AUX),
-        stripC: readValues(channelCounts.AUX),
-        stripD: readValues(channelCounts.AUX)
-      }
-
-      const fx_chstrip = {
-        inputs: readValues(channelCounts.FX),
-        stripA: readValues(channelCounts.FX), // eq out
-        stripB: readValues(channelCounts.FX), // comp out
-        stripC: readValues(channelCounts.FX) // outs
-      }
-
-      // Stereo
-      const main = readValues(channelCounts.MAIN * 2)
-      const main_chstrip = {
-        stageA: readValues(channelCounts.MAIN * 2),
-        stageB: readValues(channelCounts.MAIN * 2),
-        stageC: readValues(channelCounts.MAIN * 2),
-        stageD: readValues(channelCounts.MAIN * 2)
-      }
-
-      const result: MeterData = {
-        input,
-        channelStrip,
-        aux_metering,
-        aux_chstrip,
-        mainMixFaders,
-        main_chstrip,
-        main,
-        fx_chstrip,
-        fxreturn_strip
-      }
-
-      onData(result)
-    })
-    UDPserver.on('listening', () => resolve(UDPserver))
-    UDPserver.bind(port)
-  })
+    UDPserver.on("listening", () => {
+      console.log("Listening on port", UDPserver.address().port);
+      resolve(UDPserver);
+    });
+    UDPserver.bind(port);
+  });
 }

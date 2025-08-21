@@ -47,6 +47,6 @@ export enum MessageCode {
      * Linear position of main mix faders and sends
      * Assume the S means short (16)
      */
-    // Meter16
+    Meter16 = 'MS',
     FaderPosition = 'MS'
 }
