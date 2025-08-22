@@ -116,7 +116,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
 	// Now, check that all added elements have a key, and therefore also
 	// have a value as keys are only added on child nodes and value methods
 	for (const [key, value] of Object.entries(root)) {
-		if (!Object.hasOwn(value, ZlibKeySymbol)) {
+		if (!Object.hasOwn(value as object, ZlibKeySymbol)) {
 			console.warn(`[${root[ZlibKeySymbol].join("/")}] finished building, but ${key} did not have a value`);
 		}
 
