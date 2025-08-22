@@ -24,8 +24,9 @@
     "transpile:esm": "swc src -d dist/esm --strip-leading-paths --config-file .swcrc.esm.json --quiet",
     "transpile:cjs": "swc src -d dist/cjs --strip-leading-paths --config-file .swcrc.cjs.json --quiet",
     "transpile": "yarn transpile:esm && yarn transpile:cjs",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint --fix src/**/*.ts",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format --write src/",
     "install": "npm run --silent transpile",
     "test": "sucrase-node test.ts | bunyan",
     "test:debug": "cross-env DEBUG=1 sucrase-node test.ts | bunyan"
@@ -45,17 +46,16 @@
     "queue": "^6"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.0",
     "@eslint/js": "^9.33.0",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.13.3",
     "@types/bunyan": "^1.8.11",
     "@types/node": "^22",
     "cross-env": "^10.0.0",
-    "eslint": "^9.33.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1",
     "sucrase": "^3.35.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript": "^5.9.2"
   }
 }

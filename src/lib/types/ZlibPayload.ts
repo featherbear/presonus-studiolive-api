@@ -5,1187 +5,1186 @@
 
 /* eslint-disable */
 export interface ZlibPayload {
-    id: string;
-    children: ZlibPayloadChildren;
-    shared: Shared;
+	id: string;
+	children: ZlibPayloadChildren;
+	shared: Shared;
 }
-export default ZlibPayload
+export default ZlibPayload;
 
 export interface ZlibPayloadChildren {
-    global: Global;
-    advancedscenefilters: Filters;
-    projectfilters: Filters;
-    permissions: Permissions;
-    presets: Presets;
-    channelfilters: Filters;
-    mastersection: Mastersection;
-    mutegroup: Mutegroup;
-    outputpatchrouter: Outputpatchrouter;
-    networksetup: Networksetup;
-    sdrecorder: Sdrecorder;
-    stageboxsetup: Stageboxsetup;
-    earmixsetup: Earmixsetup;
-    softpower: Softpower;
-    users: Users;
-    line: Line;
-    return: Return;
-    talkback: Talkback;
-    signalgen: Signalgen;
-    aux: Aux;
-    fxbus: Fxbus;
-    fxreturn: Fxreturn;
-    main: Main;
-    geq: Geq;
-    filtergroup: Filtergroup;
-    autofiltergroup: Filtergroup;
-    fx: Fx;
+	global: Global;
+	advancedscenefilters: Filters;
+	projectfilters: Filters;
+	permissions: Permissions;
+	presets: Presets;
+	channelfilters: Filters;
+	mastersection: Mastersection;
+	mutegroup: Mutegroup;
+	outputpatchrouter: Outputpatchrouter;
+	networksetup: Networksetup;
+	sdrecorder: Sdrecorder;
+	stageboxsetup: Stageboxsetup;
+	earmixsetup: Earmixsetup;
+	softpower: Softpower;
+	users: Users;
+	line: Line;
+	return: Return;
+	talkback: Talkback;
+	signalgen: Signalgen;
+	aux: Aux;
+	fxbus: Fxbus;
+	fxreturn: Fxreturn;
+	main: Main;
+	geq: Geq;
+	filtergroup: Filtergroup;
+	autofiltergroup: Filtergroup;
+	fx: Fx;
 }
 
 export interface Filters {
-    values: { [key: string]: number };
+	values: { [key: string]: number };
 }
 
 export interface Filtergroup {
-    children: { [key: string]: AutofiltergroupChild };
+	children: { [key: string]: AutofiltergroupChild };
 }
 
 export interface AutofiltergroupChild {
-    values: PurpleValues;
+	values: PurpleValues;
 }
 
 export interface PurpleValues {
-    name: string;
-    groupnum: string;
-    solo: number;
-    iconid: string;
-    mute: number;
-    mute_aux1: number;
-    mute_aux2: number;
-    mute_aux3: number;
-    mute_aux4: number;
-    mute_aux5: number;
-    mute_aux6: number;
-    mute_aux7: number;
-    mute_aux8: number;
-    mute_aux9: number;
-    mute_aux10: number;
-    mute_aux11: number;
-    mute_aux12: number;
-    mute_aux13: number;
-    mute_aux14: number;
-    mute_aux15: number;
-    mute_aux16: number;
-    mute_aux17: number;
-    mute_aux18: number;
-    mute_aux19: number;
-    mute_aux20: number;
-    mute_aux21: number;
-    mute_aux22: number;
-    mute_aux23: number;
-    mute_aux24: number;
-    mute_aux25: number;
-    mute_aux26: number;
-    mute_aux27: number;
-    mute_aux28: number;
-    mute_aux29: number;
-    mute_aux30: number;
-    mute_aux31: number;
-    mute_aux32: number;
-    mute_fx1: number;
-    mute_fx2: number;
-    mute_fx3: number;
-    mute_fx4: number;
-    mute_fx5: number;
-    mute_fx6: number;
-    mute_fx7: number;
-    mute_fx8: number;
-    volume: number;
-    aux1: number;
-    aux2: number;
-    aux3: number;
-    aux4: number;
-    aux5: number;
-    aux6: number;
-    aux7: number;
-    aux8: number;
-    aux9: number;
-    aux10: number;
-    aux11: number;
-    aux12: number;
-    aux13: number;
-    aux14: number;
-    aux15: number;
-    aux16: number;
-    aux17: number;
-    aux18: number;
-    aux19: number;
-    aux20: number;
-    aux21: number;
-    aux22: number;
-    aux23: number;
-    aux24: number;
-    aux25: number;
-    aux26: number;
-    aux27: number;
-    aux28: number;
-    aux29: number;
-    aux30: number;
-    aux31: number;
-    aux32: number;
-    fx1: number;
-    fx2: number;
-    fx3: number;
-    fx4: number;
-    fx5: number;
-    fx6: number;
-    fx7: number;
-    fx8: number;
-    line1: number;
-    line2: number;
-    line3: number;
-    line4: number;
-    line5: number;
-    line6: number;
-    line7: number;
-    line8: number;
-    line9: number;
-    line10: number;
-    line11: number;
-    line12: number;
-    line13: number;
-    line14: number;
-    line15: number;
-    line16: number;
-    line17: number;
-    line18: number;
-    line19: number;
-    line20: number;
-    line21: number;
-    line22: number;
-    line23: number;
-    line24: number;
-    line25: number;
-    line26: number;
-    line27: number;
-    line28: number;
-    line29: number;
-    line30: number;
-    line31: number;
-    line32: number;
-    line33: number;
-    line34: number;
-    line35: number;
-    line36: number;
-    line37: number;
-    line38: number;
-    line39: number;
-    line40: number;
-    line41: number;
-    line42: number;
-    line43: number;
-    line44: number;
-    line45: number;
-    line46: number;
-    line47: number;
-    line48: number;
-    line49: number;
-    line50: number;
-    line51: number;
-    line52: number;
-    line53: number;
-    line54: number;
-    line55: number;
-    line56: number;
-    line57: number;
-    line58: number;
-    line59: number;
-    line60: number;
-    line61: number;
-    line62: number;
-    line63: number;
-    line64: number;
-    fxreturn1: number;
-    fxreturn2: number;
-    fxreturn3: number;
-    fxreturn4: number;
-    fxreturn5: number;
-    fxreturn6: number;
-    fxreturn7: number;
-    fxreturn8: number;
-    return1: number;
-    return2: number;
-    return3: number;
-    return4: number;
+	name: string;
+	groupnum: string;
+	solo: number;
+	iconid: string;
+	mute: number;
+	mute_aux1: number;
+	mute_aux2: number;
+	mute_aux3: number;
+	mute_aux4: number;
+	mute_aux5: number;
+	mute_aux6: number;
+	mute_aux7: number;
+	mute_aux8: number;
+	mute_aux9: number;
+	mute_aux10: number;
+	mute_aux11: number;
+	mute_aux12: number;
+	mute_aux13: number;
+	mute_aux14: number;
+	mute_aux15: number;
+	mute_aux16: number;
+	mute_aux17: number;
+	mute_aux18: number;
+	mute_aux19: number;
+	mute_aux20: number;
+	mute_aux21: number;
+	mute_aux22: number;
+	mute_aux23: number;
+	mute_aux24: number;
+	mute_aux25: number;
+	mute_aux26: number;
+	mute_aux27: number;
+	mute_aux28: number;
+	mute_aux29: number;
+	mute_aux30: number;
+	mute_aux31: number;
+	mute_aux32: number;
+	mute_fx1: number;
+	mute_fx2: number;
+	mute_fx3: number;
+	mute_fx4: number;
+	mute_fx5: number;
+	mute_fx6: number;
+	mute_fx7: number;
+	mute_fx8: number;
+	volume: number;
+	aux1: number;
+	aux2: number;
+	aux3: number;
+	aux4: number;
+	aux5: number;
+	aux6: number;
+	aux7: number;
+	aux8: number;
+	aux9: number;
+	aux10: number;
+	aux11: number;
+	aux12: number;
+	aux13: number;
+	aux14: number;
+	aux15: number;
+	aux16: number;
+	aux17: number;
+	aux18: number;
+	aux19: number;
+	aux20: number;
+	aux21: number;
+	aux22: number;
+	aux23: number;
+	aux24: number;
+	aux25: number;
+	aux26: number;
+	aux27: number;
+	aux28: number;
+	aux29: number;
+	aux30: number;
+	aux31: number;
+	aux32: number;
+	fx1: number;
+	fx2: number;
+	fx3: number;
+	fx4: number;
+	fx5: number;
+	fx6: number;
+	fx7: number;
+	fx8: number;
+	line1: number;
+	line2: number;
+	line3: number;
+	line4: number;
+	line5: number;
+	line6: number;
+	line7: number;
+	line8: number;
+	line9: number;
+	line10: number;
+	line11: number;
+	line12: number;
+	line13: number;
+	line14: number;
+	line15: number;
+	line16: number;
+	line17: number;
+	line18: number;
+	line19: number;
+	line20: number;
+	line21: number;
+	line22: number;
+	line23: number;
+	line24: number;
+	line25: number;
+	line26: number;
+	line27: number;
+	line28: number;
+	line29: number;
+	line30: number;
+	line31: number;
+	line32: number;
+	line33: number;
+	line34: number;
+	line35: number;
+	line36: number;
+	line37: number;
+	line38: number;
+	line39: number;
+	line40: number;
+	line41: number;
+	line42: number;
+	line43: number;
+	line44: number;
+	line45: number;
+	line46: number;
+	line47: number;
+	line48: number;
+	line49: number;
+	line50: number;
+	line51: number;
+	line52: number;
+	line53: number;
+	line54: number;
+	line55: number;
+	line56: number;
+	line57: number;
+	line58: number;
+	line59: number;
+	line60: number;
+	line61: number;
+	line62: number;
+	line63: number;
+	line64: number;
+	fxreturn1: number;
+	fxreturn2: number;
+	fxreturn3: number;
+	fxreturn4: number;
+	fxreturn5: number;
+	fxreturn6: number;
+	fxreturn7: number;
+	fxreturn8: number;
+	return1: number;
+	return2: number;
+	return3: number;
+	return4: number;
 }
 
 export interface Aux {
-    children: { [key: string]: AuxChild };
+	children: { [key: string]: AuxChild };
 }
 
 export interface AuxChild {
-    values: FluffyValues;
-    strings: PurpleStrings;
-    ranges: { [key: string]: Range };
-    states: PurpleStates;
-    children: PurpleChildren;
+	values: FluffyValues;
+	strings: PurpleStrings;
+	ranges: { [key: string]: Range };
+	states: PurpleStates;
+	children: PurpleChildren;
 }
 
 export interface PurpleChildren {
-    opt: Opt;
-    filter?: Filter;
-    comp: PurpleComp;
-    eq: PurpleEq;
-    limit: Limit;
-    linkoptions: Linkoptions;
+	opt: Opt;
+	filter?: Filter;
+	comp: PurpleComp;
+	eq: PurpleEq;
+	limit: Limit;
+	linkoptions: Linkoptions;
 }
 
 export interface PurpleComp {
-    classId: CompClassID;
-    values: { [key: string]: number };
+	classId: CompClassID;
+	values: { [key: string]: number };
 }
 
 export enum CompClassID {
-    The870D04F7212E4F9CAdbb39A97216433F = '{870D04F7-212E-4F9C-ADBB-39A97216433F}',
+	The870D04F7212E4F9CAdbb39A97216433F = "{870D04F7-212E-4F9C-ADBB-39A97216433F}",
 }
 
 export interface PurpleEq {
-    classId: string;
-    values: { [key: string]: number };
+	classId: string;
+	values: { [key: string]: number };
 }
 
 export interface Filter {
-    values: FilterValues;
+	values: FilterValues;
 }
 
 export interface FilterValues {
-    hpf: number;
+	hpf: number;
 }
 
 export interface Limit {
-    values: LimitValues;
+	values: LimitValues;
 }
 
 export interface LimitValues {
-    limiteron: number;
-    threshold: number;
-    reduction: number;
+	limiteron: number;
+	threshold: number;
+	reduction: number;
 }
 
 export interface Linkoptions {
-    values: LinkoptionsValues;
+	values: LinkoptionsValues;
 }
 
 export interface LinkoptionsValues {
-    ch_gain: number;
-    pan: number;
-    fader: number;
-    dyn: number;
-    ch_name: number;
-    ins_fx: number;
+	ch_gain: number;
+	pan: number;
+	fader: number;
+	dyn: number;
+	ch_name: number;
+	ins_fx: number;
 }
 
 export interface Opt {
-    values: OptValues;
-    strings: OptStrings;
+	values: OptValues;
+	strings: OptStrings;
 }
 
 export interface OptStrings {
-    eqmodel: number;
-    compmodel: number;
+	eqmodel: number;
+	compmodel: number;
 }
 
 export interface OptValues {
-    eqmodel: number;
-    compmodel: number;
-    swapcompeq: number;
+	eqmodel: number;
+	compmodel: number;
+	swapcompeq: number;
 }
 
 export interface Range {
-    min: number;
-    max: number;
-    def: number;
-    units?: PurpleUnits;
+	min: number;
+	max: number;
+	def: number;
+	units?: PurpleUnits;
 }
 
 export enum PurpleUnits {
-    AnalogSource = 'analog_source',
-    Avbnum = 'avbnum',
-    DigitalSource = 'digital_source',
-    Usbnum = 'usbnum',
+	AnalogSource = "analog_source",
+	Avbnum = "avbnum",
+	DigitalSource = "digital_source",
+	Usbnum = "usbnum",
 }
 
 export interface PurpleStates {
-    monolevel: number;
-    centerdiv: number;
-    adc_src: number;
-    usb_src: number;
+	monolevel: number;
+	centerdiv: number;
+	adc_src: number;
+	usb_src: number;
 }
 
 export interface PurpleStrings {
-    auxpremode: number;
-    busmode: number;
-    bussrc: number;
+	auxpremode: number;
+	busmode: number;
+	bussrc: number;
 }
 
 export interface FluffyValues {
-    chnum: string;
-    name: string;
-    username: string;
-    color: number;
-    select: number;
-    solo?: number;
-    volume: number;
-    mute: number;
-    pan: number;
-    stereopan: number;
-    panlinkstate: number;
-    link: number;
-    linkmaster: number;
-    dawpostdsp: number;
-    memab: number;
-    iconid: string;
-    rta_active: number;
-    rta_pre: number;
-    assign_aux1: number;
-    assign_aux2: number;
-    assign_aux3: number;
-    assign_aux4: number;
-    assign_aux5: number;
-    assign_aux6: number;
-    assign_aux7: number;
-    assign_aux8: number;
-    assign_aux9: number;
-    assign_aux10: number;
-    assign_aux11: number;
-    assign_aux12: number;
-    assign_aux13: number;
-    assign_aux14: number;
-    assign_aux15: number;
-    assign_aux16: number;
-    assign_aux17: number;
-    assign_aux18: number;
-    assign_aux19: number;
-    assign_aux20: number;
-    assign_aux21: number;
-    assign_aux22: number;
-    assign_aux23: number;
-    assign_aux24: number;
-    assign_aux25: number;
-    assign_aux26: number;
-    assign_aux27: number;
-    assign_aux28: number;
-    assign_aux29: number;
-    assign_aux30: number;
-    assign_aux31: number;
-    assign_aux32: number;
-    aux1: number;
-    aux2: number;
-    aux3: number;
-    aux4: number;
-    aux5: number;
-    aux6: number;
-    aux7: number;
-    aux8: number;
-    aux9: number;
-    aux10: number;
-    aux11: number;
-    aux12: number;
-    aux13: number;
-    aux14: number;
-    aux15: number;
-    aux16: number;
-    aux17: number;
-    aux18: number;
-    aux19: number;
-    aux20: number;
-    aux21: number;
-    aux22: number;
-    aux23: number;
-    aux24: number;
-    aux25: number;
-    aux26: number;
-    aux27: number;
-    aux28: number;
-    aux29: number;
-    aux30: number;
-    aux31: number;
-    aux32: number;
-    aux12_pan: number;
-    aux34_pan: number;
-    aux56_pan: number;
-    aux78_pan: number;
-    aux910_pan: number;
-    aux1112_pan: number;
-    aux1314_pan: number;
-    aux1516_pan: number;
-    aux1718_pan: number;
-    aux1920_pan: number;
-    aux2122_pan: number;
-    aux2324_pan: number;
-    aux2526_pan: number;
-    aux2728_pan: number;
-    aux2930_pan: number;
-    aux3132_pan: number;
-    aux12_stpan: number;
-    aux34_stpan: number;
-    aux56_stpan: number;
-    aux78_stpan: number;
-    aux910_stpan: number;
-    aux1112_stpan: number;
-    aux1314_stpan: number;
-    aux1516_stpan: number;
-    aux1718_stpan: number;
-    aux1920_stpan: number;
-    aux2122_stpan: number;
-    aux2324_stpan: number;
-    aux2526_stpan: number;
-    aux2728_stpan: number;
-    aux2930_stpan: number;
-    aux3132_stpan: number;
-    mono: number;
-    monolevel: number;
-    centerdiv: number;
-    insertslot: number;
-    insertprepost: number;
-    adc_src?: number;
-    avb_src: number;
-    usb_src: number;
-    sd_src: number;
-    adc_src2?: number;
-    avb_src2: number;
-    usb_src2: number;
-    sd_src2: number;
-    auxpremode?: number;
-    busmode?: number;
-    busdelay?: number;
-    lr_assign?: number;
-    bussrc?: number;
-    lr?: number;
-    sub1?: number;
-    sub2?: number;
-    sub3?: number;
-    sub4?: number;
-    assign_fx1?: number;
-    assign_fx2?: number;
-    assign_fx3?: number;
-    assign_fx4?: number;
-    assign_fx5?: number;
-    assign_fx6?: number;
-    assign_fx7?: number;
-    assign_fx8?: number;
-    FXA?: number;
-    FXB?: number;
-    FXC?: number;
-    FXD?: number;
-    FXE?: number;
-    FXF?: number;
-    FXG?: number;
-    FXH?: number;
-    inputsrc?: number;
-    inputsrc_preview?: number;
-    delay?: number;
-    flexassignflags?: number;
-    preampactive?: number;
-    remotepreactive?: number;
-    remotepreperm?: number;
-    diggainactive?: number;
-    gaincompavail?: number;
-    '48v'?: number;
-    polarity?: number;
-    preampgain?: number;
-    digitalgain?: number;
-    preampmode?: number;
-    '10db_boost'?: number;
-    clip?: number;
-    gatekeysrc?: number;
-    compkeysrc?: number;
-    digsendsrc?: number;
-    gaincomp?: number;
-    trim?: number;
+	chnum: string;
+	name: string;
+	username: string;
+	color: number;
+	select: number;
+	solo?: number;
+	volume: number;
+	mute: number;
+	pan: number;
+	stereopan: number;
+	panlinkstate: number;
+	link: number;
+	linkmaster: number;
+	dawpostdsp: number;
+	memab: number;
+	iconid: string;
+	rta_active: number;
+	rta_pre: number;
+	assign_aux1: number;
+	assign_aux2: number;
+	assign_aux3: number;
+	assign_aux4: number;
+	assign_aux5: number;
+	assign_aux6: number;
+	assign_aux7: number;
+	assign_aux8: number;
+	assign_aux9: number;
+	assign_aux10: number;
+	assign_aux11: number;
+	assign_aux12: number;
+	assign_aux13: number;
+	assign_aux14: number;
+	assign_aux15: number;
+	assign_aux16: number;
+	assign_aux17: number;
+	assign_aux18: number;
+	assign_aux19: number;
+	assign_aux20: number;
+	assign_aux21: number;
+	assign_aux22: number;
+	assign_aux23: number;
+	assign_aux24: number;
+	assign_aux25: number;
+	assign_aux26: number;
+	assign_aux27: number;
+	assign_aux28: number;
+	assign_aux29: number;
+	assign_aux30: number;
+	assign_aux31: number;
+	assign_aux32: number;
+	aux1: number;
+	aux2: number;
+	aux3: number;
+	aux4: number;
+	aux5: number;
+	aux6: number;
+	aux7: number;
+	aux8: number;
+	aux9: number;
+	aux10: number;
+	aux11: number;
+	aux12: number;
+	aux13: number;
+	aux14: number;
+	aux15: number;
+	aux16: number;
+	aux17: number;
+	aux18: number;
+	aux19: number;
+	aux20: number;
+	aux21: number;
+	aux22: number;
+	aux23: number;
+	aux24: number;
+	aux25: number;
+	aux26: number;
+	aux27: number;
+	aux28: number;
+	aux29: number;
+	aux30: number;
+	aux31: number;
+	aux32: number;
+	aux12_pan: number;
+	aux34_pan: number;
+	aux56_pan: number;
+	aux78_pan: number;
+	aux910_pan: number;
+	aux1112_pan: number;
+	aux1314_pan: number;
+	aux1516_pan: number;
+	aux1718_pan: number;
+	aux1920_pan: number;
+	aux2122_pan: number;
+	aux2324_pan: number;
+	aux2526_pan: number;
+	aux2728_pan: number;
+	aux2930_pan: number;
+	aux3132_pan: number;
+	aux12_stpan: number;
+	aux34_stpan: number;
+	aux56_stpan: number;
+	aux78_stpan: number;
+	aux910_stpan: number;
+	aux1112_stpan: number;
+	aux1314_stpan: number;
+	aux1516_stpan: number;
+	aux1718_stpan: number;
+	aux1920_stpan: number;
+	aux2122_stpan: number;
+	aux2324_stpan: number;
+	aux2526_stpan: number;
+	aux2728_stpan: number;
+	aux2930_stpan: number;
+	aux3132_stpan: number;
+	mono: number;
+	monolevel: number;
+	centerdiv: number;
+	insertslot: number;
+	insertprepost: number;
+	adc_src?: number;
+	avb_src: number;
+	usb_src: number;
+	sd_src: number;
+	adc_src2?: number;
+	avb_src2: number;
+	usb_src2: number;
+	sd_src2: number;
+	auxpremode?: number;
+	busmode?: number;
+	busdelay?: number;
+	lr_assign?: number;
+	bussrc?: number;
+	lr?: number;
+	sub1?: number;
+	sub2?: number;
+	sub3?: number;
+	sub4?: number;
+	assign_fx1?: number;
+	assign_fx2?: number;
+	assign_fx3?: number;
+	assign_fx4?: number;
+	assign_fx5?: number;
+	assign_fx6?: number;
+	assign_fx7?: number;
+	assign_fx8?: number;
+	FXA?: number;
+	FXB?: number;
+	FXC?: number;
+	FXD?: number;
+	FXE?: number;
+	FXF?: number;
+	FXG?: number;
+	FXH?: number;
+	inputsrc?: number;
+	inputsrc_preview?: number;
+	delay?: number;
+	flexassignflags?: number;
+	preampactive?: number;
+	remotepreactive?: number;
+	remotepreperm?: number;
+	diggainactive?: number;
+	gaincompavail?: number;
+	"48v"?: number;
+	polarity?: number;
+	preampgain?: number;
+	digitalgain?: number;
+	preampmode?: number;
+	"10db_boost"?: number;
+	clip?: number;
+	gatekeysrc?: number;
+	compkeysrc?: number;
+	digsendsrc?: number;
+	gaincomp?: number;
+	trim?: number;
 }
 
 export interface Earmixsetup {
-    values: EarmixsetupValues;
-    strings: EarmixsetupStrings;
+	values: EarmixsetupValues;
+	strings: EarmixsetupStrings;
 }
 
 export interface EarmixsetupStrings {
-    mixerlist: any[];
+	mixerlist: any[];
 }
 
 export interface EarmixsetupValues {
-    mixerlist: number;
-    selected_name: string;
-    identify: number;
-    apply: number;
-    apply_all: number;
-    inputroute_1_8: number;
-    inputroute_9_16: number;
+	mixerlist: number;
+	selected_name: string;
+	identify: number;
+	apply: number;
+	apply_all: number;
+	inputroute_1_8: number;
+	inputroute_9_16: number;
 }
 
 export interface Fx {
-    children: { [key: string]: FxChild };
+	children: { [key: string]: FxChild };
 }
 
 export interface FxChild {
-    values: TentacledValues;
-    strings: FluffyStrings;
-    children: FluffyChildren;
+	values: TentacledValues;
+	strings: FluffyStrings;
+	children: FluffyChildren;
 }
 
 export interface FluffyChildren {
-    plugin: Plugin;
+	plugin: Plugin;
 }
 
 export interface Plugin {
-    classId: string;
-    values: PluginValues;
+	classId: string;
+	values: PluginValues;
 }
 
 export interface PluginValues {
-    type: number;
-    predelay: number;
-    diffusion?: number;
-    reflection: number;
-    lpf: number;
-    lfdamp_freq: number;
-    lfdamp_gain: number;
-    size?: number;
+	type: number;
+	predelay: number;
+	diffusion?: number;
+	reflection: number;
+	lpf: number;
+	lfdamp_freq: number;
+	lfdamp_gain: number;
+	size?: number;
 }
 
 export interface FluffyStrings {
-    type: number;
+	type: number;
 }
 
 export interface TentacledValues {
-    type: number;
-    pluginstate: string;
+	type: number;
+	pluginstate: string;
 }
 
 export interface Fxbus {
-    children: { [key: string]: FxbusChild };
+	children: { [key: string]: FxbusChild };
 }
 
 export interface FxbusChild {
-    values: StickyValues;
-    strings: TentacledStrings;
-    states: FluffyStates;
-    children: TentacledChildren;
+	values: StickyValues;
+	strings: TentacledStrings;
+	states: FluffyStates;
+	children: TentacledChildren;
 }
 
 export interface TentacledChildren {
-    opt: Opt;
-    comp: PurpleComp;
-    eq: FluffyEq;
-    limit?: Limit;
+	opt: Opt;
+	comp: PurpleComp;
+	eq: FluffyEq;
+	limit?: Limit;
 }
 
 export interface FluffyEq {
-    classId: EqClassID;
-    values: { [key: string]: number };
+	classId: EqClassID;
+	values: { [key: string]: number };
 }
 
 export enum EqClassID {
-    A0A8A06814F04B04Bb6FAf8329D0E8Ee = '{A0A8A068-14F0-4B04-BB6F-AF8329D0E8EE}',
+	A0A8A06814F04B04Bb6FAf8329D0E8Ee = "{A0A8A068-14F0-4B04-BB6F-AF8329D0E8EE}",
 }
 
 export interface FluffyStates {
-    link: number;
+	link: number;
 }
 
 export interface TentacledStrings {
-    auxpremode: number;
-    busmode: number;
+	auxpremode: number;
+	busmode: number;
 }
 
 export interface StickyValues {
-    chnum: string;
-    name: string;
-    username: string;
-    color: number;
-    select: number;
-    volume: number;
-    mute: number;
-    pan: number;
-    stereopan: number;
-    panlinkstate: number;
-    link: number;
-    linkmaster: number;
-    memab: number;
-    iconid: string;
-    rta_active: number;
-    rta_pre: number;
-    auxpremode: number;
-    busmode: number;
-    busdelay: number;
+	chnum: string;
+	name: string;
+	username: string;
+	color: number;
+	select: number;
+	volume: number;
+	mute: number;
+	pan: number;
+	stereopan: number;
+	panlinkstate: number;
+	link: number;
+	linkmaster: number;
+	memab: number;
+	iconid: string;
+	rta_active: number;
+	rta_pre: number;
+	auxpremode: number;
+	busmode: number;
+	busdelay: number;
 }
 
 export interface Fxreturn {
-    children: { [key: string]: FxreturnChild };
+	children: { [key: string]: FxreturnChild };
 }
 
 export interface FxreturnChild {
-    values: FluffyValues;
-    strings: StickyStrings;
-    ranges: PurpleRanges;
-    states: { [key: string]: number };
-    children: TentacledChildren;
+	values: FluffyValues;
+	strings: StickyStrings;
+	ranges: PurpleRanges;
+	states: { [key: string]: number };
+	children: TentacledChildren;
 }
 
 export interface PurpleRanges {
-    adc_src?: Range;
-    avb_src: Range;
-    usb_src: Range;
-    sd_src: Range;
-    adc_src2?: Range;
-    avb_src2: Range;
-    usb_src2: Range;
-    sd_src2: Range;
-    inputsrc?: Range;
-    preampgain?: Preampgain;
+	adc_src?: Range;
+	avb_src: Range;
+	usb_src: Range;
+	sd_src: Range;
+	adc_src2?: Range;
+	avb_src2: Range;
+	usb_src2: Range;
+	sd_src2: Range;
+	inputsrc?: Range;
+	preampgain?: Preampgain;
 }
 
 export interface Preampgain {
-    min: number;
-    max: number;
-    def: number;
-    units: PreampgainUnits;
-    curve: Curve;
-    mid: number;
+	min: number;
+	max: number;
+	def: number;
+	units: PreampgainUnits;
+	curve: Curve;
+	mid: number;
 }
 
 export enum Curve {
-    Linear = 'linear',
+	Linear = "linear",
 }
 
 export enum PreampgainUnits {
-    Gain0 = 'gain.0',
+	Gain0 = "gain.0",
 }
 
 export interface StickyStrings {
-    inputsrc: number;
+	inputsrc: number;
 }
 
 export interface Geq {
-    children: { [key: string]: GeqChild };
+	children: { [key: string]: GeqChild };
 }
 
 export interface GeqChild {
-    values: { [key: string]: number };
-    strings: IndigoStrings;
-    ranges: ChildRanges;
+	values: { [key: string]: number };
+	strings: IndigoStrings;
+	ranges: ChildRanges;
 }
 
 export interface ChildRanges {
-    source: Range;
+	source: Range;
 }
 
 export interface IndigoStrings {
-    source: number;
+	source: number;
 }
 
 export interface Global {
-    values: GlobalValues;
-    strings: GlobalStrings;
+	values: GlobalValues;
+	strings: GlobalStrings;
 }
 
 export interface GlobalStrings {
-    sd_assignable_source: string[];
+	sd_assignable_source: string[];
 }
 
 export interface GlobalValues {
-    identify: number;
-    stagebox_mode: number;
-    dcamode: number;
-    panmode: number;
-    mixer_name: string;
-    devicename: string;
-    mixer_version: string;
-    mixer_version_date: string;
-    mixer_serial: string;
-    registered_user: string;
-    progress_text1: string;
-    progress_text2: string;
-    progress_percent: number;
-    samplerate: number;
-    showPeakHold: number;
-    ledbrightness: number;
-    scribblebrightness: number;
-    lcdbrightness: number;
-    auxmutemode: number;
-    rta_active: number;
-    rta_pre: number;
-    sd_assignable_source: number;
-    usb_assignable_source: number;
-    fltrname: number;
-    fltrmute: number;
-    fltrfx: number;
-    fltreqdynins: number;
-    fltreqdynouts: number;
-    fltraux: number;
-    fltrassign: number;
-    fltrpreamps: number;
-    fltrfader: number;
-    fltrgeq: number;
-    fltrdcagrp: number;
-    fltr48v: number;
-    fltrmutegroups: number;
-    fltruser: number;
-    fltrpatch: number;
-    scene_safe_ins_1_32: number;
-    scene_safe_ins_33_64: number;
-    soft_power_logout: number;
-    last_logged_in_profile_index: number;
-    bus_level_limit: number;
-    if_mode: number;
+	identify: number;
+	stagebox_mode: number;
+	dcamode: number;
+	panmode: number;
+	mixer_name: string;
+	devicename: string;
+	mixer_version: string;
+	mixer_version_date: string;
+	mixer_serial: string;
+	registered_user: string;
+	progress_text1: string;
+	progress_text2: string;
+	progress_percent: number;
+	samplerate: number;
+	showPeakHold: number;
+	ledbrightness: number;
+	scribblebrightness: number;
+	lcdbrightness: number;
+	auxmutemode: number;
+	rta_active: number;
+	rta_pre: number;
+	sd_assignable_source: number;
+	usb_assignable_source: number;
+	fltrname: number;
+	fltrmute: number;
+	fltrfx: number;
+	fltreqdynins: number;
+	fltreqdynouts: number;
+	fltraux: number;
+	fltrassign: number;
+	fltrpreamps: number;
+	fltrfader: number;
+	fltrgeq: number;
+	fltrdcagrp: number;
+	fltr48v: number;
+	fltrmutegroups: number;
+	fltruser: number;
+	fltrpatch: number;
+	scene_safe_ins_1_32: number;
+	scene_safe_ins_33_64: number;
+	soft_power_logout: number;
+	last_logged_in_profile_index: number;
+	bus_level_limit: number;
+	if_mode: number;
 }
 
 export interface Line {
-    children: LineChildren;
+	children: LineChildren;
 }
 
 export interface LineChildren {
-    ch1: PurpleCh1;
-    ch2: Ch10;
-    ch3: Ch10;
-    ch4: Ch10;
-    ch5: Ch10;
-    ch6: Ch10;
-    ch7: Ch10;
-    ch8: Ch10;
-    ch9: Ch10;
-    ch10: Ch10;
-    ch11: Ch10;
-    ch12: Ch10;
-    ch13: Ch10;
-    ch14: Ch10;
-    ch15: Ch10;
-    ch16: Ch10;
+	ch1: PurpleCh1;
+	ch2: Ch10;
+	ch3: Ch10;
+	ch4: Ch10;
+	ch5: Ch10;
+	ch6: Ch10;
+	ch7: Ch10;
+	ch8: Ch10;
+	ch9: Ch10;
+	ch10: Ch10;
+	ch11: Ch10;
+	ch12: Ch10;
+	ch13: Ch10;
+	ch14: Ch10;
+	ch15: Ch10;
+	ch16: Ch10;
 }
 
 export interface PurpleCh1 {
-    values: FluffyValues;
-    strings: IndecentStrings;
-    ranges: PurpleRanges;
-    children: StickyChildren;
+	values: FluffyValues;
+	strings: IndecentStrings;
+	ranges: PurpleRanges;
+	children: StickyChildren;
 }
 
 export interface StickyChildren {
-    opt: Opt;
-    filter: Filter;
-    gate: Gate;
-    comp: FluffyComp;
-    eq: FluffyEq;
-    limit: Limit;
-    linkoptions: Linkoptions;
+	opt: Opt;
+	filter: Filter;
+	gate: Gate;
+	comp: FluffyComp;
+	eq: FluffyEq;
+	limit: Limit;
+	linkoptions: Linkoptions;
 }
 
 export interface FluffyComp {
-    classId: string;
-    values: CompValues;
+	classId: string;
+	values: CompValues;
 }
 
 export interface CompValues {
-    on: number;
-    mode: number;
-    gain: number;
-    peak: number;
-    reduction: number;
-    keyfilter: number;
-    keylisten: number;
+	on: number;
+	mode: number;
+	gain: number;
+	peak: number;
+	reduction: number;
+	keyfilter: number;
+	keylisten: number;
 }
 
 export interface Gate {
-    values: GateValues;
+	values: GateValues;
 }
 
 export interface GateValues {
-    on: number;
-    keylisten: number;
-    expander: number;
-    keyfilter: number;
-    threshold: number;
-    range: number;
-    attack: number;
-    release: number;
-    ratio: number;
-    reduction: number;
+	on: number;
+	keylisten: number;
+	expander: number;
+	keyfilter: number;
+	threshold: number;
+	range: number;
+	attack: number;
+	release: number;
+	ratio: number;
+	reduction: number;
 }
 
 export interface IndecentStrings {
-    inputsrc: number;
-    gatekeysrc: number;
-    compkeysrc: number;
+	inputsrc: number;
+	gatekeysrc: number;
+	compkeysrc: number;
 }
 
 export interface Ch10 {
-    values: FluffyValues;
-    strings: IndecentStrings;
-    ranges: PurpleRanges;
-    children: IndigoChildren;
+	values: FluffyValues;
+	strings: IndecentStrings;
+	ranges: PurpleRanges;
+	children: IndigoChildren;
 }
 
 export interface IndigoChildren {
-    opt: Opt;
-    filter: Filter;
-    gate: Gate;
-    comp: PurpleComp;
-    eq: FluffyEq;
-    limit: Limit;
-    linkoptions: Linkoptions;
+	opt: Opt;
+	filter: Filter;
+	gate: Gate;
+	comp: PurpleComp;
+	eq: FluffyEq;
+	limit: Limit;
+	linkoptions: Linkoptions;
 }
 
 export interface Main {
-    children: MainChildren;
+	children: MainChildren;
 }
 
 export interface MainChildren {
-    ch1: FluffyCh1;
+	ch1: FluffyCh1;
 }
 
 export interface FluffyCh1 {
-    values: FluffyValues;
-    strings: PurpleStrings;
-    ranges: { [key: string]: Range };
-    states: { [key: string]: number };
-    children: PurpleChildren;
+	values: FluffyValues;
+	strings: PurpleStrings;
+	ranges: { [key: string]: Range };
+	states: { [key: string]: number };
+	children: PurpleChildren;
 }
 
 export interface Mastersection {
-    values: { [key: string]: number };
-    strings: MastersectionStrings;
-    states: MastersectionStates;
+	values: { [key: string]: number };
+	strings: MastersectionStrings;
+	states: MastersectionStates;
 }
 
 export interface MastersectionStates {
-    anysolo: number;
-    solo_selects: number;
+	anysolo: number;
+	solo_selects: number;
 }
 
 export interface MastersectionStrings {
-    mon_list: string[];
-    phones_list: string[];
+	mon_list: string[];
+	phones_list: string[];
 }
 
 export interface Mutegroup {
-    values: MutegroupValues;
+	values: MutegroupValues;
 }
 
 export interface MutegroupValues {
-    allon: number;
-    alloff: number;
-    mutegroup1: number;
-    mutegroup2: number;
-    mutegroup3: number;
-    mutegroup4: number;
-    mutegroup5: number;
-    mutegroup6: number;
-    mutegroup7: number;
-    mutegroup8: number;
-    mutegroup1username: string;
-    mutegroup2username: string;
-    mutegroup3username: string;
-    mutegroup4username: string;
-    mutegroup5username: string;
-    mutegroup6username: string;
-    mutegroup7username: string;
-    mutegroup8username: string;
-    mutegroup1mutes: string;
-    mutegroup2mutes: string;
-    mutegroup3mutes: string;
-    mutegroup4mutes: string;
-    mutegroup5mutes: string;
-    mutegroup6mutes: string;
-    mutegroup7mutes: string;
-    mutegroup8mutes: string;
+	allon: number;
+	alloff: number;
+	mutegroup1: number;
+	mutegroup2: number;
+	mutegroup3: number;
+	mutegroup4: number;
+	mutegroup5: number;
+	mutegroup6: number;
+	mutegroup7: number;
+	mutegroup8: number;
+	mutegroup1username: string;
+	mutegroup2username: string;
+	mutegroup3username: string;
+	mutegroup4username: string;
+	mutegroup5username: string;
+	mutegroup6username: string;
+	mutegroup7username: string;
+	mutegroup8username: string;
+	mutegroup1mutes: string;
+	mutegroup2mutes: string;
+	mutegroup3mutes: string;
+	mutegroup4mutes: string;
+	mutegroup5mutes: string;
+	mutegroup6mutes: string;
+	mutegroup7mutes: string;
+	mutegroup8mutes: string;
 }
 
 export interface Networksetup {
-    values: NetworksetupValues;
-    strings: NetworksetupStrings;
+	values: NetworksetupValues;
+	strings: NetworksetupStrings;
 }
 
 export interface NetworksetupStrings {
-    networklist: number;
+	networklist: number;
 }
 
 export interface NetworksetupValues {
-    ipaddress: string;
-    subnet: string;
-    gateway: string;
-    assignmode: number;
-    refresh: number;
-    setupactivity: number;
-    status: string;
-    scan: number;
-    networklist: number;
-    signalstrength: number;
+	ipaddress: string;
+	subnet: string;
+	gateway: string;
+	assignmode: number;
+	refresh: number;
+	setupactivity: number;
+	status: string;
+	scan: number;
+	networklist: number;
+	signalstrength: number;
 }
 
 export interface Outputpatchrouter {
-    values: { [key: string]: number };
-    ranges: { [key: string]: Range };
+	values: { [key: string]: number };
+	ranges: { [key: string]: Range };
 }
 
 export interface Permissions {
-    values: PermissionsValues;
-    strings: PermissionsStrings;
+	values: PermissionsValues;
+	strings: PermissionsStrings;
 }
 
 export interface PermissionsStrings {
-    device_list: any[];
-    mix_permissions: string[];
+	device_list: any[];
+	mix_permissions: string[];
 }
 
 export interface PermissionsValues {
-    device_list: number;
-    mix_permissions: number;
-    access_code: string;
-    wheel_only: number;
-    rename: number;
-    channel_source: number;
-    preamps: number;
-    assigns: number;
-    scenes: number;
-    mute_groups: number;
-    channel_type: number;
-    eq_dyn: number;
-    geq: number;
-    fx: number;
-    groups: number;
+	device_list: number;
+	mix_permissions: number;
+	access_code: string;
+	wheel_only: number;
+	rename: number;
+	channel_source: number;
+	preamps: number;
+	assigns: number;
+	scenes: number;
+	mute_groups: number;
+	channel_type: number;
+	eq_dyn: number;
+	geq: number;
+	fx: number;
+	groups: number;
 }
 
 export interface Presets {
-    values: PresetsValues;
+	values: PresetsValues;
 }
 
 export interface PresetsValues {
-    isProjectLoaded: number;
-    isSceneLoaded: number;
-    loaded_scene_name: string;
-    loaded_scene_title: string;
-    loading_scene: number;
-    loaded_project_name: string;
-    loaded_project_title: string;
-    diskusage: number;
-    storedisabled: number;
+	isProjectLoaded: number;
+	isSceneLoaded: number;
+	loaded_scene_name: string;
+	loaded_scene_title: string;
+	loading_scene: number;
+	loaded_project_name: string;
+	loaded_project_title: string;
+	diskusage: number;
+	storedisabled: number;
 }
 
 export interface Return {
-    children: ReturnChildren;
+	children: ReturnChildren;
 }
 
 export interface ReturnChildren {
-    ch1: TentacledCh1;
+	ch1: TentacledCh1;
 }
 
 export interface TentacledCh1 {
-    values: FluffyValues;
-    strings: StickyStrings;
-    ranges: PurpleRanges;
-    states: TentacledStates;
-    children: TentacledChildren;
+	values: FluffyValues;
+	strings: StickyStrings;
+	ranges: PurpleRanges;
+	states: TentacledStates;
+	children: TentacledChildren;
 }
 
 export interface TentacledStates {
-    panlinkstate: number;
-    link: number;
+	panlinkstate: number;
+	link: number;
 }
 
 export interface Sdrecorder {
-    values: SdrecorderValues;
-    children: SdrecorderChildren;
+	values: SdrecorderValues;
+	children: SdrecorderChildren;
 }
 
 export interface SdrecorderChildren {
-    transport: Transport;
-    session: Session;
-    sdcard: Sdcard;
+	transport: Transport;
+	session: Session;
+	sdcard: Sdcard;
 }
 
 export interface Sdcard {
-    values: SdcardValues;
+	values: SdcardValues;
 }
 
 export interface SdcardValues {
-    card_type: number;
-    card_mounted: number;
-    card_capcity: string;
-    volume_label: string;
-    speed_test: number;
-    performance_speed: string;
-    performance_tracks: string;
-    format_type: number;
-    do_format: number;
-    format_error: number;
+	card_type: number;
+	card_mounted: number;
+	card_capcity: string;
+	volume_label: string;
+	speed_test: number;
+	performance_speed: string;
+	performance_tracks: string;
+	format_type: number;
+	do_format: number;
+	format_error: number;
 }
 
 export interface Session {
-    values: SessionValues;
-    strings: SessionStrings;
+	values: SessionValues;
+	strings: SessionStrings;
 }
 
 export interface SessionStrings {
-    artistlist: number;
-    performancelist: number;
-    locationlist: number;
+	artistlist: number;
+	performancelist: number;
+	locationlist: number;
 }
 
 export interface SessionValues {
-    artist: string;
-    performance: string;
-    location: string;
-    artistlist: number;
-    performancelist: number;
-    locationlist: number;
-    folder_hierarchy: number;
-    title: string;
-    path: string;
-    new: number;
-    load: number;
-    loadmix: number;
-    close: number;
-    active: number;
-    lockSession: number;
-    loadStatus: number;
+	artist: string;
+	performance: string;
+	location: string;
+	artistlist: number;
+	performancelist: number;
+	locationlist: number;
+	folder_hierarchy: number;
+	title: string;
+	path: string;
+	new: number;
+	load: number;
+	loadmix: number;
+	close: number;
+	active: number;
+	lockSession: number;
+	loadStatus: number;
 }
 
 export interface Transport {
-    values: TransportValues;
+	values: TransportValues;
 }
 
 export interface TransportValues {
-    play: number;
-    stop: number;
-    record: number;
-    returnToZero: number;
-    fastForward: number;
-    rewind: number;
-    recordLock: number;
-    locate_pos: number;
-    currentRecordTime: string;
-    jog: number;
-    running: number;
-    remainingTime: string;
-    diskSpaceWarning: number;
-    fileSizeWarning: number;
-    performanceWarning: number;
-    record_error: string;
-    lockTransport: number;
+	play: number;
+	stop: number;
+	record: number;
+	returnToZero: number;
+	fastForward: number;
+	rewind: number;
+	recordLock: number;
+	locate_pos: number;
+	currentRecordTime: string;
+	jog: number;
+	running: number;
+	remainingTime: string;
+	diskSpaceWarning: number;
+	fileSizeWarning: number;
+	performanceWarning: number;
+	record_error: string;
+	lockTransport: number;
 }
 
 export interface SdrecorderValues {
-    soundcheckMode: number;
-    allDigitalInput: number;
-    armAll: number;
-    armSelect: number;
-    status: string;
+	soundcheckMode: number;
+	allDigitalInput: number;
+	armAll: number;
+	armSelect: number;
+	status: string;
 }
 
 export interface Signalgen {
-    values: SignalgenValues;
+	values: SignalgenValues;
 }
 
 export interface SignalgenValues {
-    type: number;
-    freq: number;
-    level: number;
+	type: number;
+	freq: number;
+	level: number;
 }
 
 export interface Softpower {
-    values: SoftpowerValues;
+	values: SoftpowerValues;
 }
 
 export interface SoftpowerValues {
-    initiateSoftPower: number;
-    softPowerStage: number;
-    softPowerProgress: number;
+	initiateSoftPower: number;
+	softPowerStage: number;
+	softPowerProgress: number;
 }
 
 export interface Stageboxsetup {
-    values: StageboxsetupValues;
-    strings: StageboxsetupStrings;
-    states: StageboxsetupStates;
+	values: StageboxsetupValues;
+	strings: StageboxsetupStrings;
+	states: StageboxsetupStates;
 }
 
 export interface StageboxsetupStates {
-    apply: number;
+	apply: number;
 }
 
 export interface StageboxsetupStrings {
-    mixerlist: any[];
-    stagebox_mode: number;
-    preamp_control: string[];
-    avb_src: string[];
-    avb_src2: string[];
-    avb_src_1_8: string[];
-    avb_src_9_16: string[];
-    avb_src_17_24: string[];
-    avb_src_25_32: string[];
-    avb_src_33_40: string[];
-    avb_src_41_48: string[];
-    avb_src_49_56: string[];
-    avb_src_57_64: string[];
+	mixerlist: any[];
+	stagebox_mode: number;
+	preamp_control: string[];
+	avb_src: string[];
+	avb_src2: string[];
+	avb_src_1_8: string[];
+	avb_src_9_16: string[];
+	avb_src_17_24: string[];
+	avb_src_25_32: string[];
+	avb_src_33_40: string[];
+	avb_src_41_48: string[];
+	avb_src_49_56: string[];
+	avb_src_57_64: string[];
 }
 
 export interface StageboxsetupValues {
-    mixerlist: number;
-    selected_name: string;
-    stagebox_mode: number;
-    preamp_control: number;
-    avb_src: number;
-    avb_src2: number;
-    auto_route: number;
-    identify: number;
-    apply: number;
-    preamp_lock: number;
-    stagebox_type: number;
-    connect_status: number;
-    latency_menu: number;
-    latency: number;
-    apply_latency: number;
-    avb_src_1_8: number;
-    avb_src_9_16: number;
-    avb_src_17_24: number;
-    avb_src_25_32: number;
-    avb_src_33_40: number;
-    avb_src_41_48: number;
-    avb_src_49_56: number;
-    avb_src_57_64: number;
-    avb_clocksrc: number;
-    avb_clockstatus: number;
+	mixerlist: number;
+	selected_name: string;
+	stagebox_mode: number;
+	preamp_control: number;
+	avb_src: number;
+	avb_src2: number;
+	auto_route: number;
+	identify: number;
+	apply: number;
+	preamp_lock: number;
+	stagebox_type: number;
+	connect_status: number;
+	latency_menu: number;
+	latency: number;
+	apply_latency: number;
+	avb_src_1_8: number;
+	avb_src_9_16: number;
+	avb_src_17_24: number;
+	avb_src_25_32: number;
+	avb_src_33_40: number;
+	avb_src_41_48: number;
+	avb_src_49_56: number;
+	avb_src_57_64: number;
+	avb_clocksrc: number;
+	avb_clockstatus: number;
 }
 
 export interface Talkback {
-    children: TalkbackChildren;
+	children: TalkbackChildren;
 }
 
 export interface TalkbackChildren {
-    ch1: StickyCh1;
+	ch1: StickyCh1;
 }
 
 export interface StickyCh1 {
-    values: FluffyValues;
-    strings: IndecentStrings;
-    ranges: PurpleRanges;
-    states: StickyStates;
-    children: IndecentChildren;
+	values: FluffyValues;
+	strings: IndecentStrings;
+	ranges: PurpleRanges;
+	states: StickyStates;
+	children: IndecentChildren;
 }
 
 export interface IndecentChildren {
-    filter: Filter;
+	filter: Filter;
 }
 
 export interface StickyStates {
-    link: number;
-    dawpostdsp: number;
-    usb_src: number;
-    sd_src: number;
+	link: number;
+	dawpostdsp: number;
+	usb_src: number;
+	sd_src: number;
 }
 
-export interface Users {
-}
+export type Users = {};
 
 export interface Shared {
-    strings: Array<string[]>;
+	strings: Array<string[]>;
 }

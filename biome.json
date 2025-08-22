@@ -1,0 +1,49 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"overrides": [
+		{
+			"includes": ["**/*.test.js", "**/*.test.ts"],
+			"linter": {
+				"enabled": false
+			}
+		}
+	],
+	"formatter": {
+		"lineWidth": 120,
+		"formatWithErrors": false
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedImports": "info",
+                "noUnusedVariables": "info",
+                "noUnusedFunctionParameters": "info"
+			},
+			"complexity": {
+				"useLiteralKeys": "off",
+				"noBannedTypes": "off",
+				"useArrowFunction": "off"
+			},
+			"style": {
+				"noParameterAssign": "off",
+				"noUselessElse": "off",
+				"noInferrableTypes": "info",
+				"noNonNullAssertion": "off",
+				"useTemplate": "off",
+				"useEnumInitializers": "off",
+				"useConst": "warn"
+			},
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noAsyncPromiseExecutor": "off",
+                "useIterableCallbackReturn": "off"
+			},
+            "performance": {
+                "noAccumulatingSpread": "off"
+            }
+		}
+	}
+}

@@ -1,6 +1,5 @@
-import type bunyan from 'bunyan'
+import type bunyan from "bunyan";
 
 declare global {
-     
-    var logger: bunyan
+	var logger: bunyan;
 }
