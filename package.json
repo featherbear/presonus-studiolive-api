@@ -1,6 +1,6 @@
 {
   "name": "presonus-studiolive-api",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
   "main": "./dist/cjs/api.js",
   "module": "./dist/esm/api.js",
@@ -17,16 +17,17 @@
     }
   },
   "scripts": {
-    "build": "npm-run-all lint clean transpile build:types",
+    "build": "npm-run-all clean transpile build:types",
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist/types",
-    "build:fix": "npm-run-all lint:fix clean transpile",
     "clean": "rimraf dist",
     "transpile:esm": "swc src -d dist/esm --strip-leading-paths --config-file .swcrc.esm.json --quiet",
     "transpile:cjs": "swc src -d dist/cjs --strip-leading-paths --config-file .swcrc.cjs.json --quiet",
     "transpile": "yarn transpile:esm && yarn transpile:cjs",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint --fix src/**/*.ts",
-    "install": "npm run --silent transpile",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format --write src/",
+    "install": "npm run --silent build",
+    
     "test": "sucrase-node test.ts | bunyan",
     "test:debug": "cross-env DEBUG=1 sucrase-node test.ts | bunyan"
   },
@@ -45,17 +46,16 @@
     "queue": "^6"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.0",
     "@eslint/js": "^9.33.0",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.13.3",
     "@types/bunyan": "^1.8.11",
     "@types/node": "^22",
     "cross-env": "^10.0.0",
-    "eslint": "^9.33.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1",
     "sucrase": "^3.35.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript": "^5.9.2"
   }
 }
