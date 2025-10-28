@@ -2,75 +2,78 @@
  * TCP data client to receive messages from UCNet devices
  */
 
-import { Socket } from 'net'
-import { PacketHeader } from '../constants'
-import Queue from 'queue'
+import { Socket } from "net";
+import { PacketHeader } from "../constants";
+import Queue from "queue";
 
-export default function (callback) {
-  const TCPclient = new Socket()
-  
-  let remaining = 0
-  let payload = Buffer.allocUnsafe(0)
-  const Q = new Queue({
-    autostart: true,
-    concurrency: 1
-  })
+export default function (callback, customSocket: Socket = null) {
+	const TCPclient = customSocket ?? new Socket();
 
-  TCPclient.on('data', bytes => {
-    let frame = Buffer.from(bytes)
-    Q.push(finish => {
-      // 27/12/2021 @featherbear: I have no idea why we need to wrap this execution in its own inline function but we need it heh.
-      ; (function () {
-        // Desc   Header  Length   Payload
-        // Size     4       2       ...
-        while (frame.length !== 0) {
-          if (remaining === 0 && PacketHeader.matches(frame)) {
-            // Start of new packet
-            const correctLength = frame.readUInt16LE(4)
+	let remaining = 0;
+	let payload = Buffer.allocUnsafe(0);
+	const Q = new Queue({
+		autostart: true,
+		concurrency: 1,
+	});
 
-            // Check the length
-            if (frame.length - 6 < correctLength) {
-              payload = frame
-              remaining = correctLength - (frame.length - 6)
+	TCPclient.on("data", (bytes) => {
+		let frame = Buffer.from(bytes);
+		Q.push((finish) => {
+			// 27/12/2021 @featherbear: I have no idea why we need to wrap this execution in its own inline function but we need it heh.
+			(function () {
+				// Desc   Header  Length   Payload
+				// Size     4       2       ...
+				while (frame.length !== 0) {
+					if (remaining === 0 && PacketHeader.matches(frame)) {
+						// Start of new packet
+						const correctLength = frame.readUInt16LE(4);
 
-              // Wait for the next frame
-              return
-            } else {
-              // Emit payload
-              callback(frame.slice(0, correctLength + 6))
+						// Check the length
+						if (frame.length - 6 < correctLength) {
+							payload = frame;
+							remaining = correctLength - (frame.length - 6);
 
-              // Move to next part of frame
-              frame = frame.slice(correctLength + 6)
-              remaining = 0
-              payload = Buffer.allocUnsafe(0)
-            }
-          } else if (remaining > 0) {
-            // A larger payload may span over multiple packets
+							// Wait for the next frame
+							return;
+						} else {
+							// Emit payload
+							callback(frame.slice(0, correctLength + 6));
 
-            // Find number of bytes to read from the new frame
-            // Note: A frame may contain parts of more than one payload, so we need to receive only the remaining bytes of the current payload
-            const extractN = Math.min(remaining, frame.length)
+							// Move to next part of frame
+							frame = frame.slice(correctLength + 6);
+							remaining = 0;
+							payload = Buffer.allocUnsafe(0);
+						}
+					} else if (remaining > 0) {
+						// A larger payload may span over multiple packets
 
-            // Append the received bytes
-            payload = Buffer.concat([payload, frame.slice(0, extractN)])
-            remaining -= extractN
-            frame = frame.slice(extractN) // Move frame cursor
+						// Find number of bytes to read from the new frame
+						// Note: A frame may contain parts of more than one payload, so we need to receive only the remaining bytes of the current payload
+						const extractN = Math.min(remaining, frame.length);
 
-            // Check if all bytes received
-            if (remaining === 0) {
-              callback(payload)
-              payload = Buffer.allocUnsafe(0)
-            }
+						// Append the received bytes
+						payload = Buffer.concat([payload, frame.slice(0, extractN)]);
+						remaining -= extractN;
+						frame = frame.slice(extractN); // Move frame cursor
 
-            if (remaining < 0) {
-              throw Error('Extracted more bytes than the payload specified')
-            }
-          }
-        }
-      })()
-      finish()
-    })
-  })
+						// Check if all bytes received
+						if (remaining === 0) {
+							callback(payload);
+							payload = Buffer.allocUnsafe(0);
+						}
 
-  return TCPclient
+						if (remaining < 0) {
+							throw Error("Extracted more bytes than the payload specified");
+						}
+					} else {
+						// remaining is zero but the header is not matching
+						throw new Error("Header not matching and remaining is zero");
+					}
+				}
+			})();
+			finish();
+		});
+	});
+
+	return TCPclient;
 }

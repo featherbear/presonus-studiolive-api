@@ -1,72 +1,61 @@
 {
   "name": "presonus-studiolive-api",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
-  "main": "dist/api.js",
+  "main": "./dist/cjs/api.js",
+  "module": "./dist/esm/api.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/api.js",
+      "require": "./dist/cjs/api.js",
+      "types": "./dist/types/api.d.ts"
+    },
+    "./simple": {
+      "import": "./dist/esm/simple/index.js",
+      "require": "./dist/cjs/simple/index.js",
+      "types": "./dist/types/simple/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "npm-run-all lint clean transpile",
-    "build:fix": "npm-run-all lint:fix clean transpile",
+    "build": "npm-run-all clean transpile build:types",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist/types",
     "clean": "rimraf dist",
-    "transpile": "tsc",
-    "lint": "standardx src/**/*.{ts,js} | snazzy",
-    "lint:fix": "standardx --fix src/**/*.{ts,js} | snazzy",
-    "install": "npm run --silent transpile",
+    "transpile:esm": "swc src -d dist/esm --strip-leading-paths --config-file .swcrc.esm.json --quiet",
+    "transpile:cjs": "swc src -d dist/cjs --strip-leading-paths --config-file .swcrc.cjs.json --quiet",
+    "transpile": "yarn transpile:esm && yarn transpile:cjs",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format --write src/",
+    "install": "npm run --silent build",
+    
     "test": "sucrase-node test.ts | bunyan",
     "test:debug": "cross-env DEBUG=1 sucrase-node test.ts | bunyan"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/featherbear/PreSonus-StudioLive-API.git"
+    "url": "git+https://github.com/featherbear/presonus-studiolive-api.git"
   },
   "author": "featherbear",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/featherbear/PreSonus-StudioLive-API/issues"
+    "url": "https://github.com/featherbear/presonus-studiolive-api/issues"
   },
   "homepage": "https://featherbear.cc/presonus-studiolive-api",
   "dependencies": {
-    "@types/node": "^14.14.6",
     "bunyan": "^1.8.15",
-    "queue": "^6.0.1",
-    "typescript": "^4.5.4"
+    "queue": "^6"
   },
   "devDependencies": {
-    "@types/bunyan": "^1.8.8",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "cross-env": "^7.0.3",
+    "@biomejs/biome": "2.2.0",
+    "@eslint/js": "^9.33.0",
+    "@swc/cli": "^0.7.8",
+    "@swc/core": "^1.13.3",
+    "@types/bunyan": "^1.8.11",
+    "@types/node": "^22",
+    "cross-env": "^10.0.0",
     "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2",
-    "snazzy": "^9.0.0",
-    "standardx": "^7.0.0",
-    "sucrase": "^3.20.3"
-  },
-  "eslintConfig": {
-    "globals": {
-      "logger": "writable"
-    },
-    "rules": {
-      "no-trailing-spaces": [
-        "warn",
-        {
-          "ignoreComments": true,
-          "skipBlankLines": true
-        }
-      ],
-      "no-dupe-class-members": "off",
-      "space-before-function-paren": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "."
-        }
-      ]
-    }
-  },
-  "standardx": {
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin"
-    ]
+    "rimraf": "^6.0.1",
+    "sucrase": "^3.35.0",
+    "typescript": "^5.9.2"
   }
 }

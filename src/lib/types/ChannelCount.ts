@@ -1,7 +1,7 @@
-import { ChannelTypes } from '../constants'
+import type { ChannelTypes } from "../constants";
 
 type ChannelCount = {
-    [_ in ChannelTypes]: number
-}
+	[_ in ChannelTypes]: number;
+};
 
-export default ChannelCount
+export default ChannelCount;

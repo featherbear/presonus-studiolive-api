@@ -13,7 +13,11 @@ jobs:
         node-version: '22.x'
 
     - name: Install packages
-      run: yarn install --no-scripts
+      run: yarn install --ignore-scripts
     
-    - name: Lint and Build
+    - name: Lint
+      run: yarn lint
+
+    - name: Build
       run: yarn build
+

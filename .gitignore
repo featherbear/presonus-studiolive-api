@@ -3,3 +3,5 @@ __pycache__/
 node_modules/
 /dist/
 .idea/
+.DS_Store
+documentation/

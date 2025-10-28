@@ -1,63 +1,63 @@
-import { MessageCode } from '../constants'
-import { createPacket } from './messageProtocol'
-import { UniqueRandom } from './valueUtil'
+import { MessageCode } from "../constants";
+import { createPacket } from "./messageProtocol";
+import { UniqueRandom } from "./valueUtil";
 
 export default class KeepAliveHelper {
-  #lastRecv: number
-  #timeout: number
-  #loop: ReturnType<typeof setInterval>
-  #ids: number[]
+	#lastRecv: number;
+	#timeout: number;
+	#loop: ReturnType<typeof setInterval>;
+	#ids: number[];
 
-  constructor(timeout: number = 3000) {
-    this.#lastRecv = null
-    this.#timeout = timeout
-    this.#ids = []
-  }
+	constructor(timeout = 3000) {
+		this.#lastRecv = null;
+		this.#timeout = timeout;
+		this.#ids = [];
+	}
 
-  intercept(fn: (data: Buffer) => { id: number, data: any }): (data: Buffer) => ReturnType<typeof fn> {
-    return (data: Buffer) => {
-      const result = fn(data)
+	updateTime() {
+		this.#lastRecv = Date.now();
+	}
 
-      if (!!result && this.#ids.includes(result.id)) {
-        this.#ids = this.#ids.filter(id => id !== result.id)
-        this.#lastRecv = new Date().getTime()
-        return null
-      }
+	intercept(fn: (data: Buffer) => { id: number; data: any }): (data: Buffer) => ReturnType<typeof fn> {
+		return (data: Buffer) => {
+			const result = fn(data);
 
-      return result
-    }
-  }
+			if (!!result && this.#ids.includes(result.id)) {
+				this.#ids = this.#ids.filter((id) => id !== result.id);
+				this.updateTime();
+				return null;
+			}
 
-  // Send a KeepAlive packet every second
-  start(checkFn: (data: Buffer[]) => void, failFn: () => void) {
-    clearInterval(this.#loop)
-    this.#loop = setInterval(() => {
-      const now = new Date().getTime()
+			return result;
+		};
+	}
 
-      if (now - this.#lastRecv > this.#timeout) {
-        logger.debug('Timeout exceeded for keep-alive response')
-        clearInterval(this.#loop)
-        return failFn()
-      }
+	// Send a KeepAlive packet every second
+	start(checkFn: (data: Buffer[]) => void, failFn: () => void) {
+		clearInterval(this.#loop);
+		this.#loop = setInterval(() => {
+			const now = Date.now();
 
-      const id = UniqueRandom.get(16).request()
-      this.#ids.push(id)
-      const idBuffer = Buffer.allocUnsafe(2)
-      idBuffer.writeUInt16BE(id)
+			if (now - this.#lastRecv > this.#timeout) {
+				logger.debug("Timeout exceeded for keep-alive response");
+				clearInterval(this.#loop);
+				return failFn();
+			}
 
-      checkFn([
-        createPacket(MessageCode.KeepAlive),
-        createPacket(
-          MessageCode.FileRequest,
-          Buffer.concat([
-            idBuffer,
-            Buffer.from([0x46, 0x74, 98, 0o162]),
-            Buffer.from([0x00, 0x00])
-          ])
-        )
-      ])
-    }, 1000)
+			const id = UniqueRandom.get(16).request();
+			this.#ids.push(id);
+			const idBuffer = Buffer.allocUnsafe(2);
+			idBuffer.writeUInt16BE(id);
 
-    this.#lastRecv = new Date().getTime()
-  }
+			checkFn([
+				createPacket(MessageCode.KeepAlive),
+				createPacket(
+					MessageCode.FileRequest,
+					Buffer.concat([idBuffer, Buffer.from([0x46, 0x74, 98, 0o162]), Buffer.from([0x00, 0x00])]),
+				),
+			]);
+		}, 1000);
+
+		this.updateTime();
+	}
 }

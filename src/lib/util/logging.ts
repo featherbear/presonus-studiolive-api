@@ -1,7 +1,6 @@
-import bunyan from 'bunyan'
-const { name } = require('../../../package.json')
+import bunyan from "bunyan";
 
 globalThis.logger = bunyan.createLogger({
-  name,
-  level: 61 // fatal + 1
-})
+	name: "presonus-studiolive-api",
+	level: 61, // fatal + 1
+});
