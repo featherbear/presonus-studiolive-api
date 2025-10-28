@@ -16,7 +16,7 @@ export const Channel = {
 	FX: "fxbus",
 	SUB: "sub",
 	MAIN: "main",
-  	DCA: "filtergroup",
+	DCA: "filtergroup",
 	...Channel64S,
 } as const;
 

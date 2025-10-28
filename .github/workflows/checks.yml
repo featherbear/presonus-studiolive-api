@@ -4,20 +4,19 @@ on: push
 
 jobs:
   checks:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
 
     - uses: actions/setup-node@v1
       with:
-        node-version: '22.x'
+        node-version: '22.21.0'
 
     - name: Install packages
-      run: yarn install --ignore-scripts
+      run: pnpm install --frozen-lockfile
     
     - name: Lint
-      run: yarn lint
+      run: pnpm run lint
 
     - name: Build
-      run: yarn build
-
+      run: pnpm run build
