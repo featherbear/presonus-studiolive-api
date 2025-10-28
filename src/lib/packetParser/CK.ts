@@ -1,9 +1,10 @@
 import type Client from "../Client";
 import { parseCompressed } from "./ZB";
+import type { ZlibNode } from "../util/zlib/zlibNodeParser";
 
 let chunkBuffer: Buffer[] = [];
 
-export default function handleCKPacket(this: Client, data: Buffer) {
+export default function handleCKPacket(this: Client, data: Buffer): ZlibNode {
 	data = data.slice(4);
 
 	const chunkOffset = data.readUInt32LE(0);

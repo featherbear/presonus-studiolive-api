@@ -1,4 +1,4 @@
-import type { ZlibPayload } from "../types";
+import type { ZlibPayload } from "../types/ZlibPayload";
 import KVTree from "./KVTree";
 
 interface FallbackInterface {
