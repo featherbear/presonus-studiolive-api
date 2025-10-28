@@ -62,6 +62,7 @@ const transformers: {
 		fromPV: IGNORE,
 	},
 	"*.ch*.volume": {
+		fromPV: DEFAULT_TRANSFORMS.buffer.float,
 		fromUB(value: number) {
 			return value * 100;
 		},

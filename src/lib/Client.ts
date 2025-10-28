@@ -666,7 +666,7 @@ export class Client {
     When channels are grouped
     link = 1
     panlinkstate = 1
-    
+
     initiator
     linkmaster = 1
     */
