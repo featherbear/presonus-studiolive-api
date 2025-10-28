@@ -8,12 +8,27 @@ importers:
 
   .:
     dependencies:
+      '@swc/cli':
+        specifier: ^0.7.8
+        version: 0.7.8(@swc/core@1.13.5)
+      '@swc/core':
+        specifier: ^1.13.3
+        version: 1.13.5
       bunyan:
         specifier: ^1.8.15
         version: 1.8.15
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
       queue:
         specifier: ^6
         version: 6.0.2
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.0
@@ -21,12 +36,6 @@ importers:
       '@eslint/js':
         specifier: ^9.33.0
         version: 9.38.0
-      '@swc/cli':
-        specifier: ^0.7.8
-        version: 0.7.8(@swc/core@1.13.5)
-      '@swc/core':
-        specifier: ^1.13.3
-        version: 1.13.5
       '@types/bunyan':
         specifier: ^1.8.11
         version: 1.8.11
@@ -36,18 +45,9 @@ importers:
       cross-env:
         specifier: ^10.0.0
         version: 10.1.0
-      npm-run-all:
-        specifier: ^4.1.5
-        version: 4.1.5
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
       sucrase:
         specifier: ^3.35.0
         version: 3.35.0
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
 
 packages:
 
