@@ -1,8 +1,37 @@
 import * as dgram from "dgram";
 import { MessageCode, PacketHeader } from "./constants";
-import type ChannelCount from "./types/ChannelCount";
 
 export type MeterData = {};
+
+export enum MeterGroups {
+  INPUT_SIGNAL = 0x0000,
+  /* Basically the same as the input signal */
+  INPUT_GATE_IN = 0x0001,
+  INPUT_GATE_OUT = 0x0002,
+  INPUT_STRIP1_OUT = 0x0003,
+  INPUT_STRIP2_OUT = 0x0004,
+  INPUT_LIMITER_OUT = 0x0005,
+
+  /**
+   * i.e. FX Returns, Digital Return, Talkback
+   */
+  RETURNS = 0x0200,
+
+  AUX_SENDS = 0x0400,
+  // 0402 - When an aux is set to matrix, the value is 0
+  AUX_STRIP_IN = 0x0402,
+  AUX_STRIP1_OUT = 0x0403,
+  AUX_STRIP2_OUT = 0x0404,
+  AUX_LIMITER_OUT = 0x0405,
+
+  FX_SENDS = 0x0500,
+
+  MAIN_SENDS = 0x0700,
+  MAIN_STRIP_IN = 0x0702,
+  MAIN_STRIP1_OUT = 0x0703,
+  MAIN_STRIP2_OUT = 0x0704,
+  MAIN_LIMITER_OUT = 0x0705,
+}
 
 export function parseDataFrame(data: Buffer<ArrayBufferLike>) {
   if (!data.subarray(0, 4).equals(PacketHeader)) return;
@@ -29,36 +58,7 @@ export function parseDataFrame(data: Buffer<ArrayBufferLike>) {
         throw new Error("Decode error: Algorithm incorrect");
       }
 
-      enum Groups {
-        INPUT_SIGNAL = 0x0000,
-        /* Basically the same as the input signal */
-        INPUT_GATE_IN = 0x0001,
-        INPUT_GATE_OUT = 0x0002,
-        INPUT_STRIP1_OUT = 0x0003,
-        INPUT_STRIP2_OUT = 0x0004,
-        INPUT_LIMITER_OUT = 0x0005,
-
-        /**
-         * i.e. FX Returns, Digital Return, Talkback
-         */
-        RETURNS = 0x0200,
-
-        AUX_SENDS = 0x0400,
-        // 0402 - When an aux is set to matrix, the value is 0
-        AUX_STRIP_IN = 0x0402,
-        AUX_STRIP1_OUT = 0x0403,
-        AUX_STRIP2_OUT = 0x0404,
-        AUX_LIMITER_OUT = 0x0405,
-
-        FX_SENDS = 0x0500,
-
-        MAIN_SENDS = 0x0700,
-        MAIN_STRIP_IN = 0x0702,
-        MAIN_STRIP1_OUT = 0x0703,
-        MAIN_STRIP2_OUT = 0x0704,
-        MAIN_LIMITER_OUT = 0x0705,
-      }
-
+      const meterData: MeterData = {};
       for (let i = 0; i < descriptorsCount; i++) {
         // Read each descriptor
         const descriptorOffset = 21 + valueCount * 2 + i * 6;
@@ -69,19 +69,21 @@ export function parseDataFrame(data: Buffer<ArrayBufferLike>) {
         ];
         const groupValues: number[] = values.slice(offset, offset + count);
 
-        console.log(
-          `${(
-            Groups[groupNumber] ||
-            "> " + groupNumber.toString(16).padStart(4, "0")
-          ).padEnd(20, " ")} [${count.toString().padStart(2, " ")}]: ` +
-            groupValues
-              .map((v: number) => v.toString(16).padStart(4, "0"))
-              .join(" ")
-        );
-      }
-      // console.log("-------");
+        // const title_text = (
+        //   Groups[groupNumber] ||
+        //   "> " + groupNumber.toString(16).padStart(4, "0")
+        // ).padEnd(20, " ");
+        // const channel_count_text = count.toString().padStart(2, " ");
+        // const values_text = groupValues
+        //   .map((v: number) => v.toString(16).padStart(4, "0"))
+        //   .join(" ");
+        // console.log(`${title_text} [${channel_count_text}]: ${values_text}`);
 
-      break;
+        meterData["type"] = "level";
+        meterData[groupNumber] = groupValues;
+      }
+
+      return meterData;
     }
     case "redu": {
       // reduction
@@ -108,11 +110,7 @@ export function parseDataFrame(data: Buffer<ArrayBufferLike>) {
  * @param channelCounts Channel count data
  * @param onData Callback
  */
-export default function createServer(
-  port,
-  channelCounts: ChannelCount,
-  onData: (data: MeterData) => any
-) {
+export default function createServer(port, onData: (data: MeterData) => any) {
   if (typeof port !== "number" || port < 0 || port > 65535) {
     throw Error("Invalid port number");
   }
@@ -128,7 +126,10 @@ export default function createServer(
   return new Promise<dgram.Socket>((resolve) => {
     UDPserver.on("message", (msg, rinfo) => {
       const data = Buffer.from(msg);
-      parseDataFrame(data);
+      const parsed = parseDataFrame(data);
+      if (parsed) {
+        onData(parsed);
+      }
     });
 
     UDPserver.on("listening", () => {

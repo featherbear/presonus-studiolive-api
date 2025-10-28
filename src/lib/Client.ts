@@ -196,7 +196,7 @@ export class Client {
 	 */
 	async meterSubscribe(port?: number) {
 		port = port ?? 0;
-		this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData: MeterData) =>
+		this.meteringClient = await MeterServer.call(this, port, (meterData: MeterData) =>
 			this.emit("meter", meterData),
 		);
 		this._sendPacket(MessageCode.Hello, toShort(this.meteringClient.address().port), 0x00);
