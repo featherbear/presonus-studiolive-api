@@ -196,7 +196,7 @@ export class Client {
 	 */
 	async meterSubscribe(port?: number) {
 		port = port ?? 0;
-		this.meteringClient = await MeterServer.call(this, port, this.channelCounts, (meterData: MeterData) =>
+		this.meteringClient = await MeterServer.call(this, port, (meterData: MeterData) =>
 			this.emit("meter", meterData),
 		);
 		this._sendPacket(MessageCode.Hello, toShort(this.meteringClient.address().port), 0x00);
@@ -239,6 +239,7 @@ export class Client {
 
 				Promise.all([
 					new Promise((resolve) => {
+						// TODO: Do DCAs change during project/scene recall?
 						this.once(MessageCode.ZLIB, () => {
 							// De-register the listener in case the payload was not encapsulated in a CK packet
 							this.removeListener(MessageCode.Chunk, chunkedZlibInitCallback);
@@ -252,6 +253,7 @@ export class Client {
 								RETURN /* aka tape? */: getCount("return"),
 								TALKBACK: getCount("talkback"),
 								MAIN: getCount("main"),
+								DCA: getCount("filtergroup"),
 								/**
 								 * 16R doesn't have SUB groups
 								 */
