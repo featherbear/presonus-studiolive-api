@@ -13,7 +13,7 @@ jobs:
         node-version: '22.21.0'
 
     - name: Install packages
-      run: pnpm install --frozen-lockfile
+      run: npm i -g pnpm && pnpm install --frozen-lockfile
     
     - name: Lint
       run: pnpm run lint
