@@ -17,13 +17,32 @@ import zlibParseNode, {
  * Deserialise and parse a zlib buffer into an object tree
  */
 export function zlibParse(zlib: Buffer) {
-	const payload = deserialiseUBJSON<ZlibPayload>(zlib);
-	if (payload.id !== "Synchronize") {
-		console.warn("Unexpected zlib payload id", payload.id);
-		return;
-	}
+	try {
+		const payload = deserialiseUBJSON<ZlibPayload>(zlib);
+		
+		// Check if payload is valid
+		if (!payload || typeof payload !== 'object') {
+			console.warn("Invalid zlib payload structure, skipping");
+			return null;
+		}
+		
+		// Check for parsing error indicator
+		if ((payload as any)._ubjson_parsing_error) {
+			console.warn("Skipping packet due to UBJSON parsing error");
+			return null;
+		}
+		
+		if (payload.id !== "Synchronize") {
+			console.warn("Unexpected zlib payload id", payload.id);
+			return null;
+		}
 
-	return zlibParseNode(payload as unknown as ZlibInputNode);
+		return zlibParseNode(payload as unknown as ZlibInputNode);
+		
+	} catch (error) {
+		console.warn(`Zlib parsing failed: ${error.message}`);
+		return null;
+	}
 }
 
 export default zlibParse;
