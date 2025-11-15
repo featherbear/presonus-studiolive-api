@@ -1,5 +1,5 @@
 import { tokenisePath } from "./treeUtil";
-import { inspect } from "util";
+import { inspect } from "node:util";
 
 export type ValueTransformer = (value: unknown, key?: string[]) => any;
 

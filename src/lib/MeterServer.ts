@@ -1,4 +1,4 @@
-import * as dgram from "dgram";
+import * as dgram from "node:dgram";
 import { MessageCode, PacketHeader } from "./constants";
 
 export type MeterData = {};

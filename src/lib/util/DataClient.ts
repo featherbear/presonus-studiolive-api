@@ -2,7 +2,7 @@
  * TCP data client to receive messages from UCNet devices
  */
 
-import { Socket } from "net";
+import { Socket } from "node:net";
 import { PacketHeader } from "../constants";
 import Queue from "queue";
 

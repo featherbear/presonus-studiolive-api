@@ -111,7 +111,7 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 						throw new Error("(ZB) Failed to find delimiter 2");
 					}
 
-					const dataLength = (length = buf[idx++]);
+					const dataLength = buf[idx++]
 					const valueData = buf.slice(idx, idx + dataLength);
 					idx += dataLength;
 					return valueData.toString();
