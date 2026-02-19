@@ -6,7 +6,50 @@
 import { analysePacket } from "./util/messageProtocol";
 import { EventEmitter } from "node:events";
 import dgram from "node:dgram";
+import { networkInterfaces } from "node:os";
 import type DiscoveryType from "./types/DiscoveryType";
+
+/**
+ * Get all local IP addresses from network interfaces
+ * @returns Set of local IP addresses
+ */
+function getLocalIPs(): Set<string> {
+	const localIPs = new Set<string>();
+	const interfaces = networkInterfaces();
+
+	for (const name of Object.keys(interfaces)) {
+		const iface = interfaces[name];
+		if (!iface) continue;
+
+		for (const addr of iface) {
+			// Add both IPv4 and IPv6 addresses
+			localIPs.add(addr.address);
+		}
+	}
+
+	// Also add common loopback addresses
+	localIPs.add("127.0.0.1");
+	localIPs.add("::1");
+	localIPs.add("localhost");
+
+	return localIPs;
+}
+
+/**
+ * Check if an IP address belongs to the local machine
+ * @param ip IP address to check
+ * @param localIPs Set of local IP addresses
+ * @returns true if the IP is a local address
+ */
+function isLocalIP(ip: string, localIPs: Set<string>): boolean {
+	// Direct match
+	if (localIPs.has(ip)) return true;
+
+	// Check for IPv4 loopback range (127.0.0.0/8)
+	if (ip.startsWith("127.")) return true;
+
+	return false;
+}
 
 export default class Discovery extends EventEmitter {
 	socket: dgram.Socket;
@@ -45,6 +88,9 @@ export default class Discovery extends EventEmitter {
 	 * Setup routine
 	 */
 	private setup() {
+		// Get local IPs to filter out
+		const localIPs = getLocalIPs();
+
 		// Listen to broadcast on port 47809
 		const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
 		socket.bind(47809, "0.0.0.0");
@@ -55,6 +101,11 @@ export default class Discovery extends EventEmitter {
 		socket.on("message", (packet, rinfo) => {
 			const [code, data] = analysePacket(packet, true);
 			if (!code) return;
+
+			// Filter out local machine's own IP addresses
+			if (isLocalIP(rinfo.address, localIPs)) {
+				return;
+			}
 
 			// Split data by null byte
 			const fragments = [];
