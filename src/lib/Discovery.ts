@@ -90,12 +90,14 @@ export default class Discovery extends EventEmitter {
 	private setup() {
 		// Get local IPs to filter out
 		const localIPs = getLocalIPs();
+		console.log(`[Discovery] Filtering local IPs: ${Array.from(localIPs).join(", ")}`);
 
 		// Listen to broadcast on port 47809
 		const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
 		socket.bind(47809, "0.0.0.0");
 		socket.on("listening", function () {
 			this.setBroadcast(true);
+			console.log("[Discovery] Listening for mixer broadcasts on port 47809");
 		});
 
 		socket.on("message", (packet, rinfo) => {
@@ -115,19 +117,25 @@ export default class Discovery extends EventEmitter {
 			}
 
 			// eslint-disable-next-line
-			const [nameA, _, serial, nameB] = fragments;
+			const [model, _, serial, deviceName] = fragments;
 
 			if (!serial) return;
 
-			// nameA: Model number for device image identification
-			// nameB: ???
-			this.emit("discover", {
-				name: nameA,
+			// model: Device model name (e.g., "StudioLive 16R")
+			// deviceName: User-assigned device name (e.g., "Office")
+			const discoveryData = {
+				name: model, // Keep 'name' for backward compatibility
+				model,
+				deviceName: deviceName || undefined,
 				serial,
 				ip: rinfo.address,
 				port: rinfo.port,
 				timestamp: new Date(),
-			} as DiscoveryType);
+			} as DiscoveryType;
+
+			console.log(`[Discovery] Found device: ${model}${deviceName ? ` (${deviceName})` : ""} at ${rinfo.address} [${serial}]`);
+
+			this.emit("discover", discoveryData);
 		});
 
 		this.socket = socket;
