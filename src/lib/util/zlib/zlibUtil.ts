@@ -19,7 +19,6 @@ import zlibParseNode, {
 export function zlibParse(zlib: Buffer) {
 	const payload = deserialiseUBJSON<ZlibPayload>(zlib);
 	if (payload.id !== "Synchronize") {
-		console.warn("Unexpected zlib payload id", payload.id);
 		return;
 	}
 

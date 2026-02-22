@@ -88,21 +88,27 @@ export default class Discovery extends EventEmitter {
 	 * Setup routine
 	 */
 	private setup() {
-		// Get local IPs to filter out
-		const localIPs = getLocalIPs();
-		console.log(`[Discovery] Filtering local IPs: ${Array.from(localIPs).join(", ")}`);
-
 		// Listen to broadcast on port 47809
 		const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
 		socket.bind(47809, "0.0.0.0");
 		socket.on("listening", function () {
 			this.setBroadcast(true);
-			console.log("[Discovery] Listening for mixer broadcasts on port 47809");
 		});
 
 		socket.on("message", (packet, rinfo) => {
 			const [code, data] = analysePacket(packet, true);
 			if (!code) return;
+
+			// Only accept packets sourced from port 47809 — genuine PreSonus mixer
+			// discovery broadcasts originate from the same port they listen on.
+			// This rejects any other software sending UCNet-compatible packets from
+			// a different source port (e.g. another instance of this app, DAW
+			// plugins, or Universal Control running on the same machine).
+			if (rinfo.port !== 47809) return;
+
+			// Refresh local IPs on every packet so VPN connections and dynamic
+			// interface changes after setup() never produce stale filter entries.
+			const localIPs = getLocalIPs();
 
 			// Filter out local machine's own IP addresses
 			if (isLocalIP(rinfo.address, localIPs)) {
@@ -119,7 +125,18 @@ export default class Discovery extends EventEmitter {
 			// eslint-disable-next-line
 			const [model, _, serial, deviceName] = fragments;
 
+			// Require both model and serial to be present — genuine mixer broadcasts
+			// always carry both. This filters out non-mixer UDP traffic (e.g. packets
+			// from other instances of this tool or other software on the same subnet)
+			// that happens to carry the PreSonus packet header.
 			if (!serial) return;
+			if (!model) return;
+
+			// The model name must look like a real PreSonus device. Known prefixes:
+			// "StudioLive", "CS18AI", "NSB". Reject anything that doesn't match to
+			// prevent other instances of this app from appearing as mixers.
+			const knownModelPrefix = /^(StudioLive|CS18AI|NSB)/i;
+			if (!knownModelPrefix.test(model)) return;
 
 			// model: Device model name (e.g., "StudioLive 16R")
 			// deviceName: User-assigned device name (e.g., "Office")
@@ -132,8 +149,6 @@ export default class Discovery extends EventEmitter {
 				port: rinfo.port,
 				timestamp: new Date(),
 			} as DiscoveryType;
-
-			console.log(`[Discovery] Found device: ${model}${deviceName ? ` (${deviceName})` : ""} at ${rinfo.address} [${serial}]`);
 
 			this.emit("discover", discoveryData);
 		});

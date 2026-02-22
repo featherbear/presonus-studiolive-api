@@ -95,7 +95,7 @@ export function parseDataFrame(data: Buffer<ArrayBufferLike>) {
 			break;
 		}
 		default: {
-			console.warn("Unknown message type:", type);
+			// Unknown message type - silent fail
 		}
 	}
 }
@@ -133,7 +133,6 @@ export default function createServer(port, onData: (data: MeterData) => any) {
 		});
 
 		UDPserver.on("listening", () => {
-			console.log("Listening on port", UDPserver.address().port);
 			resolve(UDPserver);
 		});
 		UDPserver.bind(port);

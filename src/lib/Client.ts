@@ -295,7 +295,6 @@ export class Client {
 							logger.info("Connection closed");
 							this.emit("closed");
 
-							console.log("conn was closed so will reconnect");
 							if (this.options?.autoreconnect) {
 								this.emit("reconnecting");
 								reconnect();
@@ -357,8 +356,6 @@ export class Client {
 
 		if (Object.hasOwn(handlers, messageCode)) {
 			data = handlers[messageCode]?.call?.(this, data);
-		} else {
-			console.warn("Unhandled message code", messageCode);
 		}
 
 		if (!data) return;
