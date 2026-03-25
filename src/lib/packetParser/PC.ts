@@ -10,8 +10,6 @@ export default function handlePCPacket(data) {
 			name,
 			value: valueTransform(name, data.slice(idx + 3), transformersPC),
 		} as SettingType;
-	} else {
-		console.warn("Could parse PC packet", data);
 	}
 
 	return data;

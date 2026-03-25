@@ -10,16 +10,12 @@ import { toShort } from "./bufferUtil";
  */
 export function analysePacket(packet: Buffer, ignoreLengthMismatch = false): [MessageCode, Buffer] {
 	if (!PacketHeader.matches(packet)) {
-		console.warn("Ignoring irrelevant packet", packet);
 		return [null, null];
 	}
 
 	const payloadLength = packet.slice(4, 6).readUInt16LE();
 	if (payloadLength + 6 !== packet.length) {
 		if (!ignoreLengthMismatch) {
-			console.warn(
-				`Packet is meant to be ${payloadLength + 6} bytes long, but is actually ${packet.length} bytes long`,
-			);
 			return [null, null];
 		}
 	}
