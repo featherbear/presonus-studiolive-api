@@ -110,6 +110,18 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 				break;
 			}
 
+			// PreSonus extension: type 73 (0x49 = 'I') - variable-length payload with single length byte
+			case 0x49 /* I */: {
+				length = buf[idx++];
+				break;
+			}
+
+			// PreSonus extension: type 114 (0x72 = 'r') - variable-length string with single length byte
+			case 0x72 /* r */: {
+				length = buf[idx++];
+				break;
+			}
+
 			default: {
 				throw new Error(`Unknown type ${type} at position ${idx}`);
 			}
@@ -153,6 +165,19 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 			// int64
 			case 0x4c /* L */: {
 				value = valueData.readBigInt64BE();
+				break;
+			}
+
+			// PreSonus extension: type 73 (0x49 = 'I') - variable length data
+			case 0x49 /* I */: {
+				// Known usage: 4-byte int; otherwise, keep raw as hex for forward-compat
+				value = valueData.length === 4 ? valueData.readInt32BE() : valueData.toString('hex');
+				break;
+			}
+
+			// PreSonus extension: type 114 (0x72 = 'r') - string type
+			case 0x72 /* r */: {
+				value = valueData.toString('utf8');
 				break;
 			}
 
