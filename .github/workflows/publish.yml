@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v4
       with:
         node-version: '22.21.0'
 
@@ -34,7 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v4
       with:
         node-version: '22.21.0'
         registry-url: 'https://npm.pkg.github.com'
@@ -44,6 +44,9 @@ jobs:
 
     - name: Build
       run: pnpm run build
+
+    - name: Set version from tag
+      run: npm pkg set version="${GITHUB_REF_NAME#v}"
 
     - name: Publish
       run: pnpm publish --no-git-checks
