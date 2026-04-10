@@ -36,7 +36,8 @@
 	},
 	"homepage": "https://featherbear.cc/presonus-studiolive-api",
 	"publishConfig": {
-		"registry": "https://npm.pkg.github.com"
+		"registry": "https://registry.npmjs.org",
+		"access": "public"
 	},
 	"dependencies": {
 		"bunyan": "^1.8.15",

@@ -30,14 +30,15 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      id-token: write
+      contents: read
     steps:
     - uses: actions/checkout@master
 
     - uses: actions/setup-node@v4
       with:
         node-version: '22.21.0'
-        registry-url: 'https://npm.pkg.github.com'
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Install packages
       run: npm i -g pnpm && pnpm install --frozen-lockfile
@@ -49,6 +50,4 @@ jobs:
       run: npm pkg set version="${GITHUB_REF_NAME#v}"
 
     - name: Publish
-      run: pnpm publish --no-git-checks
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm publish --no-git-checks
