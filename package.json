@@ -37,18 +37,18 @@
 	"homepage": "https://featherbear.cc/presonus-studiolive-api",
 	"dependencies": {
 		"bunyan": "^1.8.15",
-		"queue": "^6"
+		"queue": "^6",
+		"cross-env": "^10.0.0",
+		"rimraf": "^6.0.1",
+		"tsdown": "^0.21.7",
+		"typescript": "^5.9.2"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",
 		"@eslint/js": "^9.33.0",
 		"@types/bunyan": "^1.8.11",
 		"@types/node": "22",
-		"cross-env": "^10.0.0",
-		"rimraf": "^6.0.1",
 		"sucrase": "^3.35.0",
-		"tsdown": "^0.21.7",
-		"typescript": "^5.9.2",
 		"vitest": "^4.1.4"
 	}
 }

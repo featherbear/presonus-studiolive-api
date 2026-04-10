@@ -16,10 +16,6 @@ export default defineConfig({
 	hash: false,
 	// Disable auto-generated declarations; types are emitted separately by tsc -p tsconfig.types.json
 	dts: false,
-	// Keep runtime dependencies external (not bundled into the output)
-	deps: {
-		neverBundle: ["bunyan", "queue"],
-	},
 	// Name the shared internal chunk instead of letting rolldown auto-generate "api2"
 	outputOptions: (options, format) => ({
 		chunkFileNames: `_internal${format === "cjs" ? ".cjs" : ".mjs"}`,
