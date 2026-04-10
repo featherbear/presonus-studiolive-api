@@ -12,7 +12,7 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: '22.21.0'
+        node-version: '24'
 
     - name: Install packages
       run: npm i -g pnpm && pnpm install --frozen-lockfile
@@ -37,7 +37,7 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: '22.21.0'
+        node-version: '24'
         registry-url: 'https://registry.npmjs.org'
 
     - name: Install packages

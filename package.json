@@ -35,6 +35,9 @@
 		"url": "https://github.com/featherbear/presonus-studiolive-api/issues"
 	},
 	"homepage": "https://featherbear.cc/presonus-studiolive-api",
+	"files": [
+		"dist"
+	],
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org",
 		"access": "public"
