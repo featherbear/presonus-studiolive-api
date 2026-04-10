@@ -23,7 +23,8 @@
 		"format": "biome format --write src/",
 		"run": "sucrase-node run.ts | bunyan",
 		"run:debug": "cross-env DEBUG=1 sucrase-node run.ts | bunyan",
-		"test": "npm run build && vitest run"
+		"test": "npm run build && vitest run",
+		"install": "npm run build"
 	},
 	"repository": {
 		"type": "git",
