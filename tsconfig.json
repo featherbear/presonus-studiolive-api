@@ -1,12 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "es2022",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-  },
-  "include": ["src/**/*"]
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"declaration": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": false,
+		"noEmit": true
+	},
+	"include": ["src/**/*"]
 }

@@ -1,60 +1,54 @@
 {
-  "name": "presonus-studiolive-api",
-  "version": "1.7.3",
-  "description": "Unofficial PreSonus StudioLive III Network Control API",
-  "main": "./dist/cjs/api.js",
-  "module": "./dist/esm/api.js",
-  "exports": {
-    ".": {
-      "import": "./dist/esm/api.js",
-      "require": "./dist/cjs/api.js",
-      "types": "./dist/types/api.d.ts"
-    },
-    "./simple": {
-      "import": "./dist/esm/simple/index.js",
-      "require": "./dist/cjs/simple/index.js",
-      "types": "./dist/types/simple/index.d.ts"
-    }
-  },
-  "scripts": {
-    "build": "npm-run-all clean transpile build:types",
-    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist/types",
-    "clean": "rimraf dist",
-    "transpile:esm": "swc src -d dist/esm --strip-leading-paths --config-file .swcrc.esm.json --quiet && node scripts/fix-esm-imports.mjs",
-    "transpile:cjs": "swc src -d dist/cjs --strip-leading-paths --config-file .swcrc.cjs.json --quiet",
-    "transpile": "npm-run-all transpile:esm transpile:cjs",
-    "lint": "biome lint src/",
-    "lint:fix": "biome lint --write src/",
-    "format": "biome format --write src/",
-    "install": "npm run --silent build",
-    "test": "sucrase-node test.ts | bunyan",
-    "test:debug": "cross-env DEBUG=1 sucrase-node test.ts | bunyan"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/featherbear/presonus-studiolive-api.git"
-  },
-  "author": "featherbear",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/featherbear/presonus-studiolive-api/issues"
-  },
-  "homepage": "https://featherbear.cc/presonus-studiolive-api",
-  "dependencies": {
-    "bunyan": "^1.8.15",
-    "queue": "^6",
-    "@swc/cli": "^0.7.8",
-    "@swc/core": "^1.13.3",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.9.2"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.2.0",
-    "@eslint/js": "^9.33.0",
-    "@types/bunyan": "^1.8.11",
-    "@types/node": "22",
-    "cross-env": "^10.0.0",
-    "sucrase": "^3.35.0"
-  }
+	"name": "presonus-studiolive-api",
+	"version": "1.7.3",
+	"description": "Unofficial PreSonus StudioLive III Network Control API",
+	"main": "./dist/api.cjs",
+	"module": "./dist/api.mjs",
+	"exports": {
+		".": {
+			"types": "./dist/types/api.d.ts",
+			"import": "./dist/api.mjs",
+			"require": "./dist/api.cjs"
+		},
+		"./simple": {
+			"types": "./dist/types/simple/index.d.ts",
+			"import": "./dist/simple/index.mjs",
+			"require": "./dist/simple/index.cjs"
+		}
+	},
+	"scripts": {
+		"build": "rimraf dist && tsdown && tsc -p tsconfig.types.json",
+		"lint": "biome lint src/",
+		"lint:fix": "biome lint --write src/",
+		"format": "biome format --write src/",
+		"run": "sucrase-node run.ts | bunyan",
+		"run:debug": "cross-env DEBUG=1 sucrase-node run.ts | bunyan",
+		"test": "npm run build && vitest run"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/featherbear/presonus-studiolive-api.git"
+	},
+	"author": "featherbear",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/featherbear/presonus-studiolive-api/issues"
+	},
+	"homepage": "https://featherbear.cc/presonus-studiolive-api",
+	"dependencies": {
+		"bunyan": "^1.8.15",
+		"queue": "^6"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.0",
+		"@eslint/js": "^9.33.0",
+		"@types/bunyan": "^1.8.11",
+		"@types/node": "22",
+		"cross-env": "^10.0.0",
+		"rimraf": "^6.0.1",
+		"sucrase": "^3.35.0",
+		"tsdown": "^0.21.7",
+		"typescript": "^5.9.2",
+		"vitest": "^4.1.4"
+	}
 }
