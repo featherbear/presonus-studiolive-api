@@ -20,3 +20,6 @@ jobs:
 
     - name: Build
       run: pnpm run build
+
+    - name: Test
+      run: pnpm exec vitest run
