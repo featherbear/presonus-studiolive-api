@@ -1,6 +1,6 @@
 {
 	"name": "@featherbear/presonus-studiolive-api",
-	"version": "1.7.3",
+	"version": "1.8.0",
 	"description": "Unofficial PreSonus StudioLive III Network Control API",
 	"main": "./dist/api.cjs",
 	"module": "./dist/api.mjs",
