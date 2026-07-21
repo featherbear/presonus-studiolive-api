@@ -1,6 +1,6 @@
 {
   "name": "presonus-studiolive-api",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Unofficial PreSonus StudioLive III Network Control API",
   "main": "./dist/cjs/api.js",
   "module": "./dist/esm/api.js",
@@ -26,12 +26,12 @@
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
     "format": "biome format --write src/",
-    "install": "npm run --silent build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "sucrase-node test-live.ts | bunyan",
     "test:integration:debug": "cross-env DEBUG=1 sucrase-node test-live.ts | bunyan",
-    "test:hardware": "sucrase-node test-hardware.ts"
+    "test:hardware": "sucrase-node test-hardware.ts",
+    "prepare": "npm run --silent build"
   },
   "repository": {
     "type": "git",
