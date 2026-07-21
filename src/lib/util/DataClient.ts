@@ -2,7 +2,7 @@
  * TCP data client to receive messages from UCNet devices
  */
 
-import { Socket } from "net";
+import { Socket } from "node:net";
 import { PacketHeader } from "../constants";
 import Queue from "queue";
 
@@ -19,8 +19,7 @@ export default function (callback, customSocket: Socket = null) {
 	TCPclient.on("data", (bytes) => {
 		let frame = Buffer.from(bytes);
 		Q.push((finish) => {
-			// 27/12/2021 @featherbear: I have no idea why we need to wrap this execution in its own inline function but we need it heh.
-			(function () {
+			try {
 				// Desc   Header  Length   Payload
 				// Size     4       2       ...
 				while (frame.length !== 0) {
@@ -34,7 +33,7 @@ export default function (callback, customSocket: Socket = null) {
 							remaining = correctLength - (frame.length - 6);
 
 							// Wait for the next frame
-							return;
+							break;
 						} else {
 							// Emit payload
 							callback(frame.slice(0, correctLength + 6));
@@ -63,15 +62,26 @@ export default function (callback, customSocket: Socket = null) {
 						}
 
 						if (remaining < 0) {
-							throw Error("Extracted more bytes than the payload specified");
+							logger.error("Extracted more bytes than the payload specified");
+							remaining = 0;
+							payload = Buffer.allocUnsafe(0);
+							break;
 						}
 					} else {
 						// remaining is zero but the header is not matching
-						throw new Error("Header not matching and remaining is zero");
+						logger.error("Header not matching and remaining is zero");
+						remaining = 0;
+						payload = Buffer.allocUnsafe(0);
+						break;
 					}
 				}
-			})();
-			finish();
+			} catch (err) {
+				logger.error({ err }, "Error processing TCP data frame");
+				remaining = 0;
+				payload = Buffer.allocUnsafe(0);
+			} finally {
+				finish();
+			}
 		});
 	});
 

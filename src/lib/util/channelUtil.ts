@@ -12,7 +12,7 @@ export function setCounts(channelCount: ChannelCount) {
 }
 
 // FIXME: Add channel whitelist
-export function parseChannelString(selector: ChannelSelector, whitelist?: ChannelTypes[]) {
+export function parseChannelString(selector: ChannelSelector, _whitelist?: ChannelTypes[]) {
 	let { type, channel } = selector;
 	const { mixType, mixNumber } = selector;
 

@@ -1,3 +1,6 @@
+const tokenCache = new Map<string, string[]>();
+const TOKEN_CACHE_MAX = 4096;
+
 /**
  * Split a path string into tokens
  * Delimiter: `.` or `/`
@@ -9,14 +12,18 @@
  * tokenisePath(['this', 'is', 'a', 'key']) // => ['this', 'is', 'a', 'key'] // passthrough
  */
 export function tokenisePath(key: string | string[]): string[] {
-	if (typeof key === "string") {
-		if (key.includes("/")) {
-			key = key.split("/");
-		} else {
-			key = key.split(".");
-		}
+	if (typeof key !== "string") return key;
+
+	const cached = tokenCache.get(key);
+	if (cached) return [...cached];
+
+	const tokens = key.includes("/") ? key.split("/") : key.split(".");
+
+	if (tokenCache.size < TOKEN_CACHE_MAX) {
+		tokenCache.set(key, tokens);
 	}
-	return key;
+
+	return [...tokens];
 }
 
 export function simplifyPathTokens(path: string | string[]) {

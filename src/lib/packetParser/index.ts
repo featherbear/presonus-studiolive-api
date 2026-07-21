@@ -5,4 +5,4 @@ export { default as handlePCPacket } from "./PC";
 export { default as handlePSPacket } from "./PS";
 export { default as handlePVPacket } from "./PV";
 export { default as handleZBPacket } from "./ZB";
-export { default as handleFDPacket } from "./FD";
+export { default as handleFDPacket, BufferCollector } from "./FD";

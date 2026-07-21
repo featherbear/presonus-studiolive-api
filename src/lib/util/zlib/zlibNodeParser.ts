@@ -105,7 +105,7 @@ export function zlibParseNode(node: ZlibInputNode, { base = {} }: zlibNodeParser
 
 	// Now, check that all added elements have a key, and therefore also
 	// have a value as keys are only added on child nodes and value methods
-	for (const [key, value] of Object.entries(root)) {
+	for (const [_key, value] of Object.entries(root)) {
 		// Delete the key, as we've finished building
 		delete value[ZlibKeySymbol];
 	}

@@ -5,3 +5,13 @@ node_modules/
 .idea/
 .DS_Store
 documentation/
+
+# Local test configuration (contains site-specific mixer IPs)
+.mixers.json
+
+# Local development artifacts
+midi-controller-src/
+studiolive-midi-controller/
+mixer-manager-fixed.ts
+setup-midi-controller.sh
+.claude/

@@ -1,4 +1,4 @@
-import * as dgram from "dgram";
+import * as dgram from "node:dgram";
 import { MessageCode, PacketHeader } from "./constants";
 
 export type MeterData = {};
@@ -118,13 +118,13 @@ export default function createServer(port, onData: (data: MeterData) => any) {
 	// Create UDP Server to listen to metering data
 	const UDPserver = dgram.createSocket("udp4");
 
-	UDPserver.on("error", (err) => {
-		UDPserver.close();
-		throw Error("Meter server error: " + err.stack);
-	});
-
-	return new Promise<dgram.Socket>((resolve) => {
-		UDPserver.on("message", (msg, rinfo) => {
+	return new Promise<dgram.Socket>((resolve, reject) => {
+		UDPserver.on("error", (err) => {
+			logger.error({ err }, "Meter server error");
+			UDPserver.close();
+			reject(err);
+		});
+		UDPserver.on("message", (msg, _rinfo) => {
 			const data = Buffer.from(msg);
 			const parsed = parseDataFrame(data);
 			if (parsed) {

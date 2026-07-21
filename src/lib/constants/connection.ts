@@ -3,4 +3,6 @@ export enum ConnectionState {
 	closed = "closed",
 	connected = "connected",
 	reconnecting = "reconnecting",
+	sleep = "sleep",
+	wake = "wake",
 }

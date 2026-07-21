@@ -61,7 +61,7 @@ export default class Discovery extends EventEmitter {
 	 * @returns
 	 */
 	async start(timeout = null) {
-		return new Promise<void>((resolve, reject) => {
+		return new Promise<void>((resolve, _reject) => {
 			this.stop();
 			this.setup();
 
@@ -99,12 +99,12 @@ export default class Discovery extends EventEmitter {
 			const [code, data] = analysePacket(packet, true);
 			if (!code) return;
 
-			// Only accept packets sourced from port 47809 — genuine PreSonus mixer
-			// discovery broadcasts originate from the same port they listen on.
-			// This rejects any other software sending UCNet-compatible packets from
-			// a different source port (e.g. another instance of this app, DAW
-			// plugins, or Universal Control running on the same machine).
-			if (rinfo.port !== 47809) return;
+			// Only accept packets from known PreSonus ports — genuine mixer
+			// discovery broadcasts originate from port 47809 (the discovery port)
+			// or 53000 (the connection port, used by some models like StudioLive R-series).
+			// This rejects other software sending UCNet-compatible packets from
+			// arbitrary source ports (e.g. DAW plugins, Universal Control).
+			if (rinfo.port !== 47809 && rinfo.port !== 53000) return;
 
 			// Refresh local IPs on every packet so VPN connections and dynamic
 			// interface changes after setup() never produce stale filter entries.
