@@ -93,9 +93,9 @@ class SimpleClient extends StudioLiveAPI {
 
 			if (value instanceof Buffer) {
 				const read = value.readFloatLE();
-				console.log(PV.name, value, read);
+				console.log(`SimpleClient, PV `+ PV.name + " is a buffer, read as float: " + read);
 			} else {
-				console.log(PV.name, value);
+				console.log(`SimpleClient, PV `+ PV.name + " is a " + typeof value + ", value: " + value);
 			}
 
 			switch (trailingToken) {
@@ -122,6 +122,17 @@ class SimpleClient extends StudioLiveAPI {
 					} as SoloEvent);
 					return;
 				}
+
+				case "volume": {
+					const selector = settingsPathToChannelSelector(name);
+					if (!selector) return;
+					this.emit("level", {
+						channel: selector,
+						level: value,
+						type: "level"
+					} as LevelEvent);
+					return
+				}	
 			}
 
 			if (trailingToken.startsWith("assign_")) {
