@@ -122,6 +122,17 @@ class SimpleClient extends StudioLiveAPI {
 					} as SoloEvent);
 					return;
 				}
+
+				case "volume": {
+					const selector = settingsPathToChannelSelector(name);
+					if (!selector) return;
+					this.emit("level", {
+						channel: selector,
+						level: value,
+						type: "level"
+					} as LevelEvent);
+					return
+				}	
 			}
 
 			if (trailingToken.startsWith("assign_")) {
