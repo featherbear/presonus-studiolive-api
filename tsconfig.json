@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es2022",
+		"lib": ["ES2022"],
 		"module": "preserve",
 		"moduleResolution": "bundler",
 		"declaration": true,
@@ -8,7 +9,7 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": false,
-		"noEmit": true
+		"noEmit": true,
 	},
 	"include": ["src/**/*"]
 }

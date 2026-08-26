@@ -1,3 +1,52 @@
+/** biome-ignore-all lint/complexity/useSimpleNumberKeys: Easier to read */
+
+interface TypeDecoder {
+	readonly length: number
+	readonly read: (buf: Buffer) => any
+}
+
+const decodeMap = {
+	0x69: {
+		// ASCII: i
+		// type: int8
+		length: 1,
+		read: (buf: Buffer) => buf.readInt8()
+	},
+	0x55: {
+		// ASCII: U
+		// type: uint8
+		length: 1,
+		read: (buf: Buffer) => buf.readUint8()
+	},
+	0x49: {
+		// ASCII: I
+		// type: int16
+		length: 2,
+		read: (buf: Buffer) => buf.readInt16BE()
+	},
+	0x6c: {
+		// ASCII: l
+		// type: int32
+		length: 4,
+		read: (buf: Buffer) => buf.readInt32BE()
+	},
+	0x4c: {
+		// ASCII: L
+		// type: int64
+		length: 8,
+		read: (buf: Buffer) => buf.readBigInt64BE()
+	},
+	0x64: {
+		// ASCII: d
+		// type: float32
+		length: 4,
+		read: (buf: Buffer) => buf.readFloatBE()
+	},
+} as const satisfies Readonly<Record<number, TypeDecoder>>
+
+
+
+
 /**
  * Deserialise a zlib buffer into a raw object payload
  * Partially implements the UBJSON specification
@@ -8,7 +57,6 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 	if (buf[idx++] !== 0x7b) return null;
 
 	const rootTree = {};
-	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	const workingSet: Array<[] | {}> = [rootTree];
 
 	while (idx !== buf.length) {
@@ -34,13 +82,14 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 			}
 
 			const length = buf[idx++];
-			keyData = buf.slice(idx, idx + length);
+			keyData = buf.subarray(idx, idx + length);
 			idx += length;
 		}
 
-		const type = buf[idx++];
-		let length = 0;
-		switch (type) {
+		const typeByte = buf[idx++];
+		let valueProcessor: TypeDecoder
+
+		switch (typeByte) {
 			// New leaf dictionary
 			case 0x7b /* { */: {
 				const leaf = {};
@@ -73,107 +122,31 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 				if (buf[idx++] !== 0x69) {
 					// UBJSON specifications say to read this value as the length type,
 					// but I've yet to see a non-0x69 (i) value in the received payloads
-					throw new Error("(ZB) Failed to find delimiter 2");
+					// so we'll skip that processing
+					throw new Error("(ZB) Unexpected length type when reading string");
 				}
 
-				length = buf[idx++];
-				break;
-			}
-
-			// float32
-			case 0x64 /* d */: {
-				length = 4;
-				break;
-			}
-
-			// int8
-			case 0x69 /* i */: {
-				length = 1;
-				break;
-			}
-
-			// uint8
-			case 0x55 /* U */: {
-				length = 1;
-				break;
-			}
-
-			// int16
-			case 0x49 /* I */: {
-				length = 2;
-				break;
-			}
-
-			// int32
-			case 0x6c /* l */: {
-				length = 4;
-				break;
-			}
-
-			// int64
-			case 0x4c /* L */: {
-				length = 8;
+				valueProcessor = {
+					length: buf[idx++],
+					read: (buf: Buffer) => buf.toString()
+				}
 				break;
 			}
 
 			default: {
-				throw new Error(`Unknown type ${type} at position ${idx}`);
+				valueProcessor = decodeMap[typeByte]
+				break
 			}
 		}
 
-		const valueData = buf.slice(idx, idx + length);
-
-		let value: any;
-
-		switch (type) {
-			// string
-			case 0x53 /* S */: {
-				value = valueData.toString();
-				break;
-			}
-
-			// float32
-			case 0x64 /* d */: {
-				value = valueData.readFloatBE();
-				break;
-			}
-
-			// int8
-			case 0x69 /* i */: {
-				value = valueData.readInt8();
-				break;
-			}
-
-			// uint8
-			case 0x55 /* U */: {
-				value = valueData.readUInt8();
-				break;
-			}
-
-			// int16
-			case 0x49 /* I */: {
-				value = valueData.readInt16BE();
-				break;
-			}
-
-			// int32
-			case 0x6c /* l */: {
-				value = valueData.readInt32BE();
-				break;
-			}
-
-			// int64
-			case 0x4c /* L */: {
-				value = valueData.readBigInt64BE();
-				break;
-			}
-
-			default: {
-				value = valueData.toString();
-			}
+		if (!valueProcessor) {
+			throw new Error(`Unknown type ${typeByte} at position ${idx}`);
 		}
 
-		idx += length;
+		const valueBuffer = buf.subarray(idx, idx + valueProcessor.length);
+		const value = valueProcessor.read(valueBuffer)
+
+		idx += valueProcessor.length;
 
 		if (Array.isArray(workingSet[0])) {
 			(workingSet[0] as any[]).push(value);
