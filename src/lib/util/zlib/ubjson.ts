@@ -98,6 +98,12 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 				break;
 			}
 
+			// int16
+			case 0x49 /* I */: {
+				length = 2;
+				break;
+			}
+
 			// int32
 			case 0x6c /* l */: {
 				length = 4;
@@ -141,6 +147,12 @@ export function deserialiseUBJSON<T>(buf: Buffer): T {
 			// uint8
 			case 0x55 /* U */: {
 				value = valueData.readUInt8();
+				break;
+			}
+
+			// int16
+			case 0x49 /* I */: {
+				value = valueData.readInt16BE();
 				break;
 			}
 
