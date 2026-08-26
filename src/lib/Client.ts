@@ -801,7 +801,7 @@ export class Client {
 	 *
 	 * @description Sound is difficult, so this function attempts to provide a "what-you-see-is-what-you-get" interface to control the volume levels.
 	 *              `100` Sets the fader to the top (aka +10 dB)
-	 *              `72` Sets the fader to unity (aka 0 dB) or a value close enough
+	 *              `74.6` Sets the fader to unity (aka 0 dB)
 	 *              `0` Sets the fader to the bottom (aka -84 dB)
 	 * @see http://www.sengpielaudio.com/calculator-levelchange.htm
 	 */
