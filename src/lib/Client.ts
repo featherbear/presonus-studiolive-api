@@ -715,14 +715,30 @@ export class Client {
 	/**
 	 * Read a channel switch — phantom power, polarity, or a processor in/out.
 	 *
-	 * Normalises the console's two representations (a boolean for `48v`, a 1/0
-	 * number for the rest) to a boolean. Returns null when the console has not
-	 * reported the parameter, matching the mute and solo getters.
+	 * The same switch reaches the cache in three different shapes depending on
+	 * where it came from, so all three are normalised to a boolean here:
+	 *
+	 *   - a boolean, for `48v` in the initial state dump
+	 *   - a number, for the others in that dump
+	 *   - a 4-byte Buffer holding a float, when the console pushes the change
+	 *     as a ParamValue packet
+	 *
+	 * The Buffer case is the one that bites: `Number(buffer)` is NaN, so a
+	 * naive comparison reports every echoed change as off, and a switch appears
+	 * to revert a moment after it is set.
+	 *
+	 * Returns null when the console has not reported the parameter, matching
+	 * the mute and solo getters.
 	 */
 	getSwitch(selector: ChannelSelector, name: ChannelSwitchName): boolean | null {
-		const value = this.state.get(this._getSwitchTargetString(selector, name));
+		let value = this.state.get(this._getSwitchTargetString(selector, name));
 		if (value === null || value === undefined) return null;
-		return typeof value === "boolean" ? value : Number(value) > 0;
+		if (typeof value === "boolean") return value;
+		if (Buffer.isBuffer(value)) {
+			if (value.length < 4) return null;
+			value = value.readFloatLE(0);
+		}
+		return Number(value) > 0;
 	}
 
 	/**
@@ -742,11 +758,10 @@ export class Client {
 			Buffer.concat([Buffer.from(`${targetString}\x00\x00\x00`), toBoolean(value)]),
 		);
 
-		// The console does not echo a change back to the client that made it —
-		// verified against a 16R, where a write is visible only after
-		// reconnecting and re-reading the state dump. Without this, getSwitch()
-		// would keep reporting the old value until something else refreshed it.
-		// _setLevel does the same thing for the same reason.
+		// The console echoes the change back as a ParamValue packet, but not for
+		// roughly 150ms. Seed the cache so a read straight after this call sees
+		// the new value instead of the old one — the echo then overwrites it
+		// with the identical value. _setLevel does the same thing.
 		this.state.set(targetString, value);
 	}
 

@@ -247,7 +247,27 @@ describe("Client", () => {
 			expect(packet.subarray(-4).readFloatLE(0)).toBe(1);
 		});
 
-		it("setSwitch() updates local state, since the console does not echo the sender's own change", () => {
+		it("getSwitch() decodes the Buffer the console pushes in a ParamValue echo", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			const on = Buffer.alloc(4);
+			on.writeFloatLE(1);
+			const off = Buffer.alloc(4);
+			off.writeFloatLE(0);
+
+			client.state.set("line/ch3/polarity", on);
+			expect(client.getSwitch(selector, "polarity")).toBe(true);
+
+			client.state.set("line/ch3/polarity", off);
+			expect(client.getSwitch(selector, "polarity")).toBe(false);
+		});
+
+		it("getSwitch() returns null for a truncated Buffer rather than reading out of bounds", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.state.set("line/ch3/polarity", Buffer.from([0x00, 0x00]));
+			expect(client.getSwitch(selector, "polarity")).toBeNull();
+		});
+
+		it("setSwitch() seeds local state so a read before the console echo is correct", () => {
 			const client = new Client({ host: "192.168.0.1" });
 			client.setSwitch(selector, "polarity", true);
 			expect(client.getSwitch(selector, "polarity")).toBe(true);
