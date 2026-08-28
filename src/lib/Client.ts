@@ -1,6 +1,7 @@
 import "./util/logging";
 
 import type { DiscoveryType, ChannelCount, SubscriptionOptions, ChannelSelector, FileListItem } from "./types";
+import { ChannelSwitch, type ChannelSwitchName } from "./types/ChannelSwitch";
 import type * as InstanceOptions from "./types/InstanceOptions";
 import type { MeterData } from "./MeterServer";
 
@@ -18,11 +19,11 @@ import { parseChannelString, setCounts } from "./util/channelUtil";
 import { toShort, toFloat, toBoolean } from "./util/bufferUtil";
 import { craftSubscribe, unsubscribePacket } from "./util/subscriptionUtil";
 import CacheProvider from "./util/CacheProvider";
-import { tokenisePath } from "./util/treeUtil";
+import { tokenisePath, simplifyPathTokens } from "./util/treeUtil";
 import { doesLookupMatch } from "./util/ValueTransformer";
 import { ignorePV } from "./util/transformers";
 import { logVolumeToLinear, transitionValue, UniqueRandom } from "./util/valueUtil";
-import { dumpNode, type ZlibNode } from "./util/zlib/zlibNodeParser";
+import { dumpNode, ZlibRangeSymbol, type ZlibNode } from "./util/zlib/zlibNodeParser";
 import { getZlibValue } from "./util/zlib/zlibUtil";
 import KeepAliveHelper from "./util/KeepAliveHelper";
 import * as FDHelper from "./util/fileRequestUtil";
@@ -632,6 +633,131 @@ export class Client {
 		let targetString = parseChannelString(selector);
 		targetString += "/solo";
 		return targetString;
+	}
+
+	/**
+	 * Read a channel switch — phantom power, polarity, or a processor in/out.
+	 *
+	 * The same switch reaches the cache in three shapes depending on where it
+	 * came from, so all three are normalised to a boolean here:
+	 *
+	 *   - a boolean, for `48v` in the initial state dump
+	 *   - a number, for the others in that dump
+	 *   - a 4-byte Buffer holding a float, when the console pushes the change
+	 *     back as a ParamValue packet
+	 *
+	 * The Buffer case is the one that bites: `Number(buffer)` is NaN, so a
+	 * naive comparison reports every echoed change as off, and a switch appears
+	 * to revert a moment after it is set.
+	 *
+	 * Returns null when the console has not reported the parameter, matching
+	 * the mute and solo getters.
+	 */
+	getSwitch(selector: ChannelSelector, name: ChannelSwitchName): boolean | null {
+		let value = this.state.get(this._getSwitchTargetString(selector, name));
+		if (value === null || value === undefined) return null;
+		if (typeof value === "boolean") return value;
+		if (Buffer.isBuffer(value)) {
+			if (value.length < 4) return null;
+			value = value.readFloatLE(0);
+		}
+		return Number(value) > 0;
+	}
+
+	/**
+	 * Set a channel switch. Pass "toggle" to flip whatever the console last
+	 * reported.
+	 *
+	 * These go out as a float 1 or 0: toBoolean() is toFloat(1|0), so the
+	 * switches the console stores as numbers and the one it stores as a
+	 * boolean take the same encoding on the wire.
+	 */
+	setSwitch(selector: ChannelSelector, name: ChannelSwitchName, state: boolean | "toggle") {
+		const targetString = this._getSwitchTargetString(selector, name);
+		const value = state === "toggle" ? !this.getSwitch(selector, name) : state;
+
+		this._sendPacket(
+			MessageCode.ParamValue,
+			Buffer.concat([Buffer.from(`${targetString}\x00\x00\x00`), toBoolean(value)]),
+		);
+
+		// The console echoes the change back as a ParamValue packet, but not for
+		// roughly 150ms. Seed the cache so a read straight after this call sees
+		// the new value rather than the old one; the echo then overwrites it
+		// with the identical value. _setLevel does the same thing.
+		this.state.set(targetString, value);
+	}
+
+	/**
+	 * @private
+	 */
+	private _getSwitchTargetString(selector: ChannelSelector, name: ChannelSwitchName) {
+		const property = ChannelSwitch[name];
+		if (!property) throw new Error(`Unknown channel switch: ${String(name)}`);
+		return `${parseChannelString(selector)}/${property}`;
+	}
+
+	/**
+	 * The console's own published range for a parameter, when it has one.
+	 *
+	 * The initial state dump carries min/max/default/units for a handful of
+	 * parameters — preamp gain among them — which is how gain can be presented
+	 * in decibels without hard-coding a range that may vary by console model.
+	 * Returns null for the many parameters that publish no range.
+	 */
+	getParameterRange(
+		path: string | string[],
+	): { min: number; max: number; def?: number; units?: string; curve?: string } | null {
+		if (!this.zlibData) return null;
+		let cur: any = this.zlibData;
+		for (const token of simplifyPathTokens(tokenisePath(path))) {
+			cur = cur?.[token];
+			if (!cur) return null;
+		}
+		return cur[ZlibRangeSymbol] ?? null;
+	}
+
+	/**
+	 * @internal Preamp gain is stored as a 0-1 fraction of the console's own
+	 * gain range, so the decibel conversion needs that range. 0-60 dB matches
+	 * every StudioLive III preamp seen so far and is the fallback when the
+	 * console has not published one.
+	 */
+	private _getGainRange(selector: ChannelSelector) {
+		const range = this.getParameterRange(`${parseChannelString(selector)}/preampgain`);
+		return { min: range?.min ?? 0, max: range?.max ?? 60 };
+	}
+
+	/**
+	 * Read preamp gain in decibels, or null if the console has not reported it.
+	 */
+	getPreampGain(selector: ChannelSelector): number | null {
+		let value = this.state.get(`${parseChannelString(selector)}/preampgain`);
+		if (value === null || value === undefined) return null;
+		if (Buffer.isBuffer(value)) {
+			if (value.length < 4) return null;
+			value = value.readFloatLE(0);
+		}
+		const { min, max } = this._getGainRange(selector);
+		return min + Number(value) * (max - min);
+	}
+
+	/**
+	 * Set preamp gain in decibels. Values outside the console's range are
+	 * clamped rather than sent — an out-of-range float here is a very loud
+	 * mistake.
+	 */
+	setPreampGain(selector: ChannelSelector, decibels: number) {
+		const { min, max } = this._getGainRange(selector);
+		const clamped = Math.min(max, Math.max(min, Number(decibels) || 0));
+		const fraction = max === min ? 0 : (clamped - min) / (max - min);
+		const targetString = `${parseChannelString(selector)}/preampgain`;
+
+		this._sendPacket(
+			MessageCode.ParamValue,
+			Buffer.concat([Buffer.from(`${targetString}\x00\x00\x00`), toFloat(fraction)]),
+		);
+		this.state.set(targetString, fraction);
 	}
 
 	setColor(selector: ChannelSelector, hex: string, alpha = 0xff) {
