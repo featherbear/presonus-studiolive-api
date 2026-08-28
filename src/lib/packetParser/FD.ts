@@ -1,6 +1,6 @@
 /* eslint no-unused-vars: "off" */
 
-import { UniqueRandom } from "../util/valueUtil";
+import type { UniqueRandom } from "../util/valueUtil";
 
 interface ChunkSet {
 	/**
@@ -17,9 +17,13 @@ interface ChunkSet {
 /**
  * Piece chunks of the same ID together
  */
-const BufferCollector = new (class {
-	#ids = UniqueRandom.get(16);
+export class BufferCollector {
+	#ids: UniqueRandom;
 	#files: { [id: number]: ChunkSet } = {};
+
+	constructor(ids: UniqueRandom) {
+		this.#ids = ids;
+	}
 
 	/**
 	 * Collect a chunk
@@ -93,7 +97,7 @@ const BufferCollector = new (class {
 		this.#ids.release(ret.id);
 		return ret;
 	}
-})();
+}
 
 function parseChunk(data: Buffer) {
 	let header = data.slice(0, 14);
@@ -104,15 +108,13 @@ function parseChunk(data: Buffer) {
 	const bytesRead = header.readUInt16LE();
 	header = header.slice(2);
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const unknown1 = header.slice(0, 2);
+	const _unknown1 = header.slice(0, 2);
 	header = header.slice(2);
 
 	const totalSize = header.readUInt16LE();
 	header = header.slice(2);
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const unknown2 = header.slice(0, 4);
+	const _unknown2 = header.slice(0, 4);
 	header = header.slice(4);
 
 	const payloadSize = header.readUInt16LE();
@@ -147,8 +149,8 @@ function parseChunk(data: Buffer) {
 	};
 }
 
-export default function handleFDPacket(data: Buffer) {
-	const result = BufferCollector.put(data);
+export default function handleFDPacket(this: { _bufferCollector: BufferCollector }, data: Buffer) {
+	const result = this._bufferCollector.put(data);
 
 	if (result) {
 		try {

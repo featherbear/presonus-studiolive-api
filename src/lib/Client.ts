@@ -22,9 +22,11 @@ import { tokenisePath } from "./util/treeUtil";
 import { doesLookupMatch } from "./util/ValueTransformer";
 import { ignorePV } from "./util/transformers";
 import { logVolumeToLinear, transitionValue, UniqueRandom } from "./util/valueUtil";
+import { BufferCollector } from "./packetParser/FD";
 import { dumpNode, type ZlibNode } from "./util/zlib/zlibNodeParser";
 import { getZlibValue } from "./util/zlib/zlibUtil";
 import KeepAliveHelper from "./util/KeepAliveHelper";
+import SleepWakeDetector from "./util/SleepWakeDetector";
 import * as FDHelper from "./util/fileRequestUtil";
 import { JSONtoPacketBuffer } from "./util/jsonPacketUtil";
 
@@ -55,12 +57,20 @@ export class Client {
 	private fileDataEmitter: EventEmitter;
 
 	private keepAliveHelper: KeepAliveHelper;
+	private sleepWakeDetector: SleepWakeDetector;
 
 	readonly state: ReturnType<typeof CacheProvider>;
 	private zlibData?: ZlibNode;
 
 	private conn: ReturnType<typeof DataClient>;
 	private connectPromise: Promise<Client>;
+
+	/** @internal Per-client chunk reassembly buffer for CK packets */
+	_chunkBuffer: Buffer[];
+	/** @internal Per-client buffer collector for FD packets */
+	_bufferCollector: BufferCollector;
+	/** @internal Per-client unique ID pool for file requests */
+	_idPool: UniqueRandom;
 
 	constructor(address: InstanceOptions.ConnectionAddress, options?: Partial<InstanceOptions.InstanceOptions>) {
 		if (!address?.host) throw new Error("Host address not supplied");
@@ -77,6 +87,9 @@ export class Client {
 		}
 
 		this.meteringClient = null;
+		this._chunkBuffer = [];
+		this._idPool = new UniqueRandom(16);
+		this._bufferCollector = new BufferCollector(this._idPool);
 
 		this.conn = DataClient(this.handleRecvPacket.bind(this));
 
@@ -212,19 +225,32 @@ export class Client {
 	async connect(subscribeData?: SubscriptionOptions) {
 		if (this.connectPromise) return this.connectPromise;
 
+		const CONNECTION_TIMEOUT = 15_000;
+		const HANDSHAKE_TIMEOUT = 15_000;
+
 		const connectPromise = new Promise<this>((resolve, reject) => {
 			let fastReconnectTimer: ReturnType<typeof setTimeout>;
+			let connectionTimer: ReturnType<typeof setTimeout>;
+			let resolved = false;
 			logger.info({ host: this.serverHost, port: this.serverPort }, "Connecting to console");
+
+			this.sleepWakeDetector = new SleepWakeDetector();
+
+			const cleanup = () => {
+				clearTimeout(fastReconnectTimer);
+				clearTimeout(connectionTimer);
+			};
 
 			const reconnect = () => {
 				logger.debug("Reconnecting");
 				doConnect();
 			};
 
-			this.conn.addListener("connect", () => {
+			const onConnect = () => {
 				clearTimeout(fastReconnectTimer);
+				clearTimeout(connectionTimer);
 
-				this.keepAliveHelper = new KeepAliveHelper(3000);
+				this.keepAliveHelper = new KeepAliveHelper(this._idPool, 3000);
 
 				// #region Connection handshake
 
@@ -235,8 +261,10 @@ export class Client {
 				};
 				this.addListener(MessageCode.Chunk, chunkedZlibInitCallback);
 
-				Promise.all([
-					new Promise((resolve) => {
+				let handshakeTimer: ReturnType<typeof setTimeout>;
+
+				const handshakePromise = Promise.all([
+					new Promise((resolveZlib) => {
 						// TODO: Do DCAs change during project/scene recall?
 						this.once(MessageCode.ZLIB, () => {
 							// De-register the listener in case the payload was not encapsulated in a CK packet
@@ -269,33 +297,45 @@ export class Client {
 							};
 							this.channelCounts = channelCounts;
 							setCounts(channelCounts);
-							resolve(this);
+							resolveZlib(this);
 						});
 					}),
 
 					/**
 					 * Await for the subscription success
 					 */
-					new Promise((resolve) => {
+					new Promise((resolveSub) => {
 						const subscribeCallback = (data) => {
 							if (data.id === "SubscriptionReply") {
 								this.removeListener(MessageCode.JSON, subscribeCallback);
-								resolve(this);
+								resolveSub(this);
 							}
 						};
 						this.addListener(MessageCode.JSON, subscribeCallback);
 					}),
+				]);
+
+				Promise.race([
+					handshakePromise,
+					new Promise((_, rejectTimeout) => {
+						handshakeTimer = setTimeout(() => {
+							rejectTimeout(new Error("Handshake timeout: mixer did not complete initialization"));
+						}, HANDSHAKE_TIMEOUT);
+					}),
 				]).then(() => {
+					clearTimeout(handshakeTimer);
+
 					this.keepAliveHelper.start(
 						(packets) => {
 							packets.forEach((bytes) => this._writeBytes(bytes));
 						},
 						() => {
+							this.keepAliveHelper?.stop();
 							if (!this.conn.destroyed) this.conn.destroy();
 							logger.info("Connection closed");
+							this.connectPromise = null;
 							this.emit("closed");
 
-							console.log("conn was closed so will reconnect");
 							if (this.options?.autoreconnect) {
 								this.emit("reconnecting");
 								reconnect();
@@ -303,22 +343,53 @@ export class Client {
 						},
 					);
 
+					this.sleepWakeDetector.removeAllListeners("wake");
+					this.sleepWakeDetector.start();
+					this.sleepWakeDetector.on("wake", () => {
+						this.emit("sleep");
+						this.emit("wake");
+						if (this.options?.autoreconnect) {
+							logger.info("Wake detected, triggering immediate reconnect");
+							clearTimeout(fastReconnectTimer);
+							reconnect();
+						}
+					});
+
 					logger.info("Connected");
 					this.emit("connected");
+					resolved = true;
 					resolve(this);
+				}).catch((err) => {
+					clearTimeout(handshakeTimer);
+					logger.error({ err }, "Handshake failed");
+					this.connectPromise = null;
+					if (!resolved) reject(err);
 				});
 
 				// Send subscription request
 				this._sendPacket(MessageCode.JSON, craftSubscribe(subscribeData));
 				// #endregion
-			});
+			};
+
+			this.conn.addListener("connect", onConnect);
 
 			const doConnect = () => {
 				this.conn.destroy();
 				fastReconnectTimer = setTimeout(() => reconnect(), 2000);
 				this.conn.connect(this.serverPort, this.serverHost);
-				this.conn.once("error", () => {});
+				this.conn.once("error", (err) => {
+					logger.warn({ err }, "Socket error during connection");
+				});
 			};
+
+			// Overall connection timeout for the initial connect
+			connectionTimer = setTimeout(() => {
+				cleanup();
+				this.connectPromise = null;
+				if (!resolved) {
+					reject(new Error(`Connection timeout: could not reach ${this.serverHost}:${this.serverPort}`));
+				}
+			}, CONNECTION_TIMEOUT);
 
 			doConnect();
 		});
@@ -327,8 +398,13 @@ export class Client {
 	}
 
 	async close() {
+		this.keepAliveHelper?.stop();
+		this.sleepWakeDetector?.stop();
 		this.meterUnsubscribe();
-		await this._sendPacket(MessageCode.JSON, unsubscribePacket).then(() => {
+		this._chunkBuffer = [];
+		this.connectPromise = null;
+		this.conn.removeAllListeners("connect");
+		await this._sendPacket(MessageCode.JSON, unsubscribePacket).catch(() => {}).then(() => {
 			this.conn.destroy();
 		});
 	}
@@ -349,7 +425,7 @@ export class Client {
 			[MessageCode.FaderPosition]: packetParser.handleMSPacket,
 			[MessageCode.Chunk]: packetParser.handleCKPacket,
 			[MessageCode.ParamChars]: packetParser.handlePCPacket,
-			[MessageCode.FileData]: this.keepAliveHelper.intercept(packetParser.handleFDPacket),
+			[MessageCode.FileData]: this.keepAliveHelper.intercept(packetParser.handleFDPacket.bind(this)),
 			[MessageCode.DeviceList]: null,
 			[MessageCode.Unknown1]: null,
 			[MessageCode.Unknown3]: null,
@@ -357,8 +433,6 @@ export class Client {
 
 		if (Object.hasOwn(handlers, messageCode)) {
 			data = handlers[messageCode]?.call?.(this, data);
-		} else {
-			console.warn("Unhandled message code", messageCode);
 		}
 
 		if (!data) return;
@@ -427,7 +501,7 @@ export class Client {
 	sendList(key: typeof FDHelper.CHANNEL_PRESETS): Promise<FileListItem.ChannelPresetItem[]>;
 	sendList(key: ReturnType<typeof FDHelper.SCENES_OF>): Promise<FileListItem.SceneItem[]>;
 	sendList<T = unknown>(key: string): Promise<T> {
-		const id = UniqueRandom.get(16).request();
+		const id = this._idPool.request();
 
 		const idBuffer = Buffer.allocUnsafe(2);
 		idBuffer.writeUInt16BE(id); // Different to bufferUtil::toShort()
@@ -457,7 +531,7 @@ export class Client {
 
 			timeout = setTimeout(() => {
 				this.fileDataEmitter.removeListener(eventName, callback);
-				UniqueRandom.get(16).release(id);
+				this._idPool.release(id);
 				reject(new Error("Timeout"));
 			}, 10 * 1000);
 		});
@@ -471,6 +545,10 @@ export class Client {
 	}
 
 	private async _writeBytes(bytes: Buffer) {
+		if (this.conn.destroyed || !this.conn.writable) {
+			logger.warn("Attempted to write to a closed connection");
+			return;
+		}
 		return new Promise((resolve) => {
 			this.conn.write(bytes, null, (resp) => {
 				resolve(resp);
@@ -482,7 +560,7 @@ export class Client {
 	 * @param projFile e.g 01.Showfile.proj
 	 */
 	recallProject(projFile: string) {
-		this._sendPacket(
+		return this._sendPacket(
 			MessageCode.JSON,
 			JSONtoPacketBuffer({
 				id: "RestorePreset",
@@ -500,7 +578,7 @@ export class Client {
 	 * @param sceneFile e.g. 02.SceneBackup.scn
 	 */
 	recallProjectScene(projFile: string, sceneFile: string) {
-		this._sendPacket(
+		return this._sendPacket(
 			MessageCode.JSON,
 			JSONtoPacketBuffer({
 				id: "RestorePreset",
@@ -513,7 +591,7 @@ export class Client {
 	}
 
 	recallChannelStrip(selector: ChannelSelector, chanFile: string) {
-		this._sendPacket(
+		return this._sendPacket(
 			MessageCode.JSON,
 			JSONtoPacketBuffer({
 				id: "RestorePreset",
@@ -807,19 +885,6 @@ export class Client {
 	 */
 	async setChannelVolumeLinear(selector: ChannelSelector, linearLevel: number, duration?: number) {
 		return this._setLevel(selector, linearLevel, duration);
-	}
-
-	/**
-	 * Look at metering data and adjust channel fader so that the level is of a certain loudness
-	 * NOTE: This is not perceived loudness. Not very practical, but useful in a pinch?
-	 *
-	 * @param channel
-	 * @param level
-	 * @param duration
-	 */
-	async normaliseChannelTo(channel, level, duration?: number) {
-		// TODO:
-		throw new Error("Not implemented yet");
 	}
 }
 

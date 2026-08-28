@@ -19,8 +19,6 @@ export default function handlePVPacket(data) {
 			partA,
 			partB,
 		} as SettingType;
-	} else {
-		console.warn("Could parse PV packet", data);
 	}
 
 	return data;

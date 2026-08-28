@@ -55,7 +55,6 @@ export default function handleMSPacket(this: Client, data: Buffer): MSData {
 
 		let channelType = mapping[groupNumber];
 		if (!channelType) {
-			console.warn("Unknown channel type", groupNumber);
 			// continue
 			channelType = `unknown--${groupNumber}` as any;
 		}

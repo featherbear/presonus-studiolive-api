@@ -94,31 +94,25 @@ export function transitionValue(
 }
 
 export class UniqueRandom {
-	static #instances: { [bits: number]: UniqueRandom } = {};
-	static get(bits: number) {
-		if (!UniqueRandom.#instances[bits]) UniqueRandom.#instances[bits] = new UniqueRandom(bits);
-		return UniqueRandom.#instances[bits];
-	}
-
 	#max: number;
-	#active: number[];
+	#active: Set<number>;
 
 	constructor(bits: number) {
 		this.#max = 2 ** bits - 1;
-		this.#active = [];
+		this.#active = new Set();
 	}
 
 	request() {
 		let current: number;
 
 		// biome-ignore lint/suspicious/noAssignInExpressions: readability
-		while (this.#active.includes((current = Math.floor(Math.random() * (this.#max + 1)))));
-		this.#active.push(current);
+		while (this.#active.has((current = Math.floor(Math.random() * (this.#max + 1)))));
+		this.#active.add(current);
 		return current;
 	}
 
 	release(value: number) {
-		this.#active = this.#active.filter((v) => v !== value);
+		this.#active.delete(value);
 	}
 
 	get active() {
