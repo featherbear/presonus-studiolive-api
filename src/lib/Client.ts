@@ -1,6 +1,7 @@
 import "./util/logging";
 
 import type { DiscoveryType, ChannelCount, SubscriptionOptions, ChannelSelector, FileListItem } from "./types";
+import { ChannelSwitch, type ChannelSwitchName } from "./types/ChannelSwitch";
 import type * as InstanceOptions from "./types/InstanceOptions";
 import type { MeterData } from "./MeterServer";
 
@@ -709,6 +710,53 @@ export class Client {
 		let targetString = parseChannelString(selector);
 		targetString += "/solo";
 		return targetString;
+	}
+
+	/**
+	 * Read a channel switch — phantom power, polarity, or a processor in/out.
+	 *
+	 * Normalises the console's two representations (a boolean for `48v`, a 1/0
+	 * number for the rest) to a boolean. Returns null when the console has not
+	 * reported the parameter, matching the mute and solo getters.
+	 */
+	getSwitch(selector: ChannelSelector, name: ChannelSwitchName): boolean | null {
+		const value = this.state.get(this._getSwitchTargetString(selector, name));
+		if (value === null || value === undefined) return null;
+		return typeof value === "boolean" ? value : Number(value) > 0;
+	}
+
+	/**
+	 * Set a channel switch. Pass "toggle" to flip whatever the console last
+	 * reported.
+	 *
+	 * These go out as a float 1 or 0: toBoolean() is toFloat(1|0), so the
+	 * switches the console stores as numbers and the ones it stores as
+	 * booleans take the same encoding on the wire.
+	 */
+	setSwitch(selector: ChannelSelector, name: ChannelSwitchName, state: boolean | "toggle") {
+		const targetString = this._getSwitchTargetString(selector, name);
+		const value = state === "toggle" ? !this.getSwitch(selector, name) : state;
+
+		this._sendPacket(
+			MessageCode.ParamValue,
+			Buffer.concat([Buffer.from(`${targetString}\x00\x00\x00`), toBoolean(value)]),
+		);
+
+		// The console does not echo a change back to the client that made it —
+		// verified against a 16R, where a write is visible only after
+		// reconnecting and re-reading the state dump. Without this, getSwitch()
+		// would keep reporting the old value until something else refreshed it.
+		// _setLevel does the same thing for the same reason.
+		this.state.set(targetString, value);
+	}
+
+	/**
+	 * @private
+	 */
+	private _getSwitchTargetString(selector: ChannelSelector, name: ChannelSwitchName) {
+		const property = ChannelSwitch[name];
+		if (!property) throw new Error(`Unknown channel switch: ${String(name)}`);
+		return `${parseChannelString(selector)}/${property}`;
 	}
 
 	setColor(selector: ChannelSelector, hex: string, alpha = 0xff) {

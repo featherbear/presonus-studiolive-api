@@ -188,4 +188,78 @@ describe("Client", () => {
 			expect(result).toBeInstanceOf(Promise);
 		});
 	});
+
+	describe("channel switches", () => {
+		const selector = { type: "LINE", channel: 3 } as const;
+
+		it("getSwitch() returns null when the console has not reported the value", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			expect(client.getSwitch(selector, "phantom")).toBeNull();
+		});
+
+		it("getSwitch() normalises the boolean the console uses for 48v", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.state.set("line/ch3/48v", true);
+			expect(client.getSwitch(selector, "phantom")).toBe(true);
+		});
+
+		it("getSwitch() normalises the 1/0 numbers used by the other switches", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.state.set("line/ch3/polarity", 1);
+			client.state.set("line/ch3/comp/on", 0);
+			expect(client.getSwitch(selector, "polarity")).toBe(true);
+			expect(client.getSwitch(selector, "compressor")).toBe(false);
+		});
+
+		it("setSwitch() writes the channel's parameter path and a float payload", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setSwitch(selector, "polarity", true);
+
+			expect(mockSocket.write).toHaveBeenCalled();
+			const packet: Buffer = (mockSocket.write as any).mock.calls[0][0];
+			expect(packet.includes(Buffer.from("line/ch3/polarity"))).toBe(true);
+			// toBoolean is toFloat(1|0) — four bytes, little-endian.
+			expect(packet.subarray(-4).readFloatLE(0)).toBe(1);
+		});
+
+		it("setSwitch() addresses nested processor switches", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setSwitch(selector, "limiter", true);
+
+			const packet: Buffer = (mockSocket.write as any).mock.calls[0][0];
+			expect(packet.includes(Buffer.from("line/ch3/limit/limiteron"))).toBe(true);
+		});
+
+		it("setSwitch() with \"toggle\" inverts the reported state", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.state.set("line/ch3/gate/on", 1);
+			client.setSwitch(selector, "gate", "toggle");
+
+			const packet: Buffer = (mockSocket.write as any).mock.calls[0][0];
+			expect(packet.subarray(-4).readFloatLE(0)).toBe(0);
+		});
+
+		it("setSwitch() with \"toggle\" treats an unreported switch as off", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setSwitch(selector, "phantom", "toggle");
+
+			const packet: Buffer = (mockSocket.write as any).mock.calls[0][0];
+			expect(packet.subarray(-4).readFloatLE(0)).toBe(1);
+		});
+
+		it("setSwitch() updates local state, since the console does not echo the sender's own change", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setSwitch(selector, "polarity", true);
+			expect(client.getSwitch(selector, "polarity")).toBe(true);
+
+			// And a follow-up toggle reads from that updated value.
+			client.setSwitch(selector, "polarity", "toggle");
+			expect(client.getSwitch(selector, "polarity")).toBe(false);
+		});
+
+		it("rejects an unknown switch name", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			expect(() => client.getSwitch(selector, "nope" as any)).toThrow(/Unknown channel switch/);
+		});
+	});
 });

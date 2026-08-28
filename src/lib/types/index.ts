@@ -1,5 +1,6 @@
 export { default as ChannelCount } from "./ChannelCount";
 export { default as ChannelSelector } from "./ChannelSelector";
+export { ChannelSwitch, type ChannelSwitchName } from "./ChannelSwitch";
 export { default as DiscoveryType } from "./DiscoveryType";
 export * as FileListItem from "./FileListItem";
 // Not exporting InstanceOptions
