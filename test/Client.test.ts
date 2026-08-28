@@ -282,4 +282,63 @@ describe("Client", () => {
 			expect(() => client.getSwitch(selector, "nope" as any)).toThrow(/Unknown channel switch/);
 		});
 	});
+
+	describe("preamp gain", () => {
+		const selector = { type: "LINE", channel: 4 } as const;
+
+		it("returns null when the console has not reported a gain", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			expect(client.getPreampGain(selector)).toBeNull();
+		});
+
+		// The wire value is a 0-1 fraction of the console's own gain range,
+		// which the state dump publishes as 0-60 dB on a StudioLive III.
+		it("converts the 0-1 wire value to decibels", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.state.set("line/ch4/preampgain", 0.5);
+			expect(client.getPreampGain(selector)).toBeCloseTo(30, 5);
+		});
+
+		it("decodes the Buffer form the console echoes", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			const buf = Buffer.alloc(4);
+			buf.writeFloatLE(1 / 3);
+			client.state.set("line/ch4/preampgain", buf);
+			expect(client.getPreampGain(selector)).toBeCloseTo(20, 3);
+		});
+
+		it("sends decibels as a fraction of the range", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setPreampGain(selector, 20);
+
+			const packet: Buffer = (mockSocket.write as any).mock.calls[0][0];
+			expect(packet.includes(Buffer.from("line/ch4/preampgain"))).toBe(true);
+			expect(packet.subarray(-4).readFloatLE(0)).toBeCloseTo(1 / 3, 5);
+		});
+
+		// An out-of-range float here would be a very loud mistake.
+		it("clamps above the range maximum", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setPreampGain(selector, 999);
+			expect(client.getPreampGain(selector)).toBe(60);
+		});
+
+		it("clamps below the range minimum", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setPreampGain(selector, -40);
+			expect(client.getPreampGain(selector)).toBe(0);
+		});
+
+		it("treats a non-numeric request as the range minimum rather than NaN", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			client.setPreampGain(selector, "loud" as any);
+			expect(client.getPreampGain(selector)).toBe(0);
+		});
+
+		it("getParameterRange returns null without a state dump", () => {
+			const client = new Client({ host: "192.168.0.1" });
+			expect(client.getParameterRange("line/ch4/preampgain")).toBeNull();
+		});
+	});
+
 });
