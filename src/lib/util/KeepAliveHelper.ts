@@ -1,17 +1,19 @@
 import { MessageCode } from "../constants";
 import { createPacket } from "./messageProtocol";
-import { UniqueRandom } from "./valueUtil";
+import type { UniqueRandom } from "./valueUtil";
 
 export default class KeepAliveHelper {
 	#lastRecv: number;
 	#timeout: number;
 	#loop: ReturnType<typeof setInterval>;
 	#ids: number[];
+	#idPool: UniqueRandom;
 
-	constructor(timeout = 3000) {
+	constructor(idPool: UniqueRandom, timeout = 3000) {
 		this.#lastRecv = null;
 		this.#timeout = timeout;
 		this.#ids = [];
+		this.#idPool = idPool;
 	}
 
 	updateTime() {
@@ -32,19 +34,26 @@ export default class KeepAliveHelper {
 		};
 	}
 
+	stop() {
+		if (this.#loop) {
+			clearInterval(this.#loop);
+			this.#loop = null;
+		}
+	}
+
 	// Send a KeepAlive packet every second
 	start(checkFn: (data: Buffer[]) => void, failFn: () => void) {
-		clearInterval(this.#loop);
+		this.stop();
 		this.#loop = setInterval(() => {
 			const now = Date.now();
 
 			if (now - this.#lastRecv > this.#timeout) {
 				logger.debug("Timeout exceeded for keep-alive response");
-				clearInterval(this.#loop);
+				this.stop();
 				return failFn();
 			}
 
-			const id = UniqueRandom.get(16).request();
+			const id = this.#idPool.request();
 			this.#ids.push(id);
 			const idBuffer = Buffer.allocUnsafe(2);
 			idBuffer.writeUInt16BE(id);

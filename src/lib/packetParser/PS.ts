@@ -7,8 +7,6 @@ export default function handlePSPacket(data) {
 			name: data.slice(0, idx).toString(),
 			value: data.slice(idx + 3, -1).toString(),
 		} as SettingType;
-	} else {
-		console.warn("Could parse PS packet", data);
 	}
 
 	return data;
