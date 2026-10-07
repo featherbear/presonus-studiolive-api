@@ -657,6 +657,28 @@ export class Client {
 		return this.getColor.apply(this, args);
 	}
 
+    getName(selector: ChannelSelector) {
+        const state = this.state.get(this._getUsernameTargetString(selector))
+        if (state === null) return null
+        return state
+    }
+
+    setName(selector: ChannelSelector, newName: string) {
+        const targetString = this._getUsernameTargetString(selector);
+
+        this._sendPacket(
+            MessageCode.ParamString,
+            Buffer.concat([
+                Buffer.from(targetString + '\x00\x00\x00'),
+                Buffer.from(newName + '\x00')
+            ])
+        );
+    }
+
+    private _getUsernameTargetString(selector: ChannelSelector) {
+        return parseChannelString(selector) + '/username';
+    }
+
 	/**
 	 * For a mono channel, the pan value is the pan value from 0 (hard left) to 100 (hard right)
 	 * For a stereo channel, the pan value is the width from 0 to 100 (stereo)
