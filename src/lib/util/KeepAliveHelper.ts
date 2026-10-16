@@ -60,4 +60,9 @@ export default class KeepAliveHelper {
 
 		this.updateTime();
 	}
+
+	// Stop sending KeepAlive packets; safe to call before start() and more than once
+	stop(): void {
+		clearInterval(this.#loop);
+	}
 }
