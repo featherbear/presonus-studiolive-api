@@ -62,6 +62,12 @@ export class Client {
 	private conn: ReturnType<typeof DataClient>;
 	private connectPromise: Promise<Client>;
 
+	/** Set by close(); a closed client never dials, reconnects or starts a session again. */
+	private closed = false;
+	private fastReconnectTimer: ReturnType<typeof setTimeout>;
+	/** Rejects the pending connect() promise; null once it has settled. */
+	private rejectConnect: ((err: Error) => void) | null = null;
+
 	constructor(address: InstanceOptions.ConnectionAddress, options?: Partial<InstanceOptions.InstanceOptions>) {
 		if (!address?.host) throw new Error("Host address not supplied");
 
@@ -210,19 +216,22 @@ export class Client {
 	}
 
 	async connect(subscribeData?: SubscriptionOptions) {
+		if (this.closed) return Promise.reject(new Error("Client is closed."));
 		if (this.connectPromise) return this.connectPromise;
 
 		const connectPromise = new Promise<this>((resolve, reject) => {
-			let fastReconnectTimer: ReturnType<typeof setTimeout>;
+			this.rejectConnect = reject;
 			logger.info({ host: this.serverHost, port: this.serverPort }, "Connecting to console");
 
 			const reconnect = () => {
+				if (this.closed) return;
 				logger.debug("Reconnecting");
 				doConnect();
 			};
 
 			this.conn.addListener("connect", () => {
-				clearTimeout(fastReconnectTimer);
+				if (this.closed) return;
+				clearTimeout(this.fastReconnectTimer);
 
 				this.keepAliveHelper = new KeepAliveHelper(3000);
 
@@ -286,11 +295,13 @@ export class Client {
 						this.addListener(MessageCode.JSON, subscribeCallback);
 					}),
 				]).then(() => {
+					if (this.closed) return;
 					this.keepAliveHelper.start(
 						(packets) => {
 							packets.forEach((bytes) => this._writeBytes(bytes));
 						},
 						() => {
+							if (this.closed) return;
 							if (!this.conn.destroyed) this.conn.destroy();
 							logger.info("Connection closed");
 							this.emit("closed");
@@ -305,6 +316,7 @@ export class Client {
 
 					logger.info("Connected");
 					this.emit("connected");
+					this.rejectConnect = null;
 					resolve(this);
 				});
 
@@ -314,8 +326,9 @@ export class Client {
 			});
 
 			const doConnect = () => {
+				if (this.closed) return;
 				this.conn.destroy();
-				fastReconnectTimer = setTimeout(() => reconnect(), 2000);
+				this.fastReconnectTimer = setTimeout(() => reconnect(), 2000);
 				this.conn.connect(this.serverPort, this.serverHost);
 				this.conn.once("error", () => {});
 			};
@@ -326,11 +339,29 @@ export class Client {
 		return connectPromise;
 	}
 
+	/**
+	 * Close the connection and make this client inert: no further dialling,
+	 * reconnecting or keep-alive. A pending connect() is rejected.
+	 * Idempotent, and never waits on I/O. Closed is final.
+	 */
 	async close() {
+		if (this.closed) return;
+		this.closed = true;
+
+		clearTimeout(this.fastReconnectTimer);
+		this.keepAliveHelper?.stop();
 		this.meterUnsubscribe();
-		await this._sendPacket(MessageCode.JSON, unsubscribePacket).then(() => {
-			this.conn.destroy();
-		});
+
+		// Only say goodbye on a socket that is actually connected. (Not readyState:
+		// a never-connected net.Socket reports "open".) Don't await the write.
+		if (!this.conn.pending && !this.conn.destroyed) {
+			this.conn.write(createPacket(MessageCode.JSON, unsubscribePacket));
+		}
+		this.conn.destroy();
+
+		this.rejectConnect?.(new Error("Client closed before it connected."));
+		this.rejectConnect = null;
+		this.connectPromise = null;
 	}
 
 	/**
